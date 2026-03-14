@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+results/cache/
+results/*.png
+results/*.html
+results/results.json
+.Rhistory

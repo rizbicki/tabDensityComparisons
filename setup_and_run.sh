@@ -48,8 +48,10 @@ echo "Upgrading pip..."
 
 # ── 3. Install dependencies ─────────────────────────────────────
 echo "Installing dependencies..."
-# numpy must be installed first — xbart's setup.py imports it at build time
-"$PIP" install --quiet numpy
+# numpy + setuptools must be installed first — xbart's setup.py imports numpy at build time
+"$PIP" install --quiet numpy setuptools
+# xbart needs --no-build-isolation since its setup.py imports numpy directly
+"$PIP" install --quiet --no-build-isolation xbart
 "$PIP" install --quiet -r requirements.txt
 
 # Check what actually installed

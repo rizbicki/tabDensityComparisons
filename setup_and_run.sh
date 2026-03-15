@@ -67,6 +67,10 @@ try:
 except ImportError:
     print('  ✗ XGBoost — will use sklearn GBM')
 try:
+    import xbart; print('  ✓ XBART')
+except ImportError:
+    print('  ✗ XBART — install failed, will skip BART methods')
+try:
     import torch; print('  ✓ PyTorch', torch.__version__, '(CUDA:', torch.cuda.is_available(), ')')
 except ImportError:
     print('  ✗ PyTorch not found')

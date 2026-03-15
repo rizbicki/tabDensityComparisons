@@ -11,6 +11,9 @@ tabicl>=0.2.0
 # Tree-based baseline
 xgboost>=2.0.0
 
+# BART
+xbart>=0.1.8
+
 # PyTorch (needed by TabPFN and TabICLv2)
 # If you already have a CUDA-enabled torch, comment this out
 # to avoid overwriting it with a CPU-only version.

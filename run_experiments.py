@@ -36,6 +36,14 @@ except ImportError:
     HAS_TABICL = False
     print("- TabICLv2 not found -- install with: pip install tabicl")
 
+try:
+    from xbart import XBART  # noqa: F401
+    HAS_XBART = True
+    print("+ XBART available")
+except ImportError:
+    HAS_XBART = False
+    print("- XBART not found -- install with: pip install xbart")
+
 from models import (
     FlexCodeEstimator, RFFlexRegressor,
     tabpfn_native_density, tabicl_quantile_density,
@@ -221,8 +229,9 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
     _run_density_baseline('Gamma-GLM-Ridge', gamma_glm_density, regularized=True)
 
     # ── BART methods ──────────────────────────────────────────────────────
-    _run_density_baseline('BART-Homo', bart_homo_density)
-    _run_density_baseline('BART-Hetero', bart_hetero_density)
+    if HAS_XBART:
+        _run_density_baseline('BART-Homo', bart_homo_density)
+        _run_density_baseline('BART-Hetero', bart_hetero_density)
 
     # ── True conditional density (synthetic only) ────────────────────────
     true_cde = None

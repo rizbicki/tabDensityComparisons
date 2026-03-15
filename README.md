@@ -73,6 +73,27 @@ runTab/
 | Gamma-GLM | Gamma GLM with log-link for the mean |
 | MDN-2mix | Mixture Density Network (2 Gaussians, 1 hidden layer) |
 
+### Penalized (Ridge) Variants
+
+Each parametric method above (except MDN) also has a Ridge-regularized variant
+with the penalty chosen by leave-one-out cross-validation (`RidgeCV`).
+
+| Method | Description |
+|--------|-------------|
+| LinGauss-Homo-Ridge | LinearGauss-Homo with Ridge penalty (LOO-CV) |
+| LinGauss-Hetero-Ridge | LinearGauss-Hetero with Ridge penalty (LOO-CV) |
+| Student-t-Ridge | Student-t with Ridge penalty (LOO-CV) |
+| LogNormal-Homo-Ridge | LogNormal-Homo with Ridge penalty (LOO-CV) |
+| LogNormal-Hetero-Ridge | LogNormal-Hetero with Ridge penalty (LOO-CV) |
+| Gamma-GLM-Ridge | Gamma-GLM with Ridge penalty (LOO-CV) |
+
+### BART Methods
+
+| Method | Description |
+|--------|-------------|
+| BART-Homo | XBART for the mean + constant residual variance (Gaussian) |
+| BART-Hetero | Two-stage XBART: mean + input-dependent variance (Gaussian) |
+
 ### Nonparametric Baselines
 
 | Method | Description |
@@ -113,5 +134,6 @@ All results go to `results/`:
 - `rankings_{metric}.png` -- ranking heatmap per metric
 - `raw_{metric}.png` -- raw value heatmap per metric
 - `native_tab_{ds}.png` -- selected method density comparison (synthetic)
+- `perf_vs_n_{metric}.png` -- performance vs sample size curves
 - `pit_calibration.png` -- PIT histograms for calibration assessment
 - `cache/{dataset}.npz` -- cached arrays (skip re-runs)

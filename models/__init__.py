@@ -10,4 +10,6 @@ from .baselines import (
     student_t_density,
     lognormal_homo_density,
     lognormal_hetero_density,
+    bart_homo_density,
+    bart_hetero_density,
 )

@@ -4,13 +4,20 @@ Classical density estimation baselines: Linear-Gaussian, MDN, Quantile methods, 
 
 import numpy as np
 from scipy import stats
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, RidgeCV
+
+
+def _make_reg(regularized=False):
+    """Return a RidgeCV (LOO) regressor if regularized, else OLS."""
+    if regularized:
+        return RidgeCV(alphas=np.logspace(-4, 4, 20), cv=None)  # cv=None → LOO
+    return LinearRegression()
 
 
 def linear_gaussian_homo_density(X_train, z_train, X_test, n_grid=200,
-                                  z_min=None, z_max=None):
+                                  z_min=None, z_max=None, regularized=False):
     """Linear Gaussian with constant variance: f(z|x) = N(x'beta, sigma^2)."""
-    reg = LinearRegression().fit(X_train, z_train)
+    reg = _make_reg(regularized).fit(X_train, z_train)
     mu_test = reg.predict(X_test)
     residuals = z_train - reg.predict(X_train)
     sigma = np.std(residuals, ddof=X_train.shape[1] + 1)
@@ -26,19 +33,19 @@ def linear_gaussian_homo_density(X_train, z_train, X_test, n_grid=200,
 
 
 def linear_gaussian_hetero_density(X_train, z_train, X_test, n_grid=200,
-                                    z_min=None, z_max=None):
+                                    z_min=None, z_max=None, regularized=False):
     """Linear Gaussian with input-dependent variance.
 
-    Stage 1: fit E[Z|X] = X'beta via OLS.
-    Stage 2: fit log(residual^2) = X'gamma via OLS to model variance.
+    Stage 1: fit E[Z|X] = X'beta.
+    Stage 2: fit log(residual^2) = X'gamma to model variance.
     """
-    reg_mean = LinearRegression().fit(X_train, z_train)
+    reg_mean = _make_reg(regularized).fit(X_train, z_train)
     mu_train = reg_mean.predict(X_train)
     mu_test = reg_mean.predict(X_test)
 
     residuals = z_train - mu_train
     log_sq_res = np.log(np.maximum(residuals ** 2, 1e-12))
-    reg_var = LinearRegression().fit(X_train, log_sq_res)
+    reg_var = _make_reg(regularized).fit(X_train, log_sq_res)
     log_var_test = reg_var.predict(X_test)
     sigma_test = np.sqrt(np.exp(log_var_test))
     sigma_test = np.maximum(sigma_test, 1e-8)
@@ -227,7 +234,7 @@ def quantile_linear_density(X_train, z_train, X_test, n_grid=200,
 
 
 def gamma_glm_density(X_train, z_train, X_test, n_grid=200,
-                       z_min=None, z_max=None):
+                       z_min=None, z_max=None, regularized=False):
     """Gamma GLM with log link for the mean.
 
     Fits a Gamma distribution with:
@@ -245,17 +252,15 @@ def gamma_glm_density(X_train, z_train, X_test, n_grid=200,
     z_train_pos = z_train + shift
     z_train_pos = np.maximum(z_train_pos, 1e-10)
 
-    # Fit log(E[Z|X]) = X'beta via OLS on log(z)
+    # Fit log(E[Z|X]) = X'beta on log(z)
     log_z = np.log(z_train_pos)
-    reg = LinearRegression().fit(X_train, log_z)
+    reg = _make_reg(regularized).fit(X_train, log_z)
     log_mu_train = reg.predict(X_train)
     log_mu_test = reg.predict(X_test)
     mu_train = np.exp(log_mu_train)
     mu_test = np.exp(log_mu_test)
 
-    # Estimate shape parameter from deviance residuals
-    # For Gamma: Var(Z) = mu^2 / shape, so shape = mu^2 / Var(Z|X)
-    # Approximate: shape ≈ 1 / Var(log(z) - log(mu))
+    # Estimate shape parameter
     log_resid = log_z - log_mu_train
     shape = 1.0 / np.maximum(np.var(log_resid, ddof=X_train.shape[1] + 1), 1e-8)
 
@@ -266,7 +271,6 @@ def gamma_glm_density(X_train, z_train, X_test, n_grid=200,
         z_max = z_train.max() + 0.1 * np.ptp(z_train)
     z_grid = np.linspace(z_min, z_max, n_grid)
 
-    # Evaluate density on shifted grid
     z_grid_pos = z_grid + shift
     n_test = X_test.shape[0]
     cdes = np.zeros((n_test, n_grid))
@@ -286,25 +290,22 @@ def gamma_glm_density(X_train, z_train, X_test, n_grid=200,
 
 
 def student_t_density(X_train, z_train, X_test, n_grid=200,
-                       z_min=None, z_max=None):
+                       z_min=None, z_max=None, regularized=False):
     """Student-t regression: linear mean, constant scale and df.
 
-    Stage 1: fit E[Z|X] = X'beta via OLS.
+    Stage 1: fit E[Z|X] = X'beta.
     Stage 2: estimate scale and degrees of freedom by maximising the
              Student-t log-likelihood of the residuals (profile MLE).
     """
     from scipy.optimize import minimize_scalar
 
-    reg = LinearRegression().fit(X_train, z_train)
+    reg = _make_reg(regularized).fit(X_train, z_train)
     mu_train = reg.predict(X_train)
     mu_test = reg.predict(X_test)
     residuals = z_train - mu_train
 
-    # Profile MLE for (df, scale): for each candidate df, the optimal
-    # scale has a closed-form, so we grid-search over df only.
     def neg_ll(log_df):
         df = np.exp(log_df)
-        # MLE scale for fixed df
         scale = np.sqrt(np.mean(residuals ** 2) * (df - 2) / df) if df > 2 \
                 else np.std(residuals)
         scale = max(scale, 1e-8)
@@ -328,7 +329,7 @@ def student_t_density(X_train, z_train, X_test, n_grid=200,
 
 
 def lognormal_homo_density(X_train, z_train, X_test, n_grid=200,
-                            z_min=None, z_max=None):
+                            z_min=None, z_max=None, regularized=False):
     """Log-Normal regression with constant variance.
 
     Model: log(Z - shift) ~ N(X'beta, sigma^2)
@@ -342,7 +343,7 @@ def lognormal_homo_density(X_train, z_train, X_test, n_grid=200,
     z_pos = np.maximum(z_pos, 1e-10)
 
     log_z = np.log(z_pos)
-    reg = LinearRegression().fit(X_train, log_z)
+    reg = _make_reg(regularized).fit(X_train, log_z)
     mu_train = reg.predict(X_train)
     mu_test = reg.predict(X_test)
 
@@ -372,11 +373,11 @@ def lognormal_homo_density(X_train, z_train, X_test, n_grid=200,
 
 
 def lognormal_hetero_density(X_train, z_train, X_test, n_grid=200,
-                              z_min=None, z_max=None):
+                              z_min=None, z_max=None, regularized=False):
     """Log-Normal regression with input-dependent variance.
 
-    Stage 1: log(Z - shift) = X'beta + eps  (OLS for the mean in log-space)
-    Stage 2: log(eps^2) = X'gamma           (OLS for log-variance)
+    Stage 1: log(Z - shift) = X'beta + eps  (mean in log-space)
+    Stage 2: log(eps^2) = X'gamma           (log-variance)
     """
     shift = 0.0
     z_min_val = z_train.min()
@@ -387,13 +388,13 @@ def lognormal_hetero_density(X_train, z_train, X_test, n_grid=200,
 
     log_z = np.log(z_pos)
 
-    reg_mean = LinearRegression().fit(X_train, log_z)
+    reg_mean = _make_reg(regularized).fit(X_train, log_z)
     mu_train = reg_mean.predict(X_train)
     mu_test = reg_mean.predict(X_test)
 
     residuals = log_z - mu_train
     log_sq_res = np.log(np.maximum(residuals ** 2, 1e-12))
-    reg_var = LinearRegression().fit(X_train, log_sq_res)
+    reg_var = _make_reg(regularized).fit(X_train, log_sq_res)
     log_var_test = reg_var.predict(X_test)
     sigma_test = np.sqrt(np.exp(log_var_test))
     sigma_test = np.maximum(sigma_test, 1e-8)
@@ -416,4 +417,67 @@ def lognormal_hetero_density(X_train, z_train, X_test, n_grid=200,
     row_sums = cdes.sum(axis=1) * dz
     row_sums[row_sums == 0] = 1.0
     cdes = cdes / row_sums[:, None]
+    return cdes, z_grid
+
+
+# ── BART-based density estimators ────────────────────────────────────────────
+
+def _fit_xbart(X_train, y_train, num_trees=30, num_sweeps=60, burnin=20):
+    """Fit an XBART model and return (model, posterior_mean_sigma)."""
+    from xbart import XBART
+    model = XBART(num_trees=num_trees, num_sweeps=num_sweeps, burnin=burnin)
+    model.fit(X_train, y_train)
+    # sigma_draws shape: (num_sweeps, num_trees) – average over trees,
+    # then take the mean of post-burnin sweeps
+    sigma_arr = np.array(model.sigma_draws)
+    sigma_post = sigma_arr[burnin:].mean()
+    return model, sigma_post
+
+
+def bart_homo_density(X_train, z_train, X_test, n_grid=200,
+                      z_min=None, z_max=None):
+    """BART with constant residual variance: f(z|x) = N(BART(x), sigma^2).
+
+    Uses XBART's built-in sigma draws (posterior mean) for the residual sd.
+    """
+    model, sigma = _fit_xbart(X_train, z_train)
+    mu_test = model.predict(X_test)
+    sigma = max(sigma, 1e-8)
+
+    if z_min is None:
+        z_min = z_train.min() - 0.1 * np.ptp(z_train)
+    if z_max is None:
+        z_max = z_train.max() + 0.1 * np.ptp(z_train)
+    z_grid = np.linspace(z_min, z_max, n_grid)
+    cdes = stats.norm.pdf(z_grid[None, :], mu_test[:, None], sigma)
+    return cdes, z_grid
+
+
+def bart_hetero_density(X_train, z_train, X_test, n_grid=200,
+                        z_min=None, z_max=None):
+    """Heteroscedastic BART: two-stage density estimation.
+
+    Stage 1: fit BART for E[Z|X].
+    Stage 2: fit a second BART for log(residual^2) to model Var(Z|X).
+    Result: f(z|x) = N(BART_mean(x), exp(BART_var(x))).
+    """
+    # Stage 1: mean model
+    model_mean, _ = _fit_xbart(X_train, z_train)
+    mu_train = model_mean.predict(X_train)
+    mu_test = model_mean.predict(X_test)
+
+    # Stage 2: variance model on log-squared residuals
+    residuals = z_train - mu_train
+    log_sq_res = np.log(np.maximum(residuals ** 2, 1e-12))
+    model_var, _ = _fit_xbart(X_train, log_sq_res)
+    log_var_test = model_var.predict(X_test)
+    sigma_test = np.sqrt(np.exp(log_var_test))
+    sigma_test = np.maximum(sigma_test, 1e-8)
+
+    if z_min is None:
+        z_min = z_train.min() - 0.1 * np.ptp(z_train)
+    if z_max is None:
+        z_max = z_train.max() + 0.1 * np.ptp(z_train)
+    z_grid = np.linspace(z_min, z_max, n_grid)
+    cdes = stats.norm.pdf(z_grid[None, :], mu_test[:, None], sigma_test[:, None])
     return cdes, z_grid

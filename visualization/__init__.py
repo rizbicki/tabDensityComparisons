@@ -5,6 +5,7 @@ from .plots import (
     plot_pit_histograms,
     plot_true_vs_estimated,
     plot_native_tab_subset,
+    plot_performance_vs_n,
     save_html_table,
     METHOD_STYLES,
 )

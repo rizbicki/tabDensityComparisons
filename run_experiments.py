@@ -43,12 +43,14 @@ from models import (
     mdn_density, quantile_gbm_density,
     quantile_linear_density, gamma_glm_density,
     student_t_density, lognormal_homo_density, lognormal_hetero_density,
+    bart_homo_density, bart_hetero_density,
 )
 from datasets import load_all_datasets
 from evaluation import compute_all_metrics
 from visualization import (
     plot_rankings, plot_raw_metrics,
     plot_pit_histograms, plot_native_tab_subset,
+    plot_performance_vs_n,
     save_html_table,
 )
 from utils import save_cache, load_cache, print_summary
@@ -210,6 +212,18 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
     _run_density_baseline('Quantile-Linear', quantile_linear_density)
     _run_density_baseline('Gamma-GLM', gamma_glm_density)
 
+    # ── Penalized (Ridge) variants ────────────────────────────────────
+    _run_density_baseline('LinGauss-Homo-Ridge', linear_gaussian_homo_density, regularized=True)
+    _run_density_baseline('LinGauss-Hetero-Ridge', linear_gaussian_hetero_density, regularized=True)
+    _run_density_baseline('Student-t-Ridge', student_t_density, regularized=True)
+    _run_density_baseline('LogNormal-Homo-Ridge', lognormal_homo_density, regularized=True)
+    _run_density_baseline('LogNormal-Hetero-Ridge', lognormal_hetero_density, regularized=True)
+    _run_density_baseline('Gamma-GLM-Ridge', gamma_glm_density, regularized=True)
+
+    # ── BART methods ──────────────────────────────────────────────────────
+    _run_density_baseline('BART-Homo', bart_homo_density)
+    _run_density_baseline('BART-Hetero', bart_hetero_density)
+
     # ── True conditional density (synthetic only) ────────────────────────
     true_cde = None
     true_zgrid = None
@@ -317,6 +331,7 @@ def main():
     plot_rankings(all_results, output_dir, all_data=all_data)
     plot_raw_metrics(all_results, output_dir, all_data=all_data)
     plot_pit_histograms(all_data, output_dir)
+    plot_performance_vs_n(all_results, output_dir, all_data=all_data)
 
     # Save JSON
     json_out = {}

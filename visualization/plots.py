@@ -23,6 +23,14 @@ METHOD_STYLES = {
     'LogNormal-Hetero':    {'color': '#7570b3', 'ls': ':',   'lw': 1.5, 'zorder': 2},
     'MDN-2mix':            {'color': '#8da0cb', 'ls': '--',  'lw': 1.5, 'zorder': 2},
     'Gamma-GLM':           {'color': '#e78ac3', 'ls': ':',   'lw': 1.5, 'zorder': 2},
+    'LinGauss-Homo-Ridge':    {'color': '#66c2a5', 'ls': '-.',  'lw': 1.5, 'zorder': 2},
+    'LinGauss-Hetero-Ridge':  {'color': '#fc8d62', 'ls': '-.',  'lw': 1.5, 'zorder': 2},
+    'Student-t-Ridge':        {'color': '#4daf4a', 'ls': '-.',  'lw': 1.5, 'zorder': 2},
+    'LogNormal-Homo-Ridge':   {'color': '#d95f02', 'ls': '-.',  'lw': 1.5, 'zorder': 2},
+    'LogNormal-Hetero-Ridge': {'color': '#7570b3', 'ls': '-.',  'lw': 1.5, 'zorder': 2},
+    'Gamma-GLM-Ridge':        {'color': '#e78ac3', 'ls': '-.',  'lw': 1.5, 'zorder': 2},
+    'BART-Homo':              {'color': '#1b9e77', 'ls': '-',   'lw': 1.8, 'zorder': 3},
+    'BART-Hetero':            {'color': '#d62728', 'ls': '--',  'lw': 1.8, 'zorder': 3},
 }
 _FALLBACK_COLORS = ['#8dd3c7', '#bebada', '#fb8072', '#80b1d3', '#fdb462']
 
@@ -481,6 +489,99 @@ def plot_native_tab_subset(all_data, output_dir, n_examples=4):
             fontsize=13, fontweight='bold')
         plt.tight_layout(rect=[0, 0.08, 1, 1])
         fname = f"native_tab_{ds.lower().replace(' ', '_')}.png"
+        plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
+        plt.close()
+        print(f"  saved {fname}")
+
+
+import re as _re
+
+
+def _parse_base_and_n(ds_name):
+    """Extract (base_name, n) from dataset names like 'Heteroscedastic-2000' or 'SpaceGA-1000'.
+
+    Returns (base_name, n) or (None, None) if no size suffix found.
+    """
+    m = _re.match(r'^(.+)-(\d+)$', ds_name)
+    if m:
+        return m.group(1), int(m.group(2))
+    return None, None
+
+
+def plot_performance_vs_n(all_results, output_dir, all_data=None):
+    """For each base dataset that appears at multiple n, plot metric vs n for all methods."""
+    # Group datasets by base name
+    base_groups = {}
+    for ds in all_results:
+        base, n = _parse_base_and_n(ds)
+        if base is not None:
+            base_groups.setdefault(base, []).append((n, ds))
+
+    # Keep only bases with multiple n values
+    base_groups = {b: sorted(pairs) for b, pairs in base_groups.items()
+                   if len(pairs) > 1}
+
+    if not base_groups:
+        return
+
+    methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
+    cmap = plt.cm.tab20
+    method_colors = {m: cmap(i / max(len(methods) - 1, 1)) for i, m in enumerate(methods)}
+    # Override with METHOD_STYLES where available
+    for m in methods:
+        if m in METHOD_STYLES:
+            method_colors[m] = METHOD_STYLES[m]['color']
+
+    for metric, label, direction in METRICS_INFO:
+        n_bases = len(base_groups)
+        ncols = min(3, n_bases)
+        nrows = (n_bases + ncols - 1) // ncols
+        fig, axes = plt.subplots(nrows, ncols,
+                                 figsize=(6 * ncols, 4.5 * nrows),
+                                 squeeze=False)
+
+        for idx, (base, pairs) in enumerate(sorted(base_groups.items())):
+            ax = axes[idx // ncols][idx % ncols]
+            ns = [n for n, _ in pairs]
+
+            for m in methods:
+                vals = []
+                valid_ns = []
+                for n, ds in pairs:
+                    if m in all_results[ds] and metric in all_results[ds][m]:
+                        vals.append(all_results[ds][m][metric])
+                        valid_ns.append(n)
+                if valid_ns:
+                    sty = METHOD_STYLES.get(m, {})
+                    ax.plot(valid_ns, vals,
+                            marker='o', markersize=4,
+                            color=method_colors[m],
+                            linestyle=sty.get('ls', '-'),
+                            linewidth=1.5, alpha=0.85,
+                            label=m)
+
+            ax.set_title(base, fontsize=10, fontweight='bold')
+            ax.set_xlabel('n', fontsize=9)
+            ax.set_ylabel(label, fontsize=9)
+            ax.tick_params(labelsize=8)
+            ax.set_xticks(ns)
+            ax.grid(alpha=0.3)
+
+        # Hide empty axes
+        for idx in range(n_bases, nrows * ncols):
+            axes[idx // ncols][idx % ncols].set_visible(False)
+
+        # Single legend
+        handles, labels_leg = axes[0][0].get_legend_handles_labels()
+        fig.legend(handles, labels_leg, loc='lower center',
+                   ncol=min(len(labels_leg), 6), fontsize=7,
+                   framealpha=0.9, bbox_to_anchor=(0.5, -0.02))
+
+        better = '(lower is better)' if direction == 'lower' else '(higher is better)'
+        plt.suptitle(f'{label} vs Sample Size {better}',
+                     fontsize=13, fontweight='bold')
+        plt.tight_layout(rect=[0, 0.06, 1, 0.96])
+        fname = f"perf_vs_n_{metric.lower()}.png"
         plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
         plt.close()
         print(f"  saved {fname}")

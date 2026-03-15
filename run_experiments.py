@@ -8,6 +8,7 @@ USAGE:
 """
 
 import argparse
+import re
 import time
 import json
 import warnings
@@ -69,8 +70,8 @@ from utils import save_cache, load_cache, print_summary
 # ============================================================================
 
 def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
-                   true_density_fn=None):
-    """Run all methods on one dataset."""
+                   true_density_fn=None, partial_dir=None, force=False):
+    """Run all methods on one dataset, skipping already-completed ones."""
 
     X_train, X_test, z_train, z_test = train_test_split(
         X, z, test_size=0.25, random_state=42)
@@ -88,11 +89,64 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
     cdes_dict = {}
     zgrids_dict = {}
 
+    # ── Per-method checkpoint helpers ─────────────────────────────────────
+    partial_metrics = {}
+    if partial_dir and not force:
+        metrics_file = partial_dir / f"{dataset_name}_metrics.json"
+        if metrics_file.exists():
+            try:
+                with open(metrics_file) as f:
+                    partial_metrics = json.load(f)
+                print(f"  [resume] {len(partial_metrics)} method(s) already done: "
+                      f"{', '.join(partial_metrics)}")
+            except Exception:
+                partial_metrics = {}
+
+    def _key(name):
+        return re.sub(r'[^a-zA-Z0-9_-]', '_', name)
+
+    def _load_arrays(name):
+        if partial_dir is None:
+            return None, None
+        cde_f = partial_dir / f"{dataset_name}_{_key(name)}_cdes.npy"
+        zg_f  = partial_dir / f"{dataset_name}_{_key(name)}_zgrid.npy"
+        if cde_f.exists() and zg_f.exists():
+            return np.load(cde_f), np.load(zg_f)
+        return None, None
+
+    def _save(name, m, cdes, zg):
+        if partial_dir is None:
+            return
+        partial_dir.mkdir(exist_ok=True)
+        np.save(partial_dir / f"{dataset_name}_{_key(name)}_cdes.npy", cdes)
+        np.save(partial_dir / f"{dataset_name}_{_key(name)}_zgrid.npy", zg)
+        partial_metrics[name] = {k: (float(v) if v is not None else None)
+                                 for k, v in m.items()}
+        with open(partial_dir / f"{dataset_name}_metrics.json", 'w') as f:
+            json.dump(partial_metrics, f, indent=2)
+
+    def _cached(name):
+        """Return (metrics, cdes, zgrid) if cached, else None."""
+        if name in partial_metrics:
+            cdes, zg = _load_arrays(name)
+            if cdes is not None:
+                return partial_metrics[name], cdes, zg
+        return None
+
     n_train = len(z_train)
     max_basis = min(50, max(15, int(np.sqrt(n_train))))
 
     # ── Helper to run a FlexCode method ──────────────────────────────────
     def run_flexcode(name, factory, params):
+        hit = _cached(name)
+        if hit:
+            m_c, cdes, zg = hit
+            results[name] = m_c
+            cdes_dict[name] = cdes
+            zgrids_dict[name] = zg
+            print(f"  {name}... [cached] CDE={m_c['CDE_loss']:.4f}, "
+                  f"LL={m_c['log_lik']:.3f}")
+            return
         print(f"  {name}...", end=" ", flush=True)
         t0 = time.time()
         model = FlexCodeEstimator(factory, max_basis=max_basis,
@@ -109,6 +163,7 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
         results[name] = m
         cdes_dict[name] = cdes
         zgrids_dict[name] = zg
+        _save(name, m, cdes, zg)
         print(f"I={model.best_basis_}, CDE={m['CDE_loss']:.4f}, "
               f"LL={m['log_lik']:.3f}, CRPS={m['CRPS']:.4f}, "
               f"KS={m['PIT_KS']:.3f}, t={fit_t:.1f}s")
@@ -118,79 +173,119 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
 
     # ── TabPFN Native Distribution ───────────────────────────────────────
     if HAS_TABPFN:
-        print(f"  TabPFN-Native...", end=" ", flush=True)
-        t0 = time.time()
-        pfn_reg = TabPFNRegressor(device=device)
-        pfn_reg.fit(X_tr, z_train)
-        fit_t = time.time() - t0
-        t0 = time.time()
-
-        z_lo = z_train.min() - 0.05 * np.ptp(z_train)
-        z_hi = z_train.max() + 0.05 * np.ptp(z_train)
-        cdes_pfn, zg_pfn = tabpfn_native_density(
-            pfn_reg, X_te, n_grid=n_grid, z_min=z_lo, z_max=z_hi
-        )
-        pred_t = time.time() - t0
-        m = compute_all_metrics(cdes_pfn, zg_pfn, z_test)
-        m['fit_time'] = fit_t
-        m['pred_time'] = pred_t
-        m['n_basis'] = None
-        results['TabPFN-Native'] = m
-        cdes_dict['TabPFN-Native'] = cdes_pfn
-        zgrids_dict['TabPFN-Native'] = zg_pfn
-        print(f"CDE={m['CDE_loss']:.4f}, LL={m['log_lik']:.3f}, "
-              f"CRPS={m['CRPS']:.4f}, KS={m['PIT_KS']:.3f}")
+        name = 'TabPFN-Native'
+        hit = _cached(name)
+        if hit:
+            m_c, cdes_pfn, zg_pfn = hit
+            results[name] = m_c
+            cdes_dict[name] = cdes_pfn
+            zgrids_dict[name] = zg_pfn
+            print(f"  {name}... [cached] CDE={m_c['CDE_loss']:.4f}, "
+                  f"LL={m_c['log_lik']:.3f}")
+        else:
+            print(f"  {name}...", end=" ", flush=True)
+            t0 = time.time()
+            pfn_reg = TabPFNRegressor(device=device)
+            pfn_reg.fit(X_tr, z_train)
+            fit_t = time.time() - t0
+            t0 = time.time()
+            z_lo = z_train.min() - 0.05 * np.ptp(z_train)
+            z_hi = z_train.max() + 0.05 * np.ptp(z_train)
+            cdes_pfn, zg_pfn = tabpfn_native_density(
+                pfn_reg, X_te, n_grid=n_grid, z_min=z_lo, z_max=z_hi
+            )
+            pred_t = time.time() - t0
+            m = compute_all_metrics(cdes_pfn, zg_pfn, z_test)
+            m['fit_time'] = fit_t
+            m['pred_time'] = pred_t
+            m['n_basis'] = None
+            results[name] = m
+            cdes_dict[name] = cdes_pfn
+            zgrids_dict[name] = zg_pfn
+            _save(name, m, cdes_pfn, zg_pfn)
+            print(f"CDE={m['CDE_loss']:.4f}, LL={m['log_lik']:.3f}, "
+                  f"CRPS={m['CRPS']:.4f}, KS={m['PIT_KS']:.3f}")
 
     # ── TabICLv2 Native Quantiles ────────────────────────────────────────
     if HAS_TABICL:
-        print(f"  TabICL-Quantiles...", end=" ", flush=True)
-        t0 = time.time()
-        icl_reg = TabICLRegressor(
-            n_estimators=4,
-            device=device if device != 'auto' else 'cpu'
-        )
-        icl_reg.fit(X_tr, z_train)
-        fit_t = time.time() - t0
-        t0 = time.time()
+        name = 'TabICL-Quantiles'
+        hit = _cached(name)
+        if hit:
+            m_c, cdes_icl, zg_icl = hit
+            results[name] = m_c
+            cdes_dict[name] = cdes_icl
+            zgrids_dict[name] = zg_icl
+            print(f"  {name}... [cached] CDE={m_c['CDE_loss']:.4f}, "
+                  f"LL={m_c['log_lik']:.3f}")
+        else:
+            print(f"  {name}...", end=" ", flush=True)
+            t0 = time.time()
+            icl_reg = TabICLRegressor(
+                n_estimators=4,
+                device=device if device != 'auto' else 'cpu'
+            )
+            icl_reg.fit(X_tr, z_train)
+            fit_t = time.time() - t0
+            t0 = time.time()
+            z_lo = z_train.min() - 0.05 * np.ptp(z_train)
+            z_hi = z_train.max() + 0.05 * np.ptp(z_train)
+            cdes_icl, zg_icl = tabicl_quantile_density(
+                icl_reg, X_tr, z_train, X_te,
+                n_grid=n_grid, z_min=z_lo, z_max=z_hi
+            )
+            pred_t = time.time() - t0
+            m = compute_all_metrics(cdes_icl, zg_icl, z_test)
+            m['fit_time'] = fit_t
+            m['pred_time'] = pred_t
+            m['n_basis'] = None
+            results[name] = m
+            cdes_dict[name] = cdes_icl
+            zgrids_dict[name] = zg_icl
+            _save(name, m, cdes_icl, zg_icl)
+            print(f"CDE={m['CDE_loss']:.4f}, LL={m['log_lik']:.3f}, "
+                  f"CRPS={m['CRPS']:.4f}, KS={m['PIT_KS']:.3f}")
 
+    # ── Quantile GBM/XGB baseline ────────────────────────────────────────
+    name = 'Quantile-Tree'
+    hit = _cached(name)
+    if hit:
+        m_c, cdes_qgbm, zg_qgbm = hit
+        results[name] = m_c
+        cdes_dict[name] = cdes_qgbm
+        zgrids_dict[name] = zg_qgbm
+        print(f"  {name}... [cached] CDE={m_c['CDE_loss']:.4f}, "
+              f"LL={m_c['log_lik']:.3f}")
+    else:
+        print(f"  {name}...", end=" ", flush=True)
+        t0 = time.time()
         z_lo = z_train.min() - 0.05 * np.ptp(z_train)
         z_hi = z_train.max() + 0.05 * np.ptp(z_train)
-        cdes_icl, zg_icl = tabicl_quantile_density(
-            icl_reg, X_tr, z_train, X_te,
-            n_grid=n_grid, z_min=z_lo, z_max=z_hi
+        cdes_qgbm, zg_qgbm = quantile_gbm_density(
+            X_tr, z_train, X_te, n_grid=n_grid, z_min=z_lo, z_max=z_hi
         )
-        pred_t = time.time() - t0
-        m = compute_all_metrics(cdes_icl, zg_icl, z_test)
+        fit_t = time.time() - t0
+        m = compute_all_metrics(cdes_qgbm, zg_qgbm, z_test)
         m['fit_time'] = fit_t
-        m['pred_time'] = pred_t
+        m['pred_time'] = 0
         m['n_basis'] = None
-        results['TabICL-Quantiles'] = m
-        cdes_dict['TabICL-Quantiles'] = cdes_icl
-        zgrids_dict['TabICL-Quantiles'] = zg_icl
+        results[name] = m
+        cdes_dict[name] = cdes_qgbm
+        zgrids_dict[name] = zg_qgbm
+        _save(name, m, cdes_qgbm, zg_qgbm)
         print(f"CDE={m['CDE_loss']:.4f}, LL={m['log_lik']:.3f}, "
               f"CRPS={m['CRPS']:.4f}, KS={m['PIT_KS']:.3f}")
 
-    # ── Quantile GBM/XGB baseline ────────────────────────────────────────
-    print(f"  Quantile-Tree...", end=" ", flush=True)
-    t0 = time.time()
-    z_lo = z_train.min() - 0.05 * np.ptp(z_train)
-    z_hi = z_train.max() + 0.05 * np.ptp(z_train)
-    cdes_qgbm, zg_qgbm = quantile_gbm_density(
-        X_tr, z_train, X_te, n_grid=n_grid, z_min=z_lo, z_max=z_hi
-    )
-    fit_t = time.time() - t0
-    m = compute_all_metrics(cdes_qgbm, zg_qgbm, z_test)
-    m['fit_time'] = fit_t
-    m['pred_time'] = 0
-    m['n_basis'] = None
-    results['Quantile-Tree'] = m
-    cdes_dict['Quantile-Tree'] = cdes_qgbm
-    zgrids_dict['Quantile-Tree'] = zg_qgbm
-    print(f"CDE={m['CDE_loss']:.4f}, LL={m['log_lik']:.3f}, "
-          f"CRPS={m['CRPS']:.4f}, KS={m['PIT_KS']:.3f}")
-
     # ── Helper for simple density baselines ──────────────────────────────
     def _run_density_baseline(name, density_fn, **kwargs):
+        hit = _cached(name)
+        if hit:
+            m_c, cdes_bl, zg_bl = hit
+            results[name] = m_c
+            cdes_dict[name] = cdes_bl
+            zgrids_dict[name] = zg_bl
+            print(f"  {name}... [cached] CDE={m_c['CDE_loss']:.4f}, "
+                  f"LL={m_c['log_lik']:.3f}")
+            return
         print(f"  {name}...", end=" ", flush=True)
         t0 = time.time()
         z_lo = z_train.min() - 0.05 * np.ptp(z_train)
@@ -207,6 +302,7 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
         results[name] = m_bl
         cdes_dict[name] = cdes_bl
         zgrids_dict[name] = zg_bl
+        _save(name, m_bl, cdes_bl, zg_bl)
         print(f"CDE={m_bl['CDE_loss']:.4f}, LL={m_bl['log_lik']:.3f}, "
               f"CRPS={m_bl['CRPS']:.4f}, KS={m_bl['PIT_KS']:.3f}")
 
@@ -271,6 +367,8 @@ def main():
     output_dir.mkdir(exist_ok=True)
     cache_dir = output_dir / 'cache'
     cache_dir.mkdir(exist_ok=True)
+    partial_dir = cache_dir / 'partial'
+    partial_dir.mkdir(exist_ok=True)
 
     # Load previously saved results to skip already-run datasets
     json_path = output_dir / 'results.json'
@@ -318,7 +416,8 @@ def main():
             res, cdes, zgrids, X_te, z_te, true_cde, true_zgrid = \
                 run_experiment(
                     X, z, name, device=args.device,
-                    true_density_fn=true_density_fn
+                    true_density_fn=true_density_fn,
+                    partial_dir=partial_dir, force=args.force,
                 )
             n_total = len(z)
             all_results[name] = res

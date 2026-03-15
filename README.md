@@ -93,7 +93,7 @@ Friedman1 (n=1500, d=10), Friedman2 (n=1500, d=4).
 
 ### Real-world (n = 1000, 2000, 4000 where available)
 
-SpaceGA, Kin8nm, Puma8NH, Bank8FM, CPUact -- from OpenML, at multiple
+SpaceGA, Elevators, Kin8nm, Puma8NH, Bank8FM, CPUact -- from OpenML, at multiple
 sample sizes to study scaling behavior.
 
 ## Evaluation Metrics

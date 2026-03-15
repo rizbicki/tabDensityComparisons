@@ -25,12 +25,12 @@ def _subsample(X, z, n_max, seed=42):
 
 # (openml_id, name, true_n)
 _REAL_DATASETS = [
-    (507, "SpaceGA",  3107),
-    (722, "Pol",      15000),
-    (189, "Kin8nm",   8192),
-    (225, "Puma8NH",  8192),
-    (218, "Bank8FM",  22784),
-    (197, "CPUact",   8192),
+    (507, "SpaceGA",    3107),
+    (216, "Elevators",  16599),
+    (189, "Kin8nm",     8192),
+    (225, "Puma8NH",    8192),
+    (218, "Bank8FM",    22784),
+    (197, "CPUact",     8192),
 ]
 
 

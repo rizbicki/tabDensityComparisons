@@ -63,6 +63,7 @@ def load_all_datasets(quick=False):
         datasets.append(gen())           # n=1000
         datasets.append(gen(n=2000))     # n=2000
         datasets.append(gen(n=4000))     # n=4000
+        datasets.append(gen(n=6000))     # n=6000
 
     if not quick:
         # Semi-synthetic
@@ -72,24 +73,8 @@ def load_all_datasets(quick=False):
         X, z = make_friedman2(n_samples=1500, noise=50.0, random_state=42)
         datasets.append((X, z, "Friedman2", None))
 
-        # Real datasets at n=1000
-        _load_real_at_n(datasets, 1000)
-        # Real datasets at n=2000
-        _load_real_at_n(datasets, 2000)
-        # Real datasets at n=4000 (or max available if < 4000)
-        for data_id, name, true_n in _REAL_DATASETS:
-            target = min(4000, true_n)
-            tag = f"{name}-{target}" if target != true_n else name
-            # Skip if we already added this exact tag
-            existing_tags = [d[2] for d in datasets]
-            if tag in existing_tags:
-                continue
-            try:
-                d = fetch_openml(data_id=data_id, as_frame=False, parser='auto')
-                X_d, z_d = d.data.astype(float), d.target.astype(float)
-                X_d, z_d = _subsample(X_d, z_d, target)
-                datasets.append((X_d, z_d, tag, None))
-            except Exception as e:
-                print(f"  [{tag} skipped: {e}]")
+        # Real datasets at n=1000, 2000, 4000, 6000
+        for target_n in [1000, 2000, 4000, 6000]:
+            _load_real_at_n(datasets, target_n)
 
     return datasets

@@ -185,6 +185,97 @@ def plot_rankings(all_results, output_dir, all_data=None):
         print(f"  saved {fname}")
 
 
+def _group_by_n(all_results):
+    """Group datasets by sample size suffix. Returns {n: {ds: results}}."""
+    from collections import defaultdict
+    size_groups = defaultdict(dict)
+    for ds in all_results:
+        _, n = _parse_base_and_n(ds)
+        if n is not None:
+            size_groups[n][ds] = all_results[ds]
+    return dict(size_groups)
+
+
+def plot_rankings_by_n(all_results, output_dir, all_data=None):
+    """Ranking bar plots for each sample size separately."""
+    size_groups = _group_by_n(all_results)
+    if not size_groups:
+        return
+
+    methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
+    cmap2 = plt.cm.tab10
+    colors = {m: cmap2(i) for i, m in enumerate(methods)}
+
+    for n_size in sorted(size_groups):
+        sub_results = size_groups[n_size]
+        datasets = list(sub_results.keys())
+        n_methods = len(methods)
+        n_ds = len(datasets)
+        ds_labels = _ds_labels(datasets, all_data)
+
+        for metric, label, direction in METRICS_INFO:
+            # Build rank matrix
+            matrix = np.full((n_methods, n_ds), np.nan)
+            for di, ds in enumerate(datasets):
+                vals, avail = [], []
+                for m in methods:
+                    if m in sub_results[ds]:
+                        vals.append(sub_results[ds][m][metric])
+                        avail.append(m)
+                vals = np.array(vals)
+                ranks = (np.argsort(np.argsort(vals)) + 1 if direction == 'lower'
+                         else np.argsort(np.argsort(-vals)) + 1)
+                for m, r in zip(avail, ranks):
+                    matrix[methods.index(m), di] = r
+
+            fig, (ax1, ax2) = plt.subplots(
+                1, 2,
+                figsize=(max(10, n_ds * 0.9), max(4, n_methods * 0.6)),
+                gridspec_kw={'width_ratios': [3, 1]})
+
+            im = ax1.imshow(matrix, cmap='RdYlGn_r', aspect='auto',
+                            vmin=1, vmax=n_methods)
+            ax1.set_yticks(range(n_methods))
+            ax1.set_yticklabels(methods, fontsize=9)
+            ax1.set_xticks(range(n_ds))
+            ax1.set_xticklabels(ds_labels, fontsize=7, rotation=45, ha='right')
+
+            for i in range(n_methods):
+                for j in range(n_ds):
+                    if not np.isnan(matrix[i, j]):
+                        ax1.text(j, i, f'{int(matrix[i,j])}', ha='center',
+                                 va='center', fontsize=8, fontweight='bold',
+                                 color='white' if matrix[i,j] > n_methods * 0.6
+                                 else 'black')
+
+            plt.colorbar(im, ax=ax1, label='Rank', shrink=0.8)
+            ax1.set_title(f'{label} — Rankings (n={n_size})',
+                          fontsize=11, fontweight='bold')
+
+            # Average rank bar
+            avg_ranks = {}
+            for mi, m in enumerate(methods):
+                r = matrix[mi][~np.isnan(matrix[mi])]
+                avg_ranks[m] = np.mean(r) if len(r) > 0 else 99
+
+            sorted_m = sorted(avg_ranks, key=avg_ranks.get)
+            y_pos = range(len(sorted_m))
+            ax2.barh(y_pos, [avg_ranks[m] for m in sorted_m],
+                     color=[colors[m] for m in sorted_m], alpha=0.8)
+            ax2.set_yticks(y_pos)
+            ax2.set_yticklabels(sorted_m, fontsize=9)
+            ax2.set_xlabel('Avg Rank', fontsize=10)
+            ax2.set_title(f'Overall (n={n_size})', fontsize=11, fontweight='bold')
+            ax2.grid(axis='x', alpha=0.3)
+            ax2.invert_yaxis()
+
+            plt.tight_layout()
+            fname = f"rankings_{metric.lower()}_n{n_size}.png"
+            plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
+            plt.close()
+            print(f"  saved {fname}")
+
+
 def plot_raw_metrics(all_results, output_dir, all_data=None):
     """One raw-value heatmap per metric."""
     methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
@@ -201,12 +292,25 @@ def plot_raw_metrics(all_results, output_dir, all_data=None):
                     matrix[mi, di] = all_results[ds][m][metric]
 
         cmap = 'RdYlGn_r' if direction == 'lower' else 'RdYlGn'
-        vmin, vmax = np.nanmin(matrix), np.nanmax(matrix)
+
+        # Normalize per dataset (column): map each column to [0, 1]
+        norm_matrix = np.full_like(matrix, np.nan)
+        for j in range(n_ds):
+            col = matrix[:, j]
+            col_valid = col[~np.isnan(col)]
+            if len(col_valid) == 0:
+                continue
+            cmin, cmax = np.nanmin(col), np.nanmax(col)
+            rng = cmax - cmin
+            if rng < 1e-10:
+                norm_matrix[:, j] = 0.5
+            else:
+                norm_matrix[:, j] = (col - cmin) / rng
 
         fig, ax = plt.subplots(figsize=(max(10, n_ds * 0.9),
                                         max(4, n_methods * 0.6)))
 
-        im = ax.imshow(matrix, cmap=cmap, aspect='auto', vmin=vmin, vmax=vmax)
+        im = ax.imshow(norm_matrix, cmap=cmap, aspect='auto', vmin=0, vmax=1)
         ax.set_yticks(range(n_methods))
         ax.set_yticklabels(methods, fontsize=9)
         ax.set_xticks(range(n_ds))
@@ -217,19 +321,87 @@ def plot_raw_metrics(all_results, output_dir, all_data=None):
                 if not np.isnan(matrix[i, j]):
                     val = matrix[i, j]
                     txt = f'{val:.3f}' if abs(val) < 100 else f'{val:.1f}'
-                    norm_val = (val - vmin) / max(vmax - vmin, 1e-10)
-                    dark = norm_val < 0.4 if direction == 'higher' else norm_val > 0.6
+                    nv = norm_matrix[i, j]
+                    dark = nv < 0.4 if direction == 'higher' else nv > 0.6
                     ax.text(j, i, txt, ha='center', va='center',
                             fontsize=7, fontweight='bold',
                             color='white' if dark else 'black')
 
-        plt.colorbar(im, ax=ax, shrink=0.8)
-        ax.set_title(f'{label}', fontsize=12, fontweight='bold')
+        # No colorbar — colors are relative within each column
+        ax.set_title(f'{label} (colors normalized per dataset)',
+                     fontsize=12, fontweight='bold')
         plt.tight_layout()
         fname = f"raw_{metric.lower()}.png"
         plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
         plt.close()
         print(f"  saved {fname}")
+
+
+def plot_raw_metrics_by_n(all_results, output_dir, all_data=None):
+    """Raw-value heatmaps per sample size, with per-column normalization."""
+    size_groups = _group_by_n(all_results)
+    if not size_groups:
+        return
+
+    methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
+
+    for n_size in sorted(size_groups):
+        sub_results = size_groups[n_size]
+        datasets = list(sub_results.keys())
+        n_methods = len(methods)
+        n_ds = len(datasets)
+        ds_labels = _ds_labels(datasets, all_data)
+
+        for metric, label, direction in METRICS_INFO:
+            matrix = np.full((n_methods, n_ds), np.nan)
+            for di, ds in enumerate(datasets):
+                for mi, m in enumerate(methods):
+                    if m in sub_results[ds] and metric in sub_results[ds][m]:
+                        matrix[mi, di] = sub_results[ds][m][metric]
+
+            cmap = 'RdYlGn_r' if direction == 'lower' else 'RdYlGn'
+
+            # Normalize per dataset (column)
+            norm_matrix = np.full_like(matrix, np.nan)
+            for j in range(n_ds):
+                col = matrix[:, j]
+                col_valid = col[~np.isnan(col)]
+                if len(col_valid) == 0:
+                    continue
+                cmin, cmax = np.nanmin(col), np.nanmax(col)
+                rng = cmax - cmin
+                if rng < 1e-10:
+                    norm_matrix[:, j] = 0.5
+                else:
+                    norm_matrix[:, j] = (col - cmin) / rng
+
+            fig, ax = plt.subplots(figsize=(max(10, n_ds * 0.9),
+                                            max(4, n_methods * 0.6)))
+
+            im = ax.imshow(norm_matrix, cmap=cmap, aspect='auto', vmin=0, vmax=1)
+            ax.set_yticks(range(n_methods))
+            ax.set_yticklabels(methods, fontsize=9)
+            ax.set_xticks(range(n_ds))
+            ax.set_xticklabels(ds_labels, fontsize=7, rotation=45, ha='right')
+
+            for i in range(n_methods):
+                for j in range(n_ds):
+                    if not np.isnan(matrix[i, j]):
+                        val = matrix[i, j]
+                        txt = f'{val:.3f}' if abs(val) < 100 else f'{val:.1f}'
+                        nv = norm_matrix[i, j]
+                        dark = nv < 0.4 if direction == 'higher' else nv > 0.6
+                        ax.text(j, i, txt, ha='center', va='center',
+                                fontsize=7, fontweight='bold',
+                                color='white' if dark else 'black')
+
+            ax.set_title(f'{label} (n={n_size}, colors normalized per dataset)',
+                         fontsize=12, fontweight='bold')
+            plt.tight_layout()
+            fname = f"raw_{metric.lower()}_n{n_size}.png"
+            plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
+            plt.close()
+            print(f"  saved {fname}")
 
 
 def plot_pit_histograms(all_data, output_dir):
@@ -494,6 +666,8 @@ def plot_native_tab_subset(all_data, output_dir, n_examples=4):
         print(f"  saved {fname}")
 
 
+FOUNDATIONAL_MODELS = {'TabPFN-Native', 'TabICL-Quantiles'}
+
 import re as _re
 
 
@@ -582,6 +756,105 @@ def plot_performance_vs_n(all_results, output_dir, all_data=None):
                      fontsize=13, fontweight='bold')
         plt.tight_layout(rect=[0, 0.06, 1, 0.96])
         fname = f"perf_vs_n_{metric.lower()}.png"
+        plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
+        plt.close()
+        print(f"  saved {fname}")
+
+
+def plot_performance_vs_n_foundational(all_results, output_dir, all_data=None):
+    """Like plot_performance_vs_n but foundational models are visually prominent."""
+    base_groups = {}
+    for ds in all_results:
+        base, n = _parse_base_and_n(ds)
+        if base is not None:
+            base_groups.setdefault(base, []).append((n, ds))
+    base_groups = {b: sorted(pairs) for b, pairs in base_groups.items()
+                   if len(pairs) > 1}
+    if not base_groups:
+        return
+
+    methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
+    cmap = plt.cm.tab20
+    method_colors = {m: cmap(i / max(len(methods) - 1, 1)) for i, m in enumerate(methods)}
+    for m in methods:
+        if m in METHOD_STYLES:
+            method_colors[m] = METHOD_STYLES[m]['color']
+
+    for metric, label, direction in METRICS_INFO:
+        n_bases = len(base_groups)
+        ncols = min(3, n_bases)
+        nrows = (n_bases + ncols - 1) // ncols
+        fig, axes = plt.subplots(nrows, ncols,
+                                 figsize=(6 * ncols, 4.5 * nrows),
+                                 squeeze=False)
+
+        for idx, (base, pairs) in enumerate(sorted(base_groups.items())):
+            ax = axes[idx // ncols][idx % ncols]
+            ns = [n for n, _ in pairs]
+
+            # Draw non-foundational first (faded), then foundational (bold)
+            for is_foundation_pass in [False, True]:
+                for m in methods:
+                    is_found = m in FOUNDATIONAL_MODELS
+                    if is_found != is_foundation_pass:
+                        continue
+                    vals = []
+                    valid_ns = []
+                    for n, ds in pairs:
+                        if m in all_results[ds] and metric in all_results[ds][m]:
+                            vals.append(all_results[ds][m][metric])
+                            valid_ns.append(n)
+                    if not valid_ns:
+                        continue
+
+                    if is_found:
+                        sty = METHOD_STYLES.get(m, {})
+                        ax.plot(valid_ns, vals,
+                                marker='o', markersize=6,
+                                color=method_colors[m],
+                                linestyle=sty.get('ls', '-'),
+                                linewidth=3.0, alpha=1.0,
+                                zorder=10, label=m)
+                    else:
+                        ax.plot(valid_ns, vals,
+                                marker='.', markersize=3,
+                                color='#bbbbbb',
+                                linestyle='-',
+                                linewidth=0.8, alpha=0.5,
+                                zorder=2, label=m)
+
+            ax.set_title(base, fontsize=10, fontweight='bold')
+            ax.set_xlabel('n', fontsize=9)
+            ax.set_ylabel(label, fontsize=9)
+            ax.tick_params(labelsize=8)
+            ax.set_xticks(ns)
+            ax.grid(alpha=0.3)
+
+        for idx in range(n_bases, nrows * ncols):
+            axes[idx // ncols][idx % ncols].set_visible(False)
+
+        # Legend: foundational first, then one "Others" entry
+        import matplotlib.lines as mlines
+        legend_handles = []
+        for m in sorted(FOUNDATIONAL_MODELS):
+            if m in methods:
+                sty = METHOD_STYLES.get(m, {})
+                legend_handles.append(mlines.Line2D(
+                    [], [], color=method_colors[m],
+                    linestyle=sty.get('ls', '-'), linewidth=3.0,
+                    marker='o', markersize=6, label=m))
+        legend_handles.append(mlines.Line2D(
+            [], [], color='#bbbbbb', linestyle='-', linewidth=0.8,
+            marker='.', markersize=3, alpha=0.5, label='Others'))
+        fig.legend(handles=legend_handles, loc='lower center',
+                   ncol=len(legend_handles), fontsize=9,
+                   framealpha=0.9, bbox_to_anchor=(0.5, -0.02))
+
+        better = '(lower is better)' if direction == 'lower' else '(higher is better)'
+        plt.suptitle(f'{label} vs Sample Size — Foundational Models {better}',
+                     fontsize=13, fontweight='bold')
+        plt.tight_layout(rect=[0, 0.06, 1, 0.96])
+        fname = f"perf_vs_n_foundational_{metric.lower()}.png"
         plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
         plt.close()
         print(f"  saved {fname}")

@@ -14,7 +14,7 @@ datasets with the same base name and dimensionality together.
 import numpy as np
 from scipy import stats
 
-_MAX_N = 10_000  # upper bound; we slice to the requested n
+_MAX_N = 25_000  # upper bound; we slice to the requested n
 
 
 def make_heteroscedastic(n=1000, d=5, seed=42):

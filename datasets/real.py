@@ -67,7 +67,7 @@ def load_all_datasets(quick=False):
     datasets = []
     for gen in synthetic_generators:
         for d in [5, 10, 50]:
-            for n in [1000, 2000, 4000, 6000]:
+            for n in [1000, 2000, 4000, 6000, 20000]:
                 datasets.append(gen(n=n, d=d))
 
     if not quick:
@@ -78,8 +78,8 @@ def load_all_datasets(quick=False):
         X, z = make_friedman2(n_samples=1500, noise=50.0, random_state=42)
         datasets.append((X, z, "Friedman2", None))
 
-        # Real datasets at n=1000, 2000, 4000, 6000
-        for target_n in [1000, 2000, 4000, 6000]:
+        # Real datasets at n=1000, 2000, 4000, 6000, 20000
+        for target_n in [1000, 2000, 4000, 6000, 20000]:
             _load_real_at_n(datasets, target_n)
 
     return datasets

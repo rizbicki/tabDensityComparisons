@@ -30,7 +30,7 @@ def make_heteroscedastic(n=1000, d=5, seed=42):
         sig = 0.5 + np.abs(X_test[:, 0])
         return stats.norm.pdf(z_grid[None, :], mu[:, None], sig[:, None])
 
-    tag = f"Heteroscedastic-{n}" if n != 1000 else "Heteroscedastic"
+    tag = f"Heteroscedastic-{n}"
     return X, z, tag, true_density
 
 
@@ -53,7 +53,7 @@ def make_bimodal(n=1000, d=3, seed=42):
         p2 = stats.norm.pdf(z_grid[None, :], m2[:, None], 0.5)
         return 0.5 * p1 + 0.5 * p2
 
-    tag = f"Bimodal-{n}" if n != 1000 else "Bimodal"
+    tag = f"Bimodal-{n}"
     return X, z, tag, true_density
 
 
@@ -78,7 +78,7 @@ def make_skewed(n=1000, d=5, seed=42):
             result[i, mask] = stats.gamma.pdf(z_shifted[mask], a=shapes[i], scale=0.5)
         return result
 
-    tag = f"Skewed-{n}" if n != 1000 else "Skewed"
+    tag = f"Skewed-{n}"
     return X, z, tag, true_density
 
 
@@ -99,7 +99,7 @@ def make_linear_gaussian_homo(n=1000, d=5, seed=42):
         mu = X_test @ beta
         return stats.norm.pdf(z_grid[None, :], mu[:, None], sigma)
 
-    tag = f"LinGauss-Homo-{n}" if n != 1000 else "LinGauss-Homo"
+    tag = f"LinGauss-Homo-{n}"
     return X, z, tag, true_density
 
 
@@ -118,5 +118,5 @@ def make_nonlinear(n=1000, d=5, seed=42):
         sig = 0.3 + 0.3 * np.abs(np.cos(X_test[:, 0]))
         return stats.norm.pdf(z_grid[None, :], m[:, None], sig[:, None])
 
-    tag = f"Nonlinear-{n}" if n != 1000 else "Nonlinear"
+    tag = f"Nonlinear-{n}"
     return X, z, tag, true_density

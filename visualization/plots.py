@@ -550,45 +550,96 @@ def _parse_base_and_n(ds_name):
     return None, None
 
 
-def plot_performance_vs_n(all_results, output_dir, all_data=None):
-    """For each base dataset that appears at multiple n, plot metric vs n for all methods."""
-    # Group datasets by base name
+def _parse_d(base_name):
+    """Extract d from base names like 'Heteroscedastic-d5'. Returns int or None."""
+    m = _re.search(r'-d(\d+)$', base_name)
+    return int(m.group(1)) if m else None
+
+
+def _build_base_groups(all_results):
+    """Group datasets by base name, keeping only bases with multiple n."""
     base_groups = {}
     for ds in all_results:
         base, n = _parse_base_and_n(ds)
         if base is not None:
             base_groups.setdefault(base, []).append((n, ds))
+    return {b: sorted(pairs) for b, pairs in base_groups.items()
+            if len(pairs) > 1}
 
-    # Keep only bases with multiple n values
-    base_groups = {b: sorted(pairs) for b, pairs in base_groups.items()
-                   if len(pairs) > 1}
 
-    if not base_groups:
-        return
+def _split_real_sim(base_groups):
+    """Split base_groups into real and {d: simulated_groups} dicts."""
+    real = {}
+    sim_by_d = {}
+    for base, pairs in base_groups.items():
+        d = _parse_d(base)
+        if d is not None:
+            sim_by_d.setdefault(d, {})[base] = pairs
+        else:
+            real[base] = pairs
+    return real, sim_by_d
 
-    methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
+
+def _method_colors_map(methods):
     cmap = plt.cm.tab20
     method_colors = {m: cmap(i / max(len(methods) - 1, 1)) for i, m in enumerate(methods)}
-    # Override with METHOD_STYLES where available
     for m in methods:
         if m in METHOD_STYLES:
             method_colors[m] = METHOD_STYLES[m]['color']
+    return method_colors
 
-    for metric, label, direction in METRICS_INFO:
-        n_bases = len(base_groups)
-        ncols = min(3, n_bases)
-        nrows = (n_bases + ncols - 1) // ncols
-        fig, axes = plt.subplots(nrows, ncols,
-                                 figsize=(6 * ncols, 4.5 * nrows),
-                                 squeeze=False)
 
-        for idx, (base, pairs) in enumerate(sorted(base_groups.items())):
-            ax = axes[idx // ncols][idx % ncols]
-            ns = [n for n, _ in pairs]
+def _plot_perf_grid(base_groups, all_results, methods, method_colors,
+                    metric, label, direction, title_suffix, fname,
+                    output_dir, foundational_only=False):
+    """Core helper: one subplot per base, metric vs n."""
+    if not base_groups:
+        return
 
+    import matplotlib.lines as mlines
+
+    n_bases = len(base_groups)
+    ncols = min(3, n_bases)
+    nrows = (n_bases + ncols - 1) // ncols
+    fig, axes = plt.subplots(nrows, ncols,
+                             figsize=(6 * ncols, 4.5 * nrows),
+                             squeeze=False)
+
+    for idx, (base, pairs) in enumerate(sorted(base_groups.items())):
+        ax = axes[idx // ncols][idx % ncols]
+        ns = [n for n, _ in pairs]
+
+        if foundational_only:
+            # Non-foundational faded, then foundational bold
+            for is_foundation_pass in [False, True]:
+                for m in methods:
+                    is_found = m in FOUNDATIONAL_MODELS
+                    if is_found != is_foundation_pass:
+                        continue
+                    vals, valid_ns = [], []
+                    for n, ds in pairs:
+                        if m in all_results[ds] and metric in all_results[ds][m]:
+                            vals.append(all_results[ds][m][metric])
+                            valid_ns.append(n)
+                    if not valid_ns:
+                        continue
+                    if is_found:
+                        sty = METHOD_STYLES.get(m, {})
+                        ax.plot(valid_ns, vals,
+                                marker='o', markersize=6,
+                                color=method_colors[m],
+                                linestyle=sty.get('ls', '-'),
+                                linewidth=3.0, alpha=1.0,
+                                zorder=10, label=m)
+                    else:
+                        ax.plot(valid_ns, vals,
+                                marker='.', markersize=3,
+                                color='#bbbbbb', linestyle='-',
+                                linewidth=0.8, alpha=0.5,
+                                zorder=2, label=m)
+        else:
             for m in methods:
-                vals = []
-                valid_ns = []
+                vals, valid_ns = [], []
                 for n, ds in pairs:
                     if m in all_results[ds] and metric in all_results[ds][m]:
                         vals.append(all_results[ds][m][metric])
@@ -602,107 +653,18 @@ def plot_performance_vs_n(all_results, output_dir, all_data=None):
                             linewidth=1.5, alpha=0.85,
                             label=m)
 
-            ax.set_title(base, fontsize=10, fontweight='bold')
-            ax.set_xlabel('n', fontsize=9)
-            ax.set_ylabel(label, fontsize=9)
-            ax.tick_params(labelsize=8)
-            ax.set_xticks(ns)
-            ax.grid(alpha=0.3)
+        ax.set_title(base, fontsize=10, fontweight='bold')
+        ax.set_xlabel('n', fontsize=9)
+        ax.set_ylabel(label, fontsize=9)
+        ax.tick_params(labelsize=8)
+        ax.set_xticks(ns)
+        ax.grid(alpha=0.3)
 
-        # Hide empty axes
-        for idx in range(n_bases, nrows * ncols):
-            axes[idx // ncols][idx % ncols].set_visible(False)
+    for idx in range(n_bases, nrows * ncols):
+        axes[idx // ncols][idx % ncols].set_visible(False)
 
-        # Single legend
-        handles, labels_leg = axes[0][0].get_legend_handles_labels()
-        fig.legend(handles, labels_leg, loc='lower center',
-                   ncol=min(len(labels_leg), 6), fontsize=7,
-                   framealpha=0.9, bbox_to_anchor=(0.5, -0.02))
-
-        better = '(lower is better)' if direction == 'lower' else '(higher is better)'
-        plt.suptitle(f'{label} vs Sample Size {better}',
-                     fontsize=13, fontweight='bold')
-        plt.tight_layout(rect=[0, 0.06, 1, 0.96])
-        fname = f"perf_vs_n_{metric.lower()}.png"
-        plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
-        plt.close()
-        print(f"  saved {fname}")
-
-
-def plot_performance_vs_n_foundational(all_results, output_dir, all_data=None):
-    """Like plot_performance_vs_n but foundational models are visually prominent."""
-    base_groups = {}
-    for ds in all_results:
-        base, n = _parse_base_and_n(ds)
-        if base is not None:
-            base_groups.setdefault(base, []).append((n, ds))
-    base_groups = {b: sorted(pairs) for b, pairs in base_groups.items()
-                   if len(pairs) > 1}
-    if not base_groups:
-        return
-
-    methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
-    cmap = plt.cm.tab20
-    method_colors = {m: cmap(i / max(len(methods) - 1, 1)) for i, m in enumerate(methods)}
-    for m in methods:
-        if m in METHOD_STYLES:
-            method_colors[m] = METHOD_STYLES[m]['color']
-
-    for metric, label, direction in METRICS_INFO:
-        n_bases = len(base_groups)
-        ncols = min(3, n_bases)
-        nrows = (n_bases + ncols - 1) // ncols
-        fig, axes = plt.subplots(nrows, ncols,
-                                 figsize=(6 * ncols, 4.5 * nrows),
-                                 squeeze=False)
-
-        for idx, (base, pairs) in enumerate(sorted(base_groups.items())):
-            ax = axes[idx // ncols][idx % ncols]
-            ns = [n for n, _ in pairs]
-
-            # Draw non-foundational first (faded), then foundational (bold)
-            for is_foundation_pass in [False, True]:
-                for m in methods:
-                    is_found = m in FOUNDATIONAL_MODELS
-                    if is_found != is_foundation_pass:
-                        continue
-                    vals = []
-                    valid_ns = []
-                    for n, ds in pairs:
-                        if m in all_results[ds] and metric in all_results[ds][m]:
-                            vals.append(all_results[ds][m][metric])
-                            valid_ns.append(n)
-                    if not valid_ns:
-                        continue
-
-                    if is_found:
-                        sty = METHOD_STYLES.get(m, {})
-                        ax.plot(valid_ns, vals,
-                                marker='o', markersize=6,
-                                color=method_colors[m],
-                                linestyle=sty.get('ls', '-'),
-                                linewidth=3.0, alpha=1.0,
-                                zorder=10, label=m)
-                    else:
-                        ax.plot(valid_ns, vals,
-                                marker='.', markersize=3,
-                                color='#bbbbbb',
-                                linestyle='-',
-                                linewidth=0.8, alpha=0.5,
-                                zorder=2, label=m)
-
-            ax.set_title(base, fontsize=10, fontweight='bold')
-            ax.set_xlabel('n', fontsize=9)
-            ax.set_ylabel(label, fontsize=9)
-            ax.tick_params(labelsize=8)
-            ax.set_xticks(ns)
-            ax.grid(alpha=0.3)
-
-        for idx in range(n_bases, nrows * ncols):
-            axes[idx // ncols][idx % ncols].set_visible(False)
-
-        # Legend: foundational first, then one "Others" entry
-        import matplotlib.lines as mlines
+    # Legend
+    if foundational_only:
         legend_handles = []
         for m in sorted(FOUNDATIONAL_MODELS):
             if m in methods:
@@ -717,12 +679,67 @@ def plot_performance_vs_n_foundational(all_results, output_dir, all_data=None):
         fig.legend(handles=legend_handles, loc='lower center',
                    ncol=len(legend_handles), fontsize=9,
                    framealpha=0.9, bbox_to_anchor=(0.5, -0.02))
+    else:
+        handles, labels_leg = axes[0][0].get_legend_handles_labels()
+        fig.legend(handles, labels_leg, loc='lower center',
+                   ncol=min(len(labels_leg), 6), fontsize=7,
+                   framealpha=0.9, bbox_to_anchor=(0.5, -0.02))
 
-        better = '(lower is better)' if direction == 'lower' else '(higher is better)'
-        plt.suptitle(f'{label} vs Sample Size — Foundational Models {better}',
-                     fontsize=13, fontweight='bold')
-        plt.tight_layout(rect=[0, 0.06, 1, 0.96])
-        fname = f"perf_vs_n_foundational_{metric.lower()}.png"
-        plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
-        plt.close()
-        print(f"  saved {fname}")
+    better = '(lower is better)' if direction == 'lower' else '(higher is better)'
+    plt.suptitle(f'{label} vs Sample Size{title_suffix} {better}',
+                 fontsize=13, fontweight='bold')
+    plt.tight_layout(rect=[0, 0.06, 1, 0.96])
+    plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
+    plt.close()
+    print(f"  saved {fname}")
+
+
+def plot_performance_vs_n(all_results, output_dir, all_data=None):
+    """Performance vs n, split by real / simulated (per d)."""
+    base_groups = _build_base_groups(all_results)
+    if not base_groups:
+        return
+
+    methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
+    mc = _method_colors_map(methods)
+    real, sim_by_d = _split_real_sim(base_groups)
+
+    for metric, label, direction in METRICS_INFO:
+        ml = metric.lower()
+        if real:
+            _plot_perf_grid(real, all_results, methods, mc,
+                            metric, label, direction,
+                            ' — Real', f'perf_vs_n_{ml}_real.png',
+                            output_dir)
+        for d in sorted(sim_by_d):
+            _plot_perf_grid(sim_by_d[d], all_results, methods, mc,
+                            metric, label, direction,
+                            f' — Simulated (d={d})',
+                            f'perf_vs_n_{ml}_sim_d{d}.png',
+                            output_dir)
+
+
+def plot_performance_vs_n_foundational(all_results, output_dir, all_data=None):
+    """Like plot_performance_vs_n but foundational models are visually prominent."""
+    base_groups = _build_base_groups(all_results)
+    if not base_groups:
+        return
+
+    methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
+    mc = _method_colors_map(methods)
+    real, sim_by_d = _split_real_sim(base_groups)
+
+    for metric, label, direction in METRICS_INFO:
+        ml = metric.lower()
+        if real:
+            _plot_perf_grid(real, all_results, methods, mc,
+                            metric, label, direction,
+                            ' — Real (Foundational)',
+                            f'perf_vs_n_foundational_{ml}_real.png',
+                            output_dir, foundational_only=True)
+        for d in sorted(sim_by_d):
+            _plot_perf_grid(sim_by_d[d], all_results, methods, mc,
+                            metric, label, direction,
+                            f' — Simulated d={d} (Foundational)',
+                            f'perf_vs_n_foundational_{ml}_sim_d{d}.png',
+                            output_dir, foundational_only=True)

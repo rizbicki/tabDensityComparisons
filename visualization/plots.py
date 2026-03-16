@@ -96,10 +96,11 @@ def plot_density_comparison(all_data, output_dir):
 
 
 METRICS_INFO = [
-    ('CDE_loss', 'CDE Loss', 'lower'),
-    ('log_lik',  'Log-Lik',  'higher'),
-    ('CRPS',     'CRPS',     'lower'),
-    ('PIT_KS',   'PIT KS',   'lower'),
+    ('CDE_loss',  'CDE Loss',  'lower'),
+    ('log_lik',   'Log-Lik',   'higher'),
+    ('CRPS',      'CRPS',      'lower'),
+    ('PIT_KS',    'PIT KS',    'lower'),
+    ('fit_time',  'Fit Time',  'lower'),
 ]
 
 
@@ -111,78 +112,6 @@ def _ds_labels(datasets, all_data):
         n_str = f"\n(n={n_total})" if n_total else ''
         labels.append(f"{short}{n_str}")
     return labels
-
-
-def plot_rankings(all_results, output_dir, all_data=None):
-    """One rankings heatmap + avg-rank bar per metric."""
-    methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
-    datasets = list(all_results.keys())
-    n_methods = len(methods)
-    n_ds = len(datasets)
-    ds_labels = _ds_labels(datasets, all_data)
-
-    cmap2 = plt.cm.tab10
-    colors = {m: cmap2(i) for i, m in enumerate(methods)}
-
-    for metric, label, direction in METRICS_INFO:
-        # Build rank matrix (methods x datasets)
-        matrix = np.full((n_methods, n_ds), np.nan)
-        for di, ds in enumerate(datasets):
-            vals, avail = [], []
-            for m in methods:
-                if m in all_results[ds]:
-                    vals.append(all_results[ds][m][metric])
-                    avail.append(m)
-            vals = np.array(vals)
-            ranks = (np.argsort(np.argsort(vals)) + 1 if direction == 'lower'
-                     else np.argsort(np.argsort(-vals)) + 1)
-            for m, r in zip(avail, ranks):
-                matrix[methods.index(m), di] = r
-
-        fig, (ax1, ax2) = plt.subplots(
-            1, 2,
-            figsize=(max(10, n_ds * 0.9), max(4, n_methods * 0.6)),
-            gridspec_kw={'width_ratios': [3, 1]})
-
-        im = ax1.imshow(matrix, cmap='RdYlGn_r', aspect='auto',
-                        vmin=1, vmax=n_methods)
-        ax1.set_yticks(range(n_methods))
-        ax1.set_yticklabels(methods, fontsize=9)
-        ax1.set_xticks(range(n_ds))
-        ax1.set_xticklabels(ds_labels, fontsize=7, rotation=45, ha='right')
-
-        for i in range(n_methods):
-            for j in range(n_ds):
-                if not np.isnan(matrix[i, j]):
-                    ax1.text(j, i, f'{int(matrix[i,j])}', ha='center', va='center',
-                             fontsize=8, fontweight='bold',
-                             color='white' if matrix[i,j] > n_methods * 0.6 else 'black')
-
-        plt.colorbar(im, ax=ax1, label='Rank', shrink=0.8)
-        ax1.set_title(f'{label} — Rankings per Dataset', fontsize=11, fontweight='bold')
-
-        # Average rank bar
-        avg_ranks = {}
-        for mi, m in enumerate(methods):
-            r = matrix[mi][~np.isnan(matrix[mi])]
-            avg_ranks[m] = np.mean(r) if len(r) > 0 else 99
-
-        sorted_m = sorted(avg_ranks, key=avg_ranks.get)
-        y_pos = range(len(sorted_m))
-        ax2.barh(y_pos, [avg_ranks[m] for m in sorted_m],
-                 color=[colors[m] for m in sorted_m], alpha=0.8)
-        ax2.set_yticks(y_pos)
-        ax2.set_yticklabels(sorted_m, fontsize=9)
-        ax2.set_xlabel('Avg Rank', fontsize=10)
-        ax2.set_title('Overall', fontsize=11, fontweight='bold')
-        ax2.grid(axis='x', alpha=0.3)
-        ax2.invert_yaxis()
-
-        plt.tight_layout()
-        fname = f"rankings_{metric.lower()}.png"
-        plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
-        plt.close()
-        print(f"  saved {fname}")
 
 
 def _group_by_n(all_results):
@@ -274,67 +203,6 @@ def plot_rankings_by_n(all_results, output_dir, all_data=None):
             plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
             plt.close()
             print(f"  saved {fname}")
-
-
-def plot_raw_metrics(all_results, output_dir, all_data=None):
-    """One raw-value heatmap per metric."""
-    methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
-    datasets = list(all_results.keys())
-    n_methods = len(methods)
-    n_ds = len(datasets)
-    ds_labels = _ds_labels(datasets, all_data)
-
-    for metric, label, direction in METRICS_INFO:
-        matrix = np.full((n_methods, n_ds), np.nan)
-        for di, ds in enumerate(datasets):
-            for mi, m in enumerate(methods):
-                if m in all_results[ds] and metric in all_results[ds][m]:
-                    matrix[mi, di] = all_results[ds][m][metric]
-
-        cmap = 'RdYlGn_r' if direction == 'lower' else 'RdYlGn'
-
-        # Normalize per dataset (column): map each column to [0, 1]
-        norm_matrix = np.full_like(matrix, np.nan)
-        for j in range(n_ds):
-            col = matrix[:, j]
-            col_valid = col[~np.isnan(col)]
-            if len(col_valid) == 0:
-                continue
-            cmin, cmax = np.nanmin(col), np.nanmax(col)
-            rng = cmax - cmin
-            if rng < 1e-10:
-                norm_matrix[:, j] = 0.5
-            else:
-                norm_matrix[:, j] = (col - cmin) / rng
-
-        fig, ax = plt.subplots(figsize=(max(10, n_ds * 0.9),
-                                        max(4, n_methods * 0.6)))
-
-        im = ax.imshow(norm_matrix, cmap=cmap, aspect='auto', vmin=0, vmax=1)
-        ax.set_yticks(range(n_methods))
-        ax.set_yticklabels(methods, fontsize=9)
-        ax.set_xticks(range(n_ds))
-        ax.set_xticklabels(ds_labels, fontsize=7, rotation=45, ha='right')
-
-        for i in range(n_methods):
-            for j in range(n_ds):
-                if not np.isnan(matrix[i, j]):
-                    val = matrix[i, j]
-                    txt = f'{val:.3f}' if abs(val) < 100 else f'{val:.1f}'
-                    nv = norm_matrix[i, j]
-                    dark = nv < 0.4 if direction == 'higher' else nv > 0.6
-                    ax.text(j, i, txt, ha='center', va='center',
-                            fontsize=7, fontweight='bold',
-                            color='white' if dark else 'black')
-
-        # No colorbar — colors are relative within each column
-        ax.set_title(f'{label} (colors normalized per dataset)',
-                     fontsize=12, fontweight='bold')
-        plt.tight_layout()
-        fname = f"raw_{metric.lower()}.png"
-        plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
-        plt.close()
-        print(f"  saved {fname}")
 
 
 def plot_raw_metrics_by_n(all_results, output_dir, all_data=None):

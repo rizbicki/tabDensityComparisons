@@ -5,6 +5,10 @@ All generators produce nested samples: the first k observations for
 size n are identical to the k observations produced for any n' >= k.
 This is achieved by always generating _MAX_N observations from a
 fixed RNG seed and slicing to the requested n.
+
+Tags follow the convention "{Base}-d{d}-{n}" so that the per-n
+grouping logic (which strips the trailing number) naturally groups
+datasets with the same base name and dimensionality together.
 """
 
 import numpy as np
@@ -30,11 +34,11 @@ def make_heteroscedastic(n=1000, d=5, seed=42):
         sig = 0.5 + np.abs(X_test[:, 0])
         return stats.norm.pdf(z_grid[None, :], mu[:, None], sig[:, None])
 
-    tag = f"Heteroscedastic-{n}"
+    tag = f"Heteroscedastic-d{d}-{n}"
     return X, z, tag, true_density
 
 
-def make_bimodal(n=1000, d=3, seed=42):
+def make_bimodal(n=1000, d=5, seed=42):
     data_rng = np.random.RandomState(seed + 1000)
     X_all = data_rng.randn(_MAX_N, d)
     comp_all = data_rng.binomial(1, 0.5, _MAX_N)
@@ -53,15 +57,14 @@ def make_bimodal(n=1000, d=3, seed=42):
         p2 = stats.norm.pdf(z_grid[None, :], m2[:, None], 0.5)
         return 0.5 * p1 + 0.5 * p2
 
-    tag = f"Bimodal-{n}"
+    tag = f"Bimodal-d{d}-{n}"
     return X, z, tag, true_density
 
 
 def make_skewed(n=1000, d=5, seed=42):
     data_rng = np.random.RandomState(seed + 1000)
     X_all = data_rng.randn(_MAX_N, d)
-    # gamma draws depend on shape, so we draw per-element with fixed shapes
-    # at _MAX_N; shape depends on X[:,0] which is already fixed
+    # gamma draws depend on shape; shape depends on X[:,0] which is fixed
     shape_all = 2 + np.abs(X_all[:, 0])
     gamma_all = np.array([data_rng.gamma(s, 0.5) for s in shape_all])
 
@@ -78,7 +81,7 @@ def make_skewed(n=1000, d=5, seed=42):
             result[i, mask] = stats.gamma.pdf(z_shifted[mask], a=shapes[i], scale=0.5)
         return result
 
-    tag = f"Skewed-{n}"
+    tag = f"Skewed-d{d}-{n}"
     return X, z, tag, true_density
 
 
@@ -99,7 +102,7 @@ def make_linear_gaussian_homo(n=1000, d=5, seed=42):
         mu = X_test @ beta
         return stats.norm.pdf(z_grid[None, :], mu[:, None], sigma)
 
-    tag = f"LinGauss-Homo-{n}"
+    tag = f"LinGauss-Homo-d{d}-{n}"
     return X, z, tag, true_density
 
 
@@ -118,5 +121,5 @@ def make_nonlinear(n=1000, d=5, seed=42):
         sig = 0.3 + 0.3 * np.abs(np.cos(X_test[:, 0]))
         return stats.norm.pdf(z_grid[None, :], m[:, None], sig[:, None])
 
-    tag = f"Nonlinear-{n}"
+    tag = f"Nonlinear-d{d}-{n}"
     return X, z, tag, true_density

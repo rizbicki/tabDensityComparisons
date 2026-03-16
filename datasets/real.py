@@ -56,7 +56,7 @@ def _load_real_at_n(datasets, target_n):
 
 
 def load_all_datasets(quick=False):
-    # Synthetic: n=1000, n=2000, n=4000
+    # Synthetic: d ∈ {5, 10, 50}, n ∈ {1000, 2000, 4000, 6000}
     synthetic_generators = [
         make_heteroscedastic,
         make_bimodal,
@@ -66,10 +66,9 @@ def load_all_datasets(quick=False):
     ]
     datasets = []
     for gen in synthetic_generators:
-        datasets.append(gen())           # n=1000
-        datasets.append(gen(n=2000))     # n=2000
-        datasets.append(gen(n=4000))     # n=4000
-        datasets.append(gen(n=6000))     # n=6000
+        for d in [5, 10, 50]:
+            for n in [1000, 2000, 4000, 6000]:
+                datasets.append(gen(n=n, d=d))
 
     if not quick:
         # Semi-synthetic

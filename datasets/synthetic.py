@@ -1,17 +1,29 @@
 """
 Synthetic datasets with known true conditional densities.
+
+All generators produce nested samples: the first k observations for
+size n are identical to the k observations produced for any n' >= k.
+This is achieved by always generating _MAX_N observations from a
+fixed RNG seed and slicing to the requested n.
 """
 
 import numpy as np
 from scipy import stats
 
+_MAX_N = 10_000  # upper bound; we slice to the requested n
+
 
 def make_heteroscedastic(n=1000, d=5, seed=42):
-    rng = np.random.RandomState(seed)
-    X = rng.randn(n, d)
-    beta = rng.randn(d) * 0.5
+    param_rng = np.random.RandomState(seed)
+    beta = param_rng.randn(d) * 0.5
+
+    data_rng = np.random.RandomState(seed + 1000)
+    X_all = data_rng.randn(_MAX_N, d)
+    eps_all = data_rng.randn(_MAX_N)
+
+    X = X_all[:n]
     sigma = 0.5 + np.abs(X[:, 0])
-    z = X @ beta + sigma * rng.randn(n)
+    z = X @ beta + sigma * eps_all[:n]
 
     def true_density(X_test, z_grid):
         mu = X_test @ beta
@@ -23,11 +35,16 @@ def make_heteroscedastic(n=1000, d=5, seed=42):
 
 
 def make_bimodal(n=1000, d=3, seed=42):
-    rng = np.random.RandomState(seed)
-    X = rng.randn(n, d)
+    data_rng = np.random.RandomState(seed + 1000)
+    X_all = data_rng.randn(_MAX_N, d)
+    comp_all = data_rng.binomial(1, 0.5, _MAX_N)
+    eps1_all = data_rng.randn(_MAX_N)
+    eps2_all = data_rng.randn(_MAX_N)
+
+    X = X_all[:n]
     mu1, mu2 = X[:, 0] + X[:, 1], -X[:, 0] + X[:, 1]
-    comp = rng.binomial(1, 0.5, n)
-    z = np.where(comp, mu1 + 0.5 * rng.randn(n), mu2 + 0.5 * rng.randn(n))
+    comp = comp_all[:n]
+    z = np.where(comp, mu1 + 0.5 * eps1_all[:n], mu2 + 0.5 * eps2_all[:n])
 
     def true_density(X_test, z_grid):
         m1 = X_test[:, 0] + X_test[:, 1]
@@ -41,10 +58,15 @@ def make_bimodal(n=1000, d=3, seed=42):
 
 
 def make_skewed(n=1000, d=5, seed=42):
-    rng = np.random.RandomState(seed)
-    X = rng.randn(n, d)
-    shape = 2 + np.abs(X[:, 0])
-    z = rng.gamma(shape, 0.5, n) + X[:, 1]
+    data_rng = np.random.RandomState(seed + 1000)
+    X_all = data_rng.randn(_MAX_N, d)
+    # gamma draws depend on shape, so we draw per-element with fixed shapes
+    # at _MAX_N; shape depends on X[:,0] which is already fixed
+    shape_all = 2 + np.abs(X_all[:, 0])
+    gamma_all = np.array([data_rng.gamma(s, 0.5) for s in shape_all])
+
+    X = X_all[:n]
+    z = gamma_all[:n] + X[:, 1]
 
     def true_density(X_test, z_grid):
         shapes = 2 + np.abs(X_test[:, 0])
@@ -62,11 +84,16 @@ def make_skewed(n=1000, d=5, seed=42):
 
 def make_linear_gaussian_homo(n=1000, d=5, seed=42):
     """True DGP: Z = X'beta + sigma*eps, eps~N(0,1), sigma constant."""
-    rng = np.random.RandomState(seed)
-    X = rng.randn(n, d)
-    beta = rng.randn(d)
+    param_rng = np.random.RandomState(seed)
+    beta = param_rng.randn(d)
     sigma = 1.0
-    z = X @ beta + sigma * rng.randn(n)
+
+    data_rng = np.random.RandomState(seed + 1000)
+    X_all = data_rng.randn(_MAX_N, d)
+    eps_all = data_rng.randn(_MAX_N)
+
+    X = X_all[:n]
+    z = X @ beta + sigma * eps_all[:n]
 
     def true_density(X_test, z_grid):
         mu = X_test @ beta
@@ -77,11 +104,14 @@ def make_linear_gaussian_homo(n=1000, d=5, seed=42):
 
 
 def make_nonlinear(n=1000, d=5, seed=42):
-    rng = np.random.RandomState(seed)
-    X = rng.randn(n, d)
+    data_rng = np.random.RandomState(seed + 1000)
+    X_all = data_rng.randn(_MAX_N, d)
+    eps_all = data_rng.randn(_MAX_N)
+
+    X = X_all[:n]
     mu = np.sin(X[:, 0] * 2) + X[:, 1] ** 2 + 0.5 * X[:, 2]
     sigma = 0.3 + 0.3 * np.abs(np.cos(X[:, 0]))
-    z = mu + sigma * rng.randn(n)
+    z = mu + sigma * eps_all[:n]
 
     def true_density(X_test, z_grid):
         m = np.sin(X_test[:, 0] * 2) + X_test[:, 1] ** 2 + 0.5 * X_test[:, 2]

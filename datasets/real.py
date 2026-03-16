@@ -15,11 +15,17 @@ from .synthetic import (
 
 
 def _subsample(X, z, n_max, seed=42):
-    """Subsample large datasets."""
+    """Subsample large datasets.
+
+    Uses a fixed permutation so that smaller subsamples are always
+    strict prefixes of larger ones (e.g. the n=1000 rows are the
+    first 1000 of the n=2000 rows).
+    """
     if len(z) <= n_max:
         return X, z
     rng = np.random.RandomState(seed)
-    idx = rng.choice(len(z), n_max, replace=False)
+    perm = rng.permutation(len(z))
+    idx = perm[:n_max]
     return X[idx], z[idx]
 
 

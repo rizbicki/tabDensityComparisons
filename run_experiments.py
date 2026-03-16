@@ -70,11 +70,12 @@ from utils import save_cache, load_cache, print_summary
 # ============================================================================
 
 def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
-                   true_density_fn=None, partial_dir=None, force=False):
+                   true_density_fn=None, partial_dir=None, force=False,
+                   random_state=42):
     """Run all methods on one dataset, skipping already-completed ones."""
 
     X_train, X_test, z_train, z_test = train_test_split(
-        X, z, test_size=0.25, random_state=42)
+        X, z, test_size=0.25, random_state=random_state)
 
     scaler = StandardScaler()
     X_tr = scaler.fit_transform(X_train)
@@ -134,7 +135,7 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
         return None
 
     n_train = len(z_train)
-    max_basis = min(50, max(15, int(np.sqrt(n_train))))
+    max_basis = min(30, max(15, int(np.sqrt(n_train))))
 
     # ── Helper to run a FlexCode method ──────────────────────────────────
     def run_flexcode(name, factory, params):
@@ -361,6 +362,8 @@ def main():
                         help='Output directory')
     parser.add_argument('--force', action='store_true',
                         help='Re-run all datasets even if cached results exist')
+    parser.add_argument('--n-reps', type=int, default=20,
+                        help='Number of repetitions per dataset (default 20)')
     args = parser.parse_args()
 
     output_dir = Path(args.output_dir)
@@ -393,6 +396,43 @@ def main():
         print("  Running with sklearn baselines only.\n")
 
     datasets = load_all_datasets(quick=args.quick)
+    n_reps = args.n_reps
+
+    # ── Metrics that are averaged across repetitions ──────────────────────
+    MEAN_METRICS = ['CDE_loss', 'log_lik', 'CRPS', 'PIT_KS',
+                    'coverage_90', 'interval_width', 'fit_time', 'pred_time']
+
+    def _aggregate_reps(per_rep_results):
+        """Aggregate metrics across repetitions: mean ± SE."""
+        methods = sorted(set(m for rep in per_rep_results for m in rep))
+        agg = {}
+        for m in methods:
+            vals = {k: [] for k in MEAN_METRICS}
+            n_basis_vals = []
+            for rep in per_rep_results:
+                if m not in rep:
+                    continue
+                for k in MEAN_METRICS:
+                    if k in rep[m] and rep[m][k] is not None:
+                        vals[k].append(rep[m][k])
+                if rep[m].get('n_basis') is not None:
+                    n_basis_vals.append(rep[m]['n_basis'])
+
+            agg_m = {}
+            for k in MEAN_METRICS:
+                arr = np.array(vals[k])
+                if len(arr) > 0:
+                    agg_m[k] = float(np.mean(arr))
+                    agg_m[f'{k}_se'] = float(
+                        np.std(arr, ddof=1) / np.sqrt(len(arr))
+                    ) if len(arr) > 1 else None
+                else:
+                    agg_m[k] = None
+                    agg_m[f'{k}_se'] = None
+            agg_m['n_basis'] = (float(np.mean(n_basis_vals))
+                                if n_basis_vals else None)
+            agg[m] = agg_m
+        return agg
 
     all_results = {}
     all_data = {}
@@ -413,14 +453,23 @@ def main():
                 for m in existing_results[name]
             }
         else:
-            res, cdes, zgrids, X_te, z_te, true_cde, true_zgrid = \
-                run_experiment(
-                    X, z, name, device=args.device,
-                    true_density_fn=true_density_fn,
-                    partial_dir=partial_dir, force=args.force,
-                )
+            per_rep_results = []
+            for rep in range(n_reps):
+                rep_partial = partial_dir / f"rep{rep}"
+                rep_partial.mkdir(exist_ok=True)
+                print(f"\n  ── rep {rep+1}/{n_reps} (seed={rep}) ──")
+                res, cdes, zgrids, X_te, z_te, true_cde, true_zgrid = \
+                    run_experiment(
+                        X, z, name, device=args.device,
+                        true_density_fn=true_density_fn,
+                        partial_dir=rep_partial, force=args.force,
+                        random_state=rep,
+                    )
+                per_rep_results.append(res)
+            # Aggregate across reps
             n_total = len(z)
-            all_results[name] = res
+            all_results[name] = _aggregate_reps(per_rep_results)
+            # Save last rep's CDEs for visualization
             save_cache(cache_file, cdes, zgrids, X_te, z_te,
                        true_cde, true_zgrid, n_total)
 

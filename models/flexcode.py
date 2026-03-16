@@ -5,6 +5,7 @@ Reference: Izbicki & Lee (2017), Electronic Journal of Statistics.
 """
 
 import numpy as np
+from joblib import Parallel, delayed
 from sklearn.model_selection import KFold
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 
@@ -17,12 +18,13 @@ class FlexCodeEstimator:
     """
 
     def __init__(self, regressor_factory, max_basis=31, basis_system='cosine',
-                 regressor_params=None, name='FlexCode'):
+                 regressor_params=None, name='FlexCode', n_jobs=-1):
         self.regressor_factory = regressor_factory
         self.max_basis = max_basis
         self.basis_system = basis_system
         self.regressor_params = regressor_params or {}
         self.name = name
+        self.n_jobs = n_jobs
         self.regressors_ = []
         self.z_min_ = None
         self.z_max_ = None
@@ -36,18 +38,22 @@ class FlexCodeEstimator:
             return np.ones_like(z_norm)
         return np.sqrt(2) * np.cos(i * np.pi * z_norm)
 
+    def _fit_one_basis(self, X, z_norm, i):
+        phi_values = self._cosine_basis(z_norm, i)
+        reg = self.regressor_factory(**self.regressor_params)
+        reg.fit(X, phi_values)
+        return reg
+
     def fit(self, X, z):
         margin = 0.05 * (z.max() - z.min())
         self.z_min_ = z.min() - margin
         self.z_max_ = z.max() + margin
         z_norm = self._normalize_z(z)
 
-        self.regressors_ = []
-        for i in range(self.max_basis):
-            phi_values = self._cosine_basis(z_norm, i)
-            reg = self.regressor_factory(**self.regressor_params)
-            reg.fit(X, phi_values)
-            self.regressors_.append(reg)
+        self.regressors_ = Parallel(n_jobs=self.n_jobs)(
+            delayed(self._fit_one_basis)(X, z_norm, i)
+            for i in range(self.max_basis)
+        )
         return self
 
     def tune(self, X_val, z_val):
@@ -99,12 +105,19 @@ class FlexCodeEstimator:
             z_norm_va = z_norm[val_idx]
             n_va = len(val_idx)
 
-            fold_beta_hat = np.zeros((n_va, self.max_basis))
-            for i in range(self.max_basis):
+            def _fit_and_predict(i):
                 phi_tr = self._cosine_basis(z_norm_tr, i)
                 reg = self.regressor_factory(**self.regressor_params)
                 reg.fit(X_tr_fold, phi_tr)
-                fold_beta_hat[:, i] = reg.predict(X_va_fold)
+                return i, reg.predict(X_va_fold)
+
+            fold_beta_hat = np.zeros((n_va, self.max_basis))
+            results_list = Parallel(n_jobs=self.n_jobs)(
+                delayed(_fit_and_predict)(i)
+                for i in range(self.max_basis)
+            )
+            for i, preds in results_list:
+                fold_beta_hat[:, i] = preds
 
             cumul_sq = np.zeros(n_va)
             cumul_eval = np.zeros(n_va)
@@ -121,12 +134,10 @@ class FlexCodeEstimator:
         self.best_loss_ = oof_loss[self.best_basis_ - 1]
 
         # Refit all regressors on the full data
-        self.regressors_ = []
-        for i in range(self.max_basis):
-            phi_values = self._cosine_basis(z_norm, i)
-            reg = self.regressor_factory(**self.regressor_params)
-            reg.fit(X, phi_values)
-            self.regressors_.append(reg)
+        self.regressors_ = Parallel(n_jobs=self.n_jobs)(
+            delayed(self._fit_one_basis)(X, z_norm, i)
+            for i in range(self.max_basis)
+        )
         return self
 
     def predict(self, X, n_grid=200):

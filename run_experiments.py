@@ -135,7 +135,7 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
         return None
 
     n_train = len(z_train)
-    max_basis = min(30, max(15, int(np.sqrt(n_train))))
+    max_basis = min(20, max(15, int(np.sqrt(n_train))))
 
     # ── Helper to run a FlexCode method ──────────────────────────────────
     def run_flexcode(name, factory, params):
@@ -314,7 +314,8 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
     _run_density_baseline('LogNormal-Homo', lognormal_homo_density)
     _run_density_baseline('LogNormal-Hetero', lognormal_hetero_density)
     _run_density_baseline('MDN-2mix', mdn_density, n_components=2, n_hidden=16)
-    _run_density_baseline('Quantile-Linear', quantile_linear_density)
+    if n_train <= 10000:
+        _run_density_baseline('Quantile-Linear', quantile_linear_density)
     _run_density_baseline('Gamma-GLM', gamma_glm_density)
 
     # ── Penalized (Ridge) variants ────────────────────────────────────

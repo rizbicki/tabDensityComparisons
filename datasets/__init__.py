@@ -4,5 +4,6 @@ from .synthetic import (
     make_skewed,
     make_nonlinear,
     make_linear_gaussian_homo,
+    make_interaction,
 )
-from .real import load_all_datasets
+from .real import load_all_datasets, load_real_only_datasets

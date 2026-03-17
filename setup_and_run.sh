@@ -5,15 +5,16 @@ set -euo pipefail
 # =================================================================
 # Usage:
 #   chmod +x setup_and_run.sh
-#   ./setup_and_run.sh              # full run (8 datasets)
-#   ./setup_and_run.sh --quick      # quick sanity check (4 datasets)
-#   ./setup_and_run.sh --cpu        # force CPU
+#   ./setup_and_run.sh                  # full run (synthetic + real)
+#   ./setup_and_run.sh --quick          # quick sanity check (4 datasets)
+#   ./setup_and_run.sh --real-only      # real/semi-synthetic datasets only
+#   ./setup_and_run.sh --cpu            # force CPU
 #
 # This script:
 #   1. Creates a Python venv in .venv/
 #   2. Installs all dependencies (TabPFN, TabICLv2, XGBoost, etc.)
 #   3. Runs the experiments
-#   4. Outputs results to results/
+#   4. Outputs results to results/ (or results_real/ with --real-only)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
@@ -25,10 +26,12 @@ PIP="${VENV_DIR}/bin/pip"
 # Parse args — pass everything through to the Python script
 EXTRA_ARGS=()
 DEVICE="auto"
+REAL_ONLY=0
 for arg in "$@"; do
     case "$arg" in
         --cpu) DEVICE="cpu"; EXTRA_ARGS+=("--device" "cpu") ;;
         --quick) EXTRA_ARGS+=("--quick") ;;
+        --real-only) REAL_ONLY=1 ;;
         *) EXTRA_ARGS+=("$arg") ;;
     esac
 done
@@ -87,9 +90,16 @@ echo "  Running experiments..."
 echo "============================================================"
 echo ""
 
-"$PYTHON" run_experiments.py "${EXTRA_ARGS[@]}"
-
-echo ""
-echo "============================================================"
-echo "  Done! Results are in results/"
-echo "============================================================"
+if [ "$REAL_ONLY" -eq 1 ]; then
+    "$PYTHON" run_real_experiments.py "${EXTRA_ARGS[@]}"
+    echo ""
+    echo "============================================================"
+    echo "  Done! Results are in results_real/"
+    echo "============================================================"
+else
+    "$PYTHON" run_experiments.py "${EXTRA_ARGS[@]}"
+    echo ""
+    echo "============================================================"
+    echo "  Done! Results are in results/"
+    echo "============================================================"
+fi

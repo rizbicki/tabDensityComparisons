@@ -123,3 +123,23 @@ def make_nonlinear(n=1000, d=5, seed=42):
 
     tag = f"Nonlinear-d{d}-{n}"
     return X, z, tag, true_density
+
+
+def make_interaction(n=1000, d=5, seed=42):
+    """DGP with interaction terms: mean and variance depend on X0*X1, X1*X2."""
+    data_rng = np.random.RandomState(seed + 1000)
+    X_all = data_rng.randn(_MAX_N, d)
+    eps_all = data_rng.randn(_MAX_N)
+
+    X = X_all[:n]
+    mu = 1.0 * X[:, 0] * X[:, 1] + 0.5 * X[:, 1] * X[:, 2] + 0.3 * X[:, 0]
+    sigma = 0.3 + 0.5 * np.abs(X[:, 0] * X[:, 1])
+    z = mu + sigma * eps_all[:n]
+
+    def true_density(X_test, z_grid):
+        m = 1.0 * X_test[:, 0] * X_test[:, 1] + 0.5 * X_test[:, 1] * X_test[:, 2] + 0.3 * X_test[:, 0]
+        sig = 0.3 + 0.5 * np.abs(X_test[:, 0] * X_test[:, 1])
+        return stats.norm.pdf(z_grid[None, :], m[:, None], sig[:, None])
+
+    tag = f"Interaction-d{d}-{n}"
+    return X, z, tag, true_density

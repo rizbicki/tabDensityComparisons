@@ -2,12 +2,14 @@
 """
 Build results.json from partial results saved during experiments.
 
-Scans results/cache/partial/rep*/ for {dataset_name}_metrics.json files,
-aggregates across repetitions (mean +/- SE), and writes results/results.json.
-Also reconstructs .npz cache files from the last rep for generate_plots.py.
+Scans partial/rep*/ directories under each source dir for
+{dataset_name}_metrics.json files, aggregates across repetitions
+(mean +/- SE), merges all sources, and writes a single results.json
+plus .npz cache files for generate_plots.py.
 
 USAGE:
-  python consolidate_partial_results.py [--output-dir results]
+  python consolidate_partial_results.py
+  python consolidate_partial_results.py --output-dir results --source-dirs results results_real
 """
 
 import argparse
@@ -53,78 +55,46 @@ def _aggregate_reps(per_rep_results):
     return agg
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description='Consolidate partial results into results.json')
-    parser.add_argument('--output-dir', default='results',
-                        help='Output directory')
-    args = parser.parse_args()
-
-    output_dir = Path(args.output_dir)
-    cache_dir = output_dir / 'cache'
-    partial_dir = cache_dir / 'partial'
-
+def _consolidate_source(source_dir, all_results, output_cache_dir):
+    """Scan one source directory's partial/rep*/ and merge into all_results."""
+    source_dir = Path(source_dir)
+    partial_dir = source_dir / 'cache' / 'partial'
     if not partial_dir.exists():
-        print(f"Error: {partial_dir} not found")
+        print(f"  [skip] {partial_dir} not found")
         return
 
-    # Find all rep directories
     rep_dirs = sorted(partial_dir.glob('rep*'))
     if not rep_dirs:
-        print(f"No rep directories found in {partial_dir}")
+        print(f"  [skip] no rep dirs in {partial_dir}")
         return
 
-    print(f"Found {len(rep_dirs)} rep directories")
+    print(f"  {source_dir}: {len(rep_dirs)} rep(s)")
 
-    # Collect per-dataset, per-rep metrics
-    dataset_reps = {}  # {dataset_name: [rep0_metrics, rep1_metrics, ...]}
+    dataset_reps = {}
     for rep_dir in rep_dirs:
         for mf in sorted(rep_dir.glob('*_metrics.json')):
             try:
                 with open(mf) as f:
                     metrics = json.load(f)
                 dataset_name = mf.stem.replace('_metrics', '')
-                if dataset_name not in dataset_reps:
-                    dataset_reps[dataset_name] = []
-                dataset_reps[dataset_name].append(metrics)
+                dataset_reps.setdefault(dataset_name, []).append(metrics)
             except Exception as e:
-                print(f"  ! {mf}: {e}")
+                print(f"    ! {mf}: {e}")
 
-    print(f"Found {len(dataset_reps)} dataset(s)")
-
-    # Aggregate across reps
-    all_results = {}
+    last_rep = rep_dirs[-1]
     for ds_name in sorted(dataset_reps):
         reps = dataset_reps[ds_name]
         all_results[ds_name] = _aggregate_reps(reps)
-        n_methods = len(all_results[ds_name])
-        print(f"  {ds_name}: {len(reps)} rep(s), {n_methods} method(s)")
+        print(f"    {ds_name}: {len(reps)} rep(s), "
+              f"{len(all_results[ds_name])} method(s)")
 
-    # Save to results.json
-    json_path = output_dir / 'results.json'
-    with open(json_path, 'w') as f:
-        json.dump(all_results, f, indent=2)
-    print(f"\nWrote {json_path} ({len(all_results)} dataset(s))")
-
-    # Reconstruct .npz files from the last rep's .npy files
-    last_rep = rep_dirs[-1]
-    cdes_files = sorted(last_rep.glob('*_cdes.npy'))
-    # Derive dataset names by removing the method+suffix part
-    ds_names_seen = set()
-    for cf in cdes_files:
-        # filename: {dataset}_{method}_cdes.npy — but dataset may contain _
-        # Use metrics files as the source of truth for dataset names
-        pass
-
-    for ds_name in sorted(dataset_reps):
-        npz_path = cache_dir / f"{ds_name}.npz"
+        # Reconstruct .npz in the output cache dir if missing
+        npz_path = output_cache_dir / f"{ds_name}.npz"
         if npz_path.exists():
             continue
-
-        methods = []
-        arrays = {}
+        methods, arrays = [], {}
         for cdes_file in sorted(last_rep.glob(f"{ds_name}_*_cdes.npy")):
-            method = cdes_file.stem.replace(f"{ds_name}_", "").replace("_cdes", "")
+            method = cdes_file.stem[len(ds_name) + 1:].replace("_cdes", "")
             zgrid_file = last_rep / f"{ds_name}_{method}_zgrid.npy"
             if zgrid_file.exists():
                 try:
@@ -132,8 +102,7 @@ def main():
                     arrays[f'zgrid_{method}'] = np.load(zgrid_file)
                     methods.append(method)
                 except Exception as e:
-                    print(f"    ! Failed to load {method}: {e}")
-
+                    print(f"      ! {method}: {e}")
         if methods:
             arrays['methods'] = np.array(methods)
             arrays['X_te'] = np.array([])
@@ -143,7 +112,37 @@ def main():
             arrays['true_zgrid'] = np.array([])
             np.savez(npz_path, **arrays)
 
-    print(f"\nReady to run: python generate_plots.py")
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Consolidate partial results from all sources into one results.json')
+    parser.add_argument('--output-dir', default='results',
+                        help='Where to write results.json and cache/ (default: results)')
+    parser.add_argument('--source-dirs', nargs='+',
+                        default=['results', 'results_real'],
+                        help='Directories to scan for partial results '
+                             '(default: results results_real)')
+    args = parser.parse_args()
+
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(exist_ok=True)
+    output_cache_dir = output_dir / 'cache'
+    output_cache_dir.mkdir(exist_ok=True)
+
+    all_results = {}
+    print("Consolidating partial results...")
+    for src in args.source_dirs:
+        _consolidate_source(src, all_results, output_cache_dir)
+
+    if not all_results:
+        print("No results found.")
+        return
+
+    json_path = output_dir / 'results.json'
+    with open(json_path, 'w') as f:
+        json.dump(all_results, f, indent=2)
+    print(f"\nWrote {json_path} ({len(all_results)} dataset(s))")
+    print("Ready to run: python generate_plots.py")
 
 
 if __name__ == '__main__':

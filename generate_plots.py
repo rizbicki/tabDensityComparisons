@@ -2,8 +2,10 @@
 """
 Regenerate plots from cached results without re-running experiments.
 
+Merges results from multiple output directories (e.g. results/ and results_real/).
+
 USAGE:
-  python generate_plots.py [--output-dir results]
+  python generate_plots.py [--output-dir results] [--merge-dir results_real]
 """
 
 import argparse
@@ -19,34 +21,22 @@ from visualization import (
 )
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description='Regenerate plots from cached results')
-    parser.add_argument('--output-dir', default='results',
-                        help='Output directory containing cache/')
-    args = parser.parse_args()
-
-    output_dir = Path(args.output_dir)
+def _load_from_dir(output_dir, all_results, all_data):
+    """Load results.json and cache files from one directory into shared dicts."""
+    output_dir = Path(output_dir)
     cache_dir = output_dir / 'cache'
     json_path = output_dir / 'results.json'
 
-    if not cache_dir.exists():
-        print(f"Error: {cache_dir} not found")
-        return
-
     if not json_path.exists():
-        print(f"Error: {json_path} not found")
+        print(f"  [skip] {json_path} not found")
         return
 
-    # Load metrics from JSON
     with open(json_path) as f:
-        all_results = json.load(f)
+        results = json.load(f)
+    print(f"  Loaded {len(results)} datasets from {json_path}")
+    all_results.update(results)
 
-    print(f"Loaded {len(all_results)} dataset results from {json_path}")
-
-    # Load cached data for each dataset
-    all_data = {}
-    for dataset_name in all_results:
+    for dataset_name in results:
         cache_file = cache_dir / f"{dataset_name}.npz"
         if cache_file.exists():
             try:
@@ -58,13 +48,38 @@ def main():
                     'true_cde': true_cde, 'true_zgrid': true_zgrid,
                     'n_total': n_total,
                 }
-                print(f"  ✓ {dataset_name}")
+                print(f"    ✓ {dataset_name}")
             except Exception as e:
-                print(f"  ✗ {dataset_name}: {e}")
+                print(f"    ✗ {dataset_name}: {e}")
         else:
-            print(f"  ? {dataset_name}: cache file not found")
+            print(f"    ? {dataset_name}: cache file not found")
 
-    print(f"\nLoaded cached data for {len(all_data)} datasets")
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Regenerate plots from cached results')
+    parser.add_argument('--output-dir', default='results',
+                        help='Primary output directory containing cache/ and results.json')
+    parser.add_argument('--merge-dir', default='results_real',
+                        help='Additional directory to merge results from (default: results_real)')
+    args = parser.parse_args()
+
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(exist_ok=True)
+
+    all_results = {}
+    all_data = {}
+
+    print("Loading results...")
+    _load_from_dir(output_dir, all_results, all_data)
+    if args.merge_dir and Path(args.merge_dir).exists():
+        _load_from_dir(args.merge_dir, all_results, all_data)
+
+    if not all_results:
+        print("No results found. Run experiments first.")
+        return
+
+    print(f"\nTotal: {len(all_results)} datasets, {len(all_data)} with cached data")
 
     print("\nGenerating plots and tables...")
     save_html_table(all_results, output_dir)

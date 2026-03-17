@@ -1,10 +1,10 @@
 """
-Real-world and semi-synthetic dataset loaders.
+Real-world dataset loaders.
 """
 
 import numpy as np
 from pathlib import Path
-from sklearn.datasets import make_friedman1, make_friedman2, fetch_openml
+from sklearn.datasets import fetch_openml
 
 from .synthetic import (
     make_heteroscedastic,
@@ -13,6 +13,8 @@ from .synthetic import (
     make_nonlinear,
     make_linear_gaussian_homo,
     make_interaction,
+    make_friedman1,
+    make_friedman2,
 )
 
 
@@ -62,24 +64,6 @@ def _load_real_at_n(datasets, target_n):
             print(f"  [{name}-{target_n} skipped: {e}]")
 
 
-def load_real_only_datasets():
-    """Load only real (OpenML) and semi-synthetic (Friedman) datasets."""
-    datasets = []
-
-    # Semi-synthetic
-    X, z = make_friedman1(n_samples=1500, n_features=10, noise=1.0,
-                          random_state=42)
-    datasets.append((X, z, "Friedman1", None))
-    X, z = make_friedman2(n_samples=1500, noise=50.0, random_state=42)
-    datasets.append((X, z, "Friedman2", None))
-
-    # Real datasets at n=1000, 2000, 4000, 6000, 20000
-    for target_n in [1000, 2000, 4000, 6000, 20000]:
-        _load_real_at_n(datasets, target_n)
-
-    return datasets
-
-
 def _load_sdss(datasets, target_n):
     """Load SDSS galaxy photo-z dataset (ugriz magnitudes → spectroscopic z)."""
     csv_path = Path(__file__).parent / "sdss_galaxies.csv"
@@ -101,8 +85,17 @@ def _load_sdss(datasets, target_n):
         print(f"  [SDSS-{target_n} skipped: {e}]")
 
 
+def load_real_only_datasets():
+    """Load only real (OpenML + SDSS) datasets."""
+    datasets = []
+    for target_n in [1000, 2000, 4000, 6000, 20000]:
+        _load_real_at_n(datasets, target_n)
+        _load_sdss(datasets, target_n)
+    return datasets
+
+
 def load_all_datasets(quick=False):
-    # Synthetic: d ∈ {5, 10, 50}, n ∈ {1000, 2000, 4000, 6000}
+    # Synthetic: d ∈ {5, 10, 50}, n ∈ {1000, 2000, 4000, 6000, 20000}
     synthetic_generators = [
         make_heteroscedastic,
         make_bimodal,
@@ -110,6 +103,7 @@ def load_all_datasets(quick=False):
         make_nonlinear,
         make_linear_gaussian_homo,
         make_interaction,
+        make_friedman1,   # d varies (>=5); extra features are irrelevant noise
     ]
     datasets = []
     for gen in synthetic_generators:
@@ -117,14 +111,11 @@ def load_all_datasets(quick=False):
             for n in [1000, 2000, 4000, 6000, 20000]:
                 datasets.append(gen(n=n, d=d))
 
-    if not quick:
-        # Semi-synthetic
-        X, z = make_friedman1(n_samples=1500, n_features=10, noise=1.0,
-                              random_state=42)
-        datasets.append((X, z, "Friedman1", None))
-        X, z = make_friedman2(n_samples=1500, noise=50.0, random_state=42)
-        datasets.append((X, z, "Friedman2", None))
+    # Friedman2 has fixed d=4
+    for n in [1000, 2000, 4000, 6000, 20000]:
+        datasets.append(make_friedman2(n=n))
 
+    if not quick:
         # Real datasets at n=1000, 2000, 4000, 6000, 20000
         for target_n in [1000, 2000, 4000, 6000, 20000]:
             _load_real_at_n(datasets, target_n)

@@ -143,3 +143,60 @@ def make_interaction(n=1000, d=5, seed=42):
 
     tag = f"Interaction-d{d}-{n}"
     return X, z, tag, true_density
+
+
+def make_friedman1(n=1000, d=10, seed=42):
+    """Friedman #1: z = 10*sin(pi*x1*x2) + 20*(x3-0.5)^2 + 10*x4 + 5*x5 + N(0,1).
+
+    d >= 5; features beyond the first 5 are irrelevant uniform noise.
+    True density is Gaussian with known mean and unit variance.
+    """
+    d = max(d, 5)  # sklearn requires at least 5 features
+    data_rng = np.random.RandomState(seed + 1000)
+    X_all = data_rng.uniform(0, 1, (_MAX_N, d))
+    eps_all = data_rng.randn(_MAX_N)
+
+    X = X_all[:n]
+    mu_all = (10 * np.sin(np.pi * X_all[:, 0] * X_all[:, 1])
+              + 20 * (X_all[:, 2] - 0.5) ** 2
+              + 10 * X_all[:, 3] + 5 * X_all[:, 4])
+    z = mu_all[:n] + eps_all[:n]
+
+    def true_density(X_test, z_grid):
+        m = (10 * np.sin(np.pi * X_test[:, 0] * X_test[:, 1])
+             + 20 * (X_test[:, 2] - 0.5) ** 2
+             + 10 * X_test[:, 3] + 5 * X_test[:, 4])
+        return stats.norm.pdf(z_grid[None, :], m[:, None], 1.0)
+
+    tag = f"Friedman1-d{d}-{n}"
+    return X, z, tag, true_density
+
+
+def make_friedman2(n=1000, seed=42, **_):
+    """Friedman #2: z = sqrt(x1^2 + (x2*x3 - 1/(x2*x4))^2) + N(0, 125).
+
+    Always d=4 (fixed by the DGP).
+    True density is Gaussian with known mean and sigma=125.
+    """
+    data_rng = np.random.RandomState(seed + 1000)
+    # Feature distributions as in the original Friedman #2 DGP
+    x1 = data_rng.uniform(0, 100, _MAX_N)
+    x2 = data_rng.uniform(40 * np.pi, 560 * np.pi, _MAX_N)
+    x3 = data_rng.uniform(0, 1, _MAX_N)
+    x4 = data_rng.uniform(1, 11, _MAX_N)
+    X_all = np.column_stack([x1, x2, x3, x4])
+    eps_all = data_rng.randn(_MAX_N)
+
+    X = X_all[:n]
+    mu_all = np.sqrt(X_all[:, 0] ** 2
+                     + (X_all[:, 1] * X_all[:, 2] - 1.0 / (X_all[:, 1] * X_all[:, 3])) ** 2)
+    z = mu_all[:n] + 125.0 * eps_all[:n]
+
+    def true_density(X_test, z_grid):
+        m = np.sqrt(X_test[:, 0] ** 2
+                    + (X_test[:, 1] * X_test[:, 2]
+                       - 1.0 / (X_test[:, 1] * X_test[:, 3])) ** 2)
+        return stats.norm.pdf(z_grid[None, :], m[:, None], 125.0)
+
+    tag = f"Friedman2-d4-{n}"
+    return X, z, tag, true_density

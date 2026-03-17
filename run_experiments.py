@@ -158,7 +158,7 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
         cdes, zg = model.predict(X_te, n_grid=n_grid)
         pred_t = time.time() - t0
         m = compute_all_metrics(cdes, zg, z_test)
-        m['fit_time'] = fit_t
+        m['fit_time'] = fit_t + pred_t
         m['pred_time'] = pred_t
         m['n_basis'] = model.best_basis_
         results[name] = m
@@ -197,7 +197,7 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
             )
             pred_t = time.time() - t0
             m = compute_all_metrics(cdes_pfn, zg_pfn, z_test)
-            m['fit_time'] = fit_t
+            m['fit_time'] = fit_t + pred_t
             m['pred_time'] = pred_t
             m['n_basis'] = None
             results[name] = m
@@ -236,7 +236,7 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
             )
             pred_t = time.time() - t0
             m = compute_all_metrics(cdes_icl, zg_icl, z_test)
-            m['fit_time'] = fit_t
+            m['fit_time'] = fit_t + pred_t
             m['pred_time'] = pred_t
             m['n_basis'] = None
             results[name] = m

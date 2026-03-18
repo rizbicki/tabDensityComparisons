@@ -2,10 +2,10 @@
 """
 Regenerate plots from cached results without re-running experiments.
 
-Merges results from multiple output directories (e.g. results/ and results_real/).
+Can optionally merge results from multiple output directories.
 
 USAGE:
-  python generate_plots.py [--output-dir results] [--merge-dir results_real]
+  python generate_plots.py [--output-dir results] [--merge-dir OTHER_DIR]
 """
 
 import argparse
@@ -60,8 +60,8 @@ def main():
         description='Regenerate plots from cached results')
     parser.add_argument('--output-dir', default='results',
                         help='Primary output directory containing cache/ and results.json')
-    parser.add_argument('--merge-dir', default='results_real',
-                        help='Additional directory to merge results from (default: results_real)')
+    parser.add_argument('--merge-dir',
+                        help='Optional additional directory to merge results from')
     args = parser.parse_args()
 
     output_dir = Path(args.output_dir)

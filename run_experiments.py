@@ -23,9 +23,13 @@ warnings.filterwarnings('ignore')
 # Try importing foundation models
 try:
     from tabpfn import TabPFNRegressor
+    from tabpfn.constants import ModelVersion
+    from tabpfn.model_loading import prepend_cache_path
     HAS_TABPFN = True
     print("+ TabPFN available")
 except ImportError:
+    ModelVersion = None
+    prepend_cache_path = None
     HAS_TABPFN = False
     print("- TabPFN not found -- install with: pip install tabpfn")
 
@@ -71,7 +75,7 @@ from utils import save_cache, load_cache, print_summary
 
 def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
                    true_density_fn=None, partial_dir=None, force=False,
-                   random_state=42):
+                   random_state=42, methods=None):
     """Run all methods on one dataset, skipping already-completed ones."""
 
     X_train, X_test, z_train, z_test = train_test_split(
@@ -89,6 +93,44 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
     results = {}
     cdes_dict = {}
     zgrids_dict = {}
+    methods = set(methods) if methods is not None else None
+
+    def _want(name):
+        return methods is None or name in methods
+
+    def _run_tabpfn_method(name, model_factory):
+        hit = _cached(name)
+        if hit:
+            m_c, cdes_pfn, zg_pfn = hit
+            results[name] = m_c
+            cdes_dict[name] = cdes_pfn
+            zgrids_dict[name] = zg_pfn
+            print(f"  {name}... [cached] CDE={m_c['CDE_loss']:.4f}, "
+                  f"LL={m_c['log_lik']:.3f}")
+            return
+
+        print(f"  {name}...", end=" ", flush=True)
+        t0 = time.time()
+        pfn_reg = model_factory()
+        pfn_reg.fit(X_tr, z_train)
+        fit_t = time.time() - t0
+        t0 = time.time()
+        z_lo = z_train.min() - 0.05 * np.ptp(z_train)
+        z_hi = z_train.max() + 0.05 * np.ptp(z_train)
+        cdes_pfn, zg_pfn = tabpfn_native_density(
+            pfn_reg, X_te, n_grid=n_grid, z_min=z_lo, z_max=z_hi
+        )
+        pred_t = time.time() - t0
+        m = compute_all_metrics(cdes_pfn, zg_pfn, z_test)
+        m['fit_time'] = fit_t + pred_t
+        m['pred_time'] = pred_t
+        m['n_basis'] = None
+        results[name] = m
+        cdes_dict[name] = cdes_pfn
+        zgrids_dict[name] = zg_pfn
+        _save(name, m, cdes_pfn, zg_pfn)
+        print(f"CDE={m['CDE_loss']:.4f}, LL={m['log_lik']:.3f}, "
+              f"CRPS={m['CRPS']:.4f}, KS={m['PIT_KS']:.3f}")
 
     # ── Per-method checkpoint helpers ─────────────────────────────────────
     partial_metrics = {}
@@ -170,45 +212,40 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
               f"KS={m['PIT_KS']:.3f}, t={fit_t:.1f}s")
 
     # ── FlexCode + RandomForest ──────────────────────────────────────────
-    run_flexcode('FlexCode-RF', lambda **kw: RFFlexRegressor(), {})
+    if _want('FlexCode-RF'):
+        run_flexcode('FlexCode-RF', lambda **kw: RFFlexRegressor(), {})
 
     # ── TabPFN Native Distribution ───────────────────────────────────────
-    if HAS_TABPFN:
-        name = 'TabPFN-Native'
-        hit = _cached(name)
-        if hit:
-            m_c, cdes_pfn, zg_pfn = hit
-            results[name] = m_c
-            cdes_dict[name] = cdes_pfn
-            zgrids_dict[name] = zg_pfn
-            print(f"  {name}... [cached] CDE={m_c['CDE_loss']:.4f}, "
-                  f"LL={m_c['log_lik']:.3f}")
-        else:
-            print(f"  {name}...", end=" ", flush=True)
-            t0 = time.time()
-            pfn_reg = TabPFNRegressor(device=device)
-            pfn_reg.fit(X_tr, z_train)
-            fit_t = time.time() - t0
-            t0 = time.time()
-            z_lo = z_train.min() - 0.05 * np.ptp(z_train)
-            z_hi = z_train.max() + 0.05 * np.ptp(z_train)
-            cdes_pfn, zg_pfn = tabpfn_native_density(
-                pfn_reg, X_te, n_grid=n_grid, z_min=z_lo, z_max=z_hi
-            )
-            pred_t = time.time() - t0
-            m = compute_all_metrics(cdes_pfn, zg_pfn, z_test)
-            m['fit_time'] = fit_t + pred_t
-            m['pred_time'] = pred_t
-            m['n_basis'] = None
-            results[name] = m
-            cdes_dict[name] = cdes_pfn
-            zgrids_dict[name] = zg_pfn
-            _save(name, m, cdes_pfn, zg_pfn)
-            print(f"CDE={m['CDE_loss']:.4f}, LL={m['log_lik']:.3f}, "
-                  f"CRPS={m['CRPS']:.4f}, KS={m['PIT_KS']:.3f}")
+    if HAS_TABPFN and _want('TabPFN-Native'):
+        _run_tabpfn_method(
+            'TabPFN-Native',
+            lambda: TabPFNRegressor(device=device),
+        )
+
+    # ── Explicit TabPFN 2.5 default checkpoint ──────────────────────────
+    if HAS_TABPFN and ModelVersion is not None and _want('TabPFN-2.5'):
+        _run_tabpfn_method(
+            'TabPFN-2.5',
+            lambda: TabPFNRegressor.create_default_for_version(
+                ModelVersion.V2_5,
+                device=device,
+            ),
+        )
+
+    # ── RealTabPFN 2.5 real-data checkpoint ─────────────────────────────
+    if (HAS_TABPFN and prepend_cache_path is not None
+            and _want('RealTabPFN-2.5')):
+        real_ckpt = prepend_cache_path('tabpfn-v2.5-regressor-v2.5_real.ckpt')
+        _run_tabpfn_method(
+            'RealTabPFN-2.5',
+            lambda: TabPFNRegressor(
+                model_path=real_ckpt,
+                device=device,
+            ),
+        )
 
     # ── TabICLv2 Native Quantiles ────────────────────────────────────────
-    if HAS_TABICL:
+    if HAS_TABICL and _want('TabICL-Quantiles'):
         name = 'TabICL-Quantiles'
         hit = _cached(name)
         if hit:
@@ -247,34 +284,35 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
                   f"CRPS={m['CRPS']:.4f}, KS={m['PIT_KS']:.3f}")
 
     # ── Quantile GBM/XGB baseline ────────────────────────────────────────
-    name = 'Quantile-Tree'
-    hit = _cached(name)
-    if hit:
-        m_c, cdes_qgbm, zg_qgbm = hit
-        results[name] = m_c
-        cdes_dict[name] = cdes_qgbm
-        zgrids_dict[name] = zg_qgbm
-        print(f"  {name}... [cached] CDE={m_c['CDE_loss']:.4f}, "
-              f"LL={m_c['log_lik']:.3f}")
-    else:
-        print(f"  {name}...", end=" ", flush=True)
-        t0 = time.time()
-        z_lo = z_train.min() - 0.05 * np.ptp(z_train)
-        z_hi = z_train.max() + 0.05 * np.ptp(z_train)
-        cdes_qgbm, zg_qgbm = quantile_gbm_density(
-            X_tr, z_train, X_te, n_grid=n_grid, z_min=z_lo, z_max=z_hi
-        )
-        fit_t = time.time() - t0
-        m = compute_all_metrics(cdes_qgbm, zg_qgbm, z_test)
-        m['fit_time'] = fit_t
-        m['pred_time'] = 0
-        m['n_basis'] = None
-        results[name] = m
-        cdes_dict[name] = cdes_qgbm
-        zgrids_dict[name] = zg_qgbm
-        _save(name, m, cdes_qgbm, zg_qgbm)
-        print(f"CDE={m['CDE_loss']:.4f}, LL={m['log_lik']:.3f}, "
-              f"CRPS={m['CRPS']:.4f}, KS={m['PIT_KS']:.3f}")
+    if _want('Quantile-Tree'):
+        name = 'Quantile-Tree'
+        hit = _cached(name)
+        if hit:
+            m_c, cdes_qgbm, zg_qgbm = hit
+            results[name] = m_c
+            cdes_dict[name] = cdes_qgbm
+            zgrids_dict[name] = zg_qgbm
+            print(f"  {name}... [cached] CDE={m_c['CDE_loss']:.4f}, "
+                  f"LL={m_c['log_lik']:.3f}")
+        else:
+            print(f"  {name}...", end=" ", flush=True)
+            t0 = time.time()
+            z_lo = z_train.min() - 0.05 * np.ptp(z_train)
+            z_hi = z_train.max() + 0.05 * np.ptp(z_train)
+            cdes_qgbm, zg_qgbm = quantile_gbm_density(
+                X_tr, z_train, X_te, n_grid=n_grid, z_min=z_lo, z_max=z_hi
+            )
+            fit_t = time.time() - t0
+            m = compute_all_metrics(cdes_qgbm, zg_qgbm, z_test)
+            m['fit_time'] = fit_t
+            m['pred_time'] = 0
+            m['n_basis'] = None
+            results[name] = m
+            cdes_dict[name] = cdes_qgbm
+            zgrids_dict[name] = zg_qgbm
+            _save(name, m, cdes_qgbm, zg_qgbm)
+            print(f"CDE={m['CDE_loss']:.4f}, LL={m['log_lik']:.3f}, "
+                  f"CRPS={m['CRPS']:.4f}, KS={m['PIT_KS']:.3f}")
 
     # ── Helper for simple density baselines ──────────────────────────────
     def _run_density_baseline(name, density_fn, **kwargs):
@@ -308,27 +346,41 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
               f"CRPS={m_bl['CRPS']:.4f}, KS={m_bl['PIT_KS']:.3f}")
 
     # ── Baselines ────────────────────────────────────────────────────────
-    _run_density_baseline('LinearGauss-Homo', linear_gaussian_homo_density)
-    _run_density_baseline('LinearGauss-Hetero', linear_gaussian_hetero_density)
-    _run_density_baseline('Student-t', student_t_density)
-    _run_density_baseline('LogNormal-Homo', lognormal_homo_density)
-    _run_density_baseline('LogNormal-Hetero', lognormal_hetero_density)
-    _run_density_baseline('MDN-2mix', mdn_density, n_components=2, n_hidden=16)
-    if n_train <= 10000:
+    if _want('LinearGauss-Homo'):
+        _run_density_baseline('LinearGauss-Homo', linear_gaussian_homo_density)
+    if _want('LinearGauss-Hetero'):
+        _run_density_baseline('LinearGauss-Hetero', linear_gaussian_hetero_density)
+    if _want('Student-t'):
+        _run_density_baseline('Student-t', student_t_density)
+    if _want('LogNormal-Homo'):
+        _run_density_baseline('LogNormal-Homo', lognormal_homo_density)
+    if _want('LogNormal-Hetero'):
+        _run_density_baseline('LogNormal-Hetero', lognormal_hetero_density)
+    if _want('MDN-2mix'):
+        _run_density_baseline('MDN-2mix', mdn_density, n_components=2, n_hidden=16)
+    if n_train <= 10000 and _want('Quantile-Linear'):
         _run_density_baseline('Quantile-Linear', quantile_linear_density)
-    _run_density_baseline('Gamma-GLM', gamma_glm_density)
+    if _want('Gamma-GLM'):
+        _run_density_baseline('Gamma-GLM', gamma_glm_density)
 
     # ── Penalized (Ridge) variants ────────────────────────────────────
-    _run_density_baseline('LinGauss-Homo-Ridge', linear_gaussian_homo_density, regularized=True)
-    _run_density_baseline('LinGauss-Hetero-Ridge', linear_gaussian_hetero_density, regularized=True)
-    _run_density_baseline('Student-t-Ridge', student_t_density, regularized=True)
-    _run_density_baseline('LogNormal-Homo-Ridge', lognormal_homo_density, regularized=True)
-    _run_density_baseline('LogNormal-Hetero-Ridge', lognormal_hetero_density, regularized=True)
-    _run_density_baseline('Gamma-GLM-Ridge', gamma_glm_density, regularized=True)
+    if _want('LinGauss-Homo-Ridge'):
+        _run_density_baseline('LinGauss-Homo-Ridge', linear_gaussian_homo_density, regularized=True)
+    if _want('LinGauss-Hetero-Ridge'):
+        _run_density_baseline('LinGauss-Hetero-Ridge', linear_gaussian_hetero_density, regularized=True)
+    if _want('Student-t-Ridge'):
+        _run_density_baseline('Student-t-Ridge', student_t_density, regularized=True)
+    if _want('LogNormal-Homo-Ridge'):
+        _run_density_baseline('LogNormal-Homo-Ridge', lognormal_homo_density, regularized=True)
+    if _want('LogNormal-Hetero-Ridge'):
+        _run_density_baseline('LogNormal-Hetero-Ridge', lognormal_hetero_density, regularized=True)
+    if _want('Gamma-GLM-Ridge'):
+        _run_density_baseline('Gamma-GLM-Ridge', gamma_glm_density, regularized=True)
 
     # ── BART methods ──────────────────────────────────────────────────────
-    if HAS_XBART:
+    if HAS_XBART and _want('BART-Homo'):
         _run_density_baseline('BART-Homo', bart_homo_density)
+    if HAS_XBART and _want('BART-Hetero'):
         _run_density_baseline('BART-Hetero', bart_hetero_density)
 
     # ── True conditional density (synthetic only) ────────────────────────
@@ -363,8 +415,8 @@ def main():
                         help='Output directory')
     parser.add_argument('--force', action='store_true',
                         help='Re-run all datasets even if cached results exist')
-    parser.add_argument('--n-reps', type=int, default=20,
-                        help='Number of repetitions per dataset (default 20)')
+    parser.add_argument('--n-reps', type=int, default=4,
+                        help='Number of repetitions per dataset (default 4)')
     args = parser.parse_args()
 
     output_dir = Path(args.output_dir)

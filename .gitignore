@@ -7,4 +7,8 @@ results/cache/
 results/*.png
 results/*.html
 results/results.json
+results_real/cache/
+results_real/*.png
+results_real/*.html
+results_real/results.json
 .Rhistory

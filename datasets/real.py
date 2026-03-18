@@ -3,6 +3,7 @@ Real-world dataset loaders.
 """
 
 import numpy as np
+import pandas as pd
 from pathlib import Path
 from sklearn.datasets import fetch_openml
 
@@ -43,10 +44,35 @@ _REAL_DATASETS = [
     (197,   "CPUact",     8192),
     (537,   "CalHousing", 20640),
     (42225, "Diamonds",   53940),
+    (183,   "Abalone",    4177),
+    (296,   "Ailerons",   13750),
+    (201,   "Pol",        15000),
+    (42570, "MercedesBenz", 4209),
+    (46588, "Protein",    45730),
     (44027, "Year",       515345),
     (43144, "SGEMM_GPU",  241600),
     (41540, "BlackFriday",166821),
 ]
+
+
+def _load_openml_regression(data_id):
+    """Load an OpenML regression dataset, handling mixed feature types."""
+    d = fetch_openml(data_id=data_id, as_frame=True, parser='auto')
+
+    X_df = d.data.copy()
+    if not isinstance(X_df, pd.DataFrame):
+        X_df = pd.DataFrame(X_df)
+
+    # One-hot encode categoricals so mixed-type OpenML datasets load cleanly.
+    X_df = pd.get_dummies(X_df, dummy_na=False)
+    X_df = X_df.apply(pd.to_numeric, errors='coerce')
+
+    z = pd.to_numeric(d.target, errors='coerce')
+    keep = (~z.isna()) & (~X_df.isna().any(axis=1))
+
+    X = X_df.loc[keep].to_numpy(dtype=float, copy=False)
+    z = z.loc[keep].to_numpy(dtype=float, copy=False)
+    return X, z
 
 
 def _load_real_at_n(datasets, target_n):
@@ -55,8 +81,7 @@ def _load_real_at_n(datasets, target_n):
         if true_n < target_n:
             continue
         try:
-            d = fetch_openml(data_id=data_id, as_frame=False, parser='auto')
-            X_d, z_d = d.data.astype(float), d.target.astype(float)
+            X_d, z_d = _load_openml_regression(data_id)
             X_d, z_d = _subsample(X_d, z_d, target_n)
             tag = f"{name}-{target_n}" if target_n != true_n else name
             datasets.append((X_d, z_d, tag, None))

@@ -13,6 +13,8 @@ from evaluation.metrics import eval_pit, eval_pit_ks
 METHOD_STYLES = {
     'FlexCode-RF':         {'color': '#984ea3', 'ls': '-',   'lw': 2.0, 'zorder': 4},
     'TabPFN-Native':       {'color': '#ff7f00', 'ls': '--',  'lw': 1.8, 'zorder': 3},
+    'TabPFN-2.5':          {'color': '#ff9f1c', 'ls': '-',   'lw': 2.2, 'zorder': 4},
+    'RealTabPFN-2.5':      {'color': '#e65100', 'ls': '-.',  'lw': 2.2, 'zorder': 4},
     'TabICL-Quantiles':    {'color': '#a65628', 'ls': '--',  'lw': 1.8, 'zorder': 3},
     'Quantile-Tree':       {'color': '#888888', 'ls': ':',   'lw': 1.8, 'zorder': 3},
     'Quantile-Linear':     {'color': '#b3b3b3', 'ls': ':',   'lw': 1.5, 'zorder': 2},
@@ -507,7 +509,14 @@ def plot_true_vs_estimated(all_data, output_dir, n_examples=4):
         print(f"  saved {fname}")
 
 
-_NATIVE_SUBSET = ['TabPFN-Native', 'TabICL-Quantiles', 'FlexCode-RF', 'MDN-2mix']
+_NATIVE_SUBSET = [
+    'TabPFN-Native',
+    'TabPFN-2.5',
+    'RealTabPFN-2.5',
+    'TabICL-Quantiles',
+    'FlexCode-RF',
+    'MDN-2mix',
+]
 
 
 def plot_native_tab_subset(all_data, output_dir, n_examples=4):
@@ -574,7 +583,12 @@ def plot_native_tab_subset(all_data, output_dir, n_examples=4):
         print(f"  saved {fname}")
 
 
-FOUNDATIONAL_MODELS = {'TabPFN-Native', 'TabICL-Quantiles'}
+FOUNDATIONAL_MODELS = {
+    'TabPFN-Native',
+    'TabPFN-2.5',
+    'RealTabPFN-2.5',
+    'TabICL-Quantiles',
+}
 
 import re as _re
 

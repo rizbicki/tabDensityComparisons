@@ -91,13 +91,13 @@ echo "============================================================"
 echo ""
 
 if [ "$REAL_ONLY" -eq 1 ]; then
-    "$PYTHON" run_real_experiments.py "${EXTRA_ARGS[@]}"
+    "$PYTHON" run_real_experiments.py --n-reps 4 "${EXTRA_ARGS[@]}"
     echo ""
     echo "============================================================"
-    echo "  Done! Results are in results_real/"
+    echo "  Done! Results are in results/"
     echo "============================================================"
 else
-    "$PYTHON" run_experiments.py "${EXTRA_ARGS[@]}"
+    "$PYTHON" run_experiments.py --n-reps 4 "${EXTRA_ARGS[@]}"
     echo ""
     echo "============================================================"
     echo "  Done! Results are in results/"

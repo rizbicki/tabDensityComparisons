@@ -13,8 +13,9 @@ chmod +x setup_and_run.sh
 ./setup_and_run.sh --cpu            # force CPU (slower)
 ```
 
-Results go to `results/` (synthetic) and `results_real/` (real). To generate
-combined plots from both after runs complete:
+Results go to `results/` by default. If you have older real-data runs in
+`results_real/`, you can still generate combined plots from both after runs
+complete:
 
 ```bash
 python consolidate_partial_results.py   # merges results/ and results_real/
@@ -60,7 +61,7 @@ consolidate_partial_results.py  Build results.json from partial checkpoints
 generate_plots.py           Regenerate all plots from cached results
 models/
   flexcode.py               FlexCodeEstimator + RF regressor wrapper
-  native.py                 TabPFN-Native, TabICL-Quantiles extraction
+  native.py                 TabPFN / RealTabPFN native density extraction
   baselines.py              Parametric, GLM, quantile, and MDN baselines
 datasets/
   synthetic.py              Synthetic DGPs (with known true densities)
@@ -81,6 +82,8 @@ utils/
 | Method | Description |
 |--------|-------------|
 | TabPFN-Native | TabPFN's built-in bar distribution |
+| TabPFN-2.5 | TabPFN v2.5 default regressor checkpoint |
+| RealTabPFN-2.5 | TabPFN v2.5 real-data regressor checkpoint |
 | TabICL-Quantiles | TabICLv2's native 999-quantile distribution |
 
 ### FlexCode (basis-expansion CDE)
@@ -165,6 +168,11 @@ a strict subset of larger n.
 | CPUact | OpenML | 8192 |
 | CalHousing | OpenML | 20640 |
 | Diamonds | OpenML | 53940 |
+| Abalone | OpenML | 4177 |
+| Ailerons | OpenML | 13750 |
+| Pol | OpenML | 15000 |
+| MercedesBenz | OpenML | 4209 |
+| Protein | OpenML | 45730 |
 | Year | OpenML | 515345 |
 | SGEMM_GPU | OpenML | 241600 |
 | BlackFriday | OpenML | 166821 |
@@ -185,8 +193,9 @@ spectroscopic redshift as the target.
 
 ## Output
 
-Synthetic results go to `results/`, real dataset results to `results_real/`.
-Running `consolidate_partial_results.py` merges both into `results/results.json`.
+Synthetic results and real dataset results go to `results/` by default.
+If you have older runs split across `results/` and `results_real/`, running
+`consolidate_partial_results.py` merges both into `results/results.json`.
 
 ```
 results/

@@ -7,16 +7,17 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from pathlib import Path
+from matplotlib.transforms import blended_transform_factory
 
 from evaluation.metrics import eval_pit, eval_pit_ks
 
 # Fixed per-method visual style
 METHOD_STYLES = {
     'FlexCode-RF':         {'color': '#984ea3', 'ls': '-',   'lw': 2.0, 'zorder': 4},
-    'TabPFN-Native':       {'color': '#ff7f00', 'ls': '--',  'lw': 1.8, 'zorder': 3},
-    'TabPFN-2.5':          {'color': '#ff9f1c', 'ls': '-',   'lw': 2.2, 'zorder': 4},
-    'RealTabPFN-2.5':      {'color': '#e65100', 'ls': '-.',  'lw': 2.2, 'zorder': 4},
-    'TabICL-Quantiles':    {'color': '#a65628', 'ls': '--',  'lw': 1.8, 'zorder': 3},
+    'TabPFN-Native':       {'color': '#0072b2', 'ls': '--',  'lw': 2.0, 'zorder': 4},
+    'TabPFN-2.5':          {'color': '#e69f00', 'ls': '-',   'lw': 2.4, 'zorder': 5},
+    'RealTabPFN-2.5':      {'color': '#d55e00', 'ls': '-.',  'lw': 2.4, 'zorder': 5},
+    'TabICL-Quantiles':    {'color': '#009e73', 'ls': '--',  'lw': 2.0, 'zorder': 4},
     'Quantile-Tree':       {'color': '#888888', 'ls': ':',   'lw': 1.8, 'zorder': 3},
     'Quantile-Linear':     {'color': '#b3b3b3', 'ls': ':',   'lw': 1.5, 'zorder': 2},
     'LinearGauss-Homo':    {'color': '#66c2a5', 'ls': ':',   'lw': 1.5, 'zorder': 2},
@@ -37,12 +38,194 @@ METHOD_STYLES = {
 }
 _FALLBACK_COLORS = ['#8dd3c7', '#bebada', '#fb8072', '#80b1d3', '#fdb462']
 
+FOUNDATIONAL_MODELS = {
+    'TabPFN-Native',
+    'TabPFN-2.5',
+    'RealTabPFN-2.5',
+    'TabICL-Quantiles',
+}
+
+NONPARAMETRIC_MODELS = {
+    'FlexCode-RF',
+    'BART-Homo',
+    'BART-Hetero',
+    'MDN-2mix',
+    'Quantile-Tree',
+}
+
+METHOD_GROUP_ORDER = ('parametric', 'nonparametric', 'foundational')
+
+METHOD_GROUP_META = {
+    'parametric': {'label': 'Parametric', 'accent': '#1b9e77'},
+    'nonparametric': {'label': 'Nonparametric', 'accent': '#377eb8'},
+    'foundational': {'label': 'Foundational', 'accent': '#e67e22'},
+}
+
+METHOD_ORDER_HINTS = [
+    'LinearGauss-Homo',
+    'LinearGauss-Hetero',
+    'Student-t',
+    'LogNormal-Homo',
+    'LogNormal-Hetero',
+    'Gamma-GLM',
+    'Quantile-Linear',
+    'LinGauss-Homo-Ridge',
+    'LinGauss-Hetero-Ridge',
+    'Student-t-Ridge',
+    'LogNormal-Homo-Ridge',
+    'LogNormal-Hetero-Ridge',
+    'Gamma-GLM-Ridge',
+    'FlexCode-RF',
+    'BART-Homo',
+    'BART-Hetero',
+    'MDN-2mix',
+    'Quantile-Tree',
+    'TabPFN-Native',
+    'TabPFN-2.5',
+    'RealTabPFN-2.5',
+    'TabICL-Quantiles',
+]
+METHOD_ORDER_INDEX = {m: i for i, m in enumerate(METHOD_ORDER_HINTS)}
+
+PERF_LABEL_ALIASES = {
+    'TabPFN-Native': 'Native',
+    'TabPFN-2.5': 'TabPFN-2.5',
+    'RealTabPFN-2.5': 'RealTabPFN',
+    'TabICL-Quantiles': 'TabICL',
+}
+
 
 def _method_style(method, fallback_idx=0):
     if method in METHOD_STYLES:
         return METHOD_STYLES[method]
     return {'color': _FALLBACK_COLORS[fallback_idx % len(_FALLBACK_COLORS)],
             'ls': '-', 'lw': 1.5, 'zorder': 3}
+
+
+def _perf_label(method):
+    return PERF_LABEL_ALIASES.get(method, method)
+
+
+def _focus_ylim(values, pad_ratio=0.22):
+    vals = np.asarray(values, dtype=float)
+    vals = vals[np.isfinite(vals)]
+    if vals.size == 0:
+        return None
+
+    vmin = float(np.min(vals))
+    vmax = float(np.max(vals))
+    span = vmax - vmin
+    scale = max(abs(vmin), abs(vmax), 1.0)
+    pad = max(span * pad_ratio, scale * 0.02)
+    if span == 0:
+        pad = max(pad, 0.03 * scale)
+    return (vmin - pad, vmax + pad)
+
+
+def _spread_positions(values, y_limits):
+    if not values:
+        return []
+
+    y_lo, y_hi = y_limits
+    min_gap = max((y_hi - y_lo) * 0.06, 1e-12)
+    ordered = sorted(enumerate(values), key=lambda item: item[1])
+    placed = []
+    prev_y = None
+    for idx, y_val in ordered:
+        y_new = y_val if prev_y is None else max(y_val, prev_y + min_gap)
+        placed.append((idx, y_new))
+        prev_y = y_new
+
+    overflow = placed[-1][1] - y_hi
+    if overflow > 0:
+        placed = [(idx, y - overflow) for idx, y in placed]
+    underflow = y_lo - placed[0][1]
+    if underflow > 0:
+        placed = [(idx, y + underflow) for idx, y in placed]
+
+    adjusted = [0.0] * len(values)
+    for idx, y_val in placed:
+        adjusted[idx] = y_val
+    return adjusted
+
+
+def _annotate_perf_labels(ax, series, x_right):
+    if not series:
+        return
+
+    y_limits = ax.get_ylim()
+    label_ys = _spread_positions([s['label_y'] for s in series], y_limits)
+    for label_y, info in zip(label_ys, series):
+        ax.plot([info['x'], x_right], [info['label_y'], label_y],
+                color=info['color'], linewidth=1.0, alpha=0.7,
+                solid_capstyle='round', zorder=11)
+        ax.text(
+            x_right, label_y, _perf_label(info['method']),
+            color=info['color'], fontsize=9, fontweight='bold',
+            va='center', ha='left', clip_on=False,
+            bbox=dict(boxstyle='round,pad=0.18', facecolor='white',
+                      edgecolor=info['color'], linewidth=0.9, alpha=0.9),
+            zorder=12,
+        )
+
+
+def _method_group(method):
+    if method in FOUNDATIONAL_MODELS:
+        return 'foundational'
+    if method in NONPARAMETRIC_MODELS:
+        return 'nonparametric'
+    return 'parametric'
+
+
+def _ordered_methods(methods, score_map=None):
+    methods = list(dict.fromkeys(methods))
+    ordered = []
+    for group in METHOD_GROUP_ORDER:
+        grouped_methods = [m for m in methods if _method_group(m) == group]
+        grouped_methods.sort(
+            key=lambda m: (
+                score_map.get(m, np.inf) if score_map is not None else -np.inf,
+                METHOD_ORDER_INDEX.get(m, len(METHOD_ORDER_INDEX)),
+                m,
+            )
+        )
+        ordered.extend(grouped_methods)
+    return ordered
+
+
+def _method_group_spans(methods):
+    spans = []
+    start = 0
+    for group in METHOD_GROUP_ORDER:
+        count = sum(1 for m in methods if _method_group(m) == group)
+        if count == 0:
+            continue
+        end = start + count - 1
+        spans.append((group, start, end))
+        start = end + 1
+    return spans
+
+
+def _decorate_grouped_method_axis(ax, methods, label_x, show_labels=True,
+                                  show_lines=True):
+    spans = _method_group_spans(methods)
+    if not spans:
+        return
+
+    trans = blended_transform_factory(ax.transAxes, ax.transData)
+    for group, start, end in spans:
+        meta = METHOD_GROUP_META[group]
+        if show_labels:
+            ax.text(label_x, 0.5 * (start + end), meta['label'],
+                    transform=trans, ha='right', va='center',
+                    fontsize=10, fontweight='bold', color=meta['accent'],
+                    clip_on=False)
+        if show_lines and end < len(methods) - 1:
+            ax.axhline(end + 0.5, color=meta['accent'],
+                       linewidth=1.2, alpha=0.9, zorder=6)
+
+    for tick, method in zip(ax.get_yticklabels(), methods):
+        tick.set_color(METHOD_GROUP_META[_method_group(method)]['accent'])
 
 
 def _resolve_output_dirs(output_dir):
@@ -198,6 +381,7 @@ def _plot_rankings_grid(sub_results, methods, colors, n_size, kind_label,
     n_methods = len(methods)
     n_ds = len(datasets)
     ds_labels = _ds_labels(datasets, all_data)
+    method_index = {m: i for i, m in enumerate(methods)}
 
     for metric, label, direction in METRICS_INFO:
         matrix = np.full((n_methods, n_ds), np.nan)
@@ -214,49 +398,59 @@ def _plot_rankings_grid(sub_results, methods, colors, n_size, kind_label,
             ranks = (np.argsort(np.argsort(vals)) + 1 if direction == 'lower'
                      else np.argsort(np.argsort(-vals)) + 1)
             for m, r in zip(avail, ranks):
-                matrix[methods.index(m), di] = r
-
-        fig, (ax1, ax2) = plt.subplots(
-            1, 2,
-            figsize=(max(10, n_ds * 0.9), max(4, n_methods * 0.6)),
-            gridspec_kw={'width_ratios': [3, 1]})
-
-        im = ax1.imshow(matrix, cmap='RdYlGn_r', aspect='auto',
-                        vmin=1, vmax=n_methods)
-        ax1.set_yticks(range(n_methods))
-        ax1.set_yticklabels(methods, fontsize=9)
-        ax1.set_xticks(range(n_ds))
-        ax1.set_xticklabels(ds_labels, fontsize=7, rotation=45, ha='right')
-
-        for i in range(n_methods):
-            for j in range(n_ds):
-                if not np.isnan(matrix[i, j]):
-                    ax1.text(j, i, f'{int(matrix[i,j])}', ha='center',
-                             va='center', fontsize=8, fontweight='bold',
-                             color='white' if matrix[i, j] > n_methods * 0.6
-                             else 'black')
-
-        plt.colorbar(im, ax=ax1, label='Rank', shrink=0.8)
-        ax1.set_title(f'{label} — Rankings (n={n_size}, {kind_label})',
-                      fontsize=11, fontweight='bold')
+                matrix[method_index[m], di] = r
 
         avg_ranks = {}
         for mi, m in enumerate(methods):
             r = matrix[mi][~np.isnan(matrix[mi])]
             avg_ranks[m] = np.mean(r) if len(r) > 0 else 99
 
-        sorted_m = sorted(avg_ranks, key=avg_ranks.get)
-        y_pos = range(len(sorted_m))
-        ax2.barh(y_pos, [avg_ranks[m] for m in sorted_m],
-                 color=[colors[m] for m in sorted_m], alpha=0.8)
-        ax2.set_yticks(y_pos)
-        ax2.set_yticklabels(sorted_m, fontsize=9)
-        ax2.set_xlabel('Avg Rank', fontsize=10)
-        ax2.set_title(f'Overall (n={n_size})', fontsize=11, fontweight='bold')
-        ax2.grid(axis='x', alpha=0.3)
-        ax2.invert_yaxis()
+        ordered_methods = _ordered_methods(methods, score_map=avg_ranks)
+        row_order = [method_index[m] for m in ordered_methods]
+        plot_matrix = matrix[row_order, :]
 
-        plt.tight_layout()
+        fig, (ax1, ax2) = plt.subplots(
+            1, 2,
+            figsize=(max(10, n_ds * 0.9), max(4, n_methods * 0.6)),
+            gridspec_kw={'width_ratios': [3, 1]})
+
+        im = ax1.imshow(plot_matrix, cmap='RdYlGn_r', aspect='auto',
+                        vmin=1, vmax=n_methods)
+        ax1.set_yticks(range(n_methods))
+        ax1.set_yticklabels(ordered_methods, fontsize=11)
+        ax1.set_xticks(range(n_ds))
+        ax1.set_xticklabels(ds_labels, fontsize=9, rotation=45, ha='right')
+        _decorate_grouped_method_axis(ax1, ordered_methods, label_x=-0.34)
+
+        for i in range(n_methods):
+            for j in range(n_ds):
+                if not np.isnan(plot_matrix[i, j]):
+                    ax1.text(j, i, f'{int(plot_matrix[i, j])}', ha='center',
+                             va='center', fontsize=9, fontweight='bold',
+                             color='white' if plot_matrix[i, j] > n_methods * 0.6
+                             else 'black')
+
+        cbar = plt.colorbar(im, ax=ax1, label='Rank', shrink=0.8)
+        cbar.ax.tick_params(labelsize=10)
+        cbar.set_label('Rank', fontsize=11)
+        ax1.set_title(f'{label} — Rankings (n={n_size}, {kind_label})',
+                      fontsize=14, fontweight='bold')
+
+        sorted_methods = sorted(avg_ranks, key=avg_ranks.get)
+        y_pos = range(len(sorted_methods))
+        ax2.barh(y_pos, [avg_ranks[m] for m in sorted_methods],
+                 color=[colors[m] for m in sorted_methods], alpha=0.8)
+        ax2.set_yticks(y_pos)
+        ax2.set_yticklabels(sorted_methods, fontsize=11)
+        ax2.set_xlabel('Avg Rank', fontsize=11)
+        ax2.set_title(f'Overall (n={n_size})', fontsize=14, fontweight='bold')
+        ax2.grid(axis='x', alpha=0.3)
+        ax2.tick_params(axis='x', labelsize=10)
+        ax2.invert_yaxis()
+        _decorate_grouped_method_axis(ax2, sorted_methods, label_x=0,
+                                      show_labels=False, show_lines=False)
+
+        plt.tight_layout(rect=[0.08, 0, 1, 1])
         fname = f"{fname_prefix}_{metric.lower()}_n{n_size}.png"
         plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
         plt.close()
@@ -271,7 +465,7 @@ def plot_rankings_by_n(all_results, output_dir, all_data=None):
         return
 
     methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
-    colors = {m: plt.cm.tab10(i) for i, m in enumerate(methods)}
+    colors = _method_colors_map(methods)
 
     for n_size in sorted(groups):
         for kind, label, prefix in [('sim', 'Simulated', 'rankings_sim'),
@@ -286,14 +480,15 @@ def _plot_raw_grid(sub_results, methods, n_size, kind_label, fname_prefix,
     datasets = list(sub_results.keys())
     if not datasets:
         return
-    n_methods = len(methods)
+    ordered_methods = _ordered_methods(methods)
+    n_methods = len(ordered_methods)
     n_ds = len(datasets)
     ds_labels = _ds_labels(datasets, all_data)
 
     for metric, label, direction in METRICS_INFO:
         matrix = np.full((n_methods, n_ds), np.nan)
         for di, ds in enumerate(datasets):
-            for mi, m in enumerate(methods):
+            for mi, m in enumerate(ordered_methods):
                 v = sub_results[ds].get(m, {}).get(metric)
                 if v is not None:
                     matrix[mi, di] = v
@@ -314,9 +509,10 @@ def _plot_raw_grid(sub_results, methods, n_size, kind_label, fname_prefix,
                                         max(4, n_methods * 0.6)))
         ax.imshow(norm_matrix, cmap=cmap, aspect='auto', vmin=0, vmax=1)
         ax.set_yticks(range(n_methods))
-        ax.set_yticklabels(methods, fontsize=9)
+        ax.set_yticklabels(ordered_methods, fontsize=11)
         ax.set_xticks(range(n_ds))
-        ax.set_xticklabels(ds_labels, fontsize=7, rotation=45, ha='right')
+        ax.set_xticklabels(ds_labels, fontsize=9, rotation=45, ha='right')
+        _decorate_grouped_method_axis(ax, ordered_methods, label_x=-0.34)
 
         for i in range(n_methods):
             for j in range(n_ds):
@@ -326,12 +522,12 @@ def _plot_raw_grid(sub_results, methods, n_size, kind_label, fname_prefix,
                     nv = norm_matrix[i, j]
                     dark = nv < 0.4 if direction == 'higher' else nv > 0.6
                     ax.text(j, i, txt, ha='center', va='center',
-                            fontsize=7, fontweight='bold',
+                            fontsize=8, fontweight='bold',
                             color='white' if dark else 'black')
 
         ax.set_title(f'{label} (n={n_size}, {kind_label}, colors normalized per dataset)',
-                     fontsize=12, fontweight='bold')
-        plt.tight_layout()
+                     fontsize=14, fontweight='bold')
+        plt.tight_layout(rect=[0.08, 0, 1, 1])
         fname = f"{fname_prefix}_{metric.lower()}_n{n_size}.png"
         plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
         plt.close()
@@ -647,13 +843,6 @@ def plot_native_tab_subset(all_data, output_dir, n_examples=4):
         print(f"  saved {fname}")
 
 
-FOUNDATIONAL_MODELS = {
-    'TabPFN-Native',
-    'TabPFN-2.5',
-    'RealTabPFN-2.5',
-    'TabICL-Quantiles',
-}
-
 import re as _re
 
 
@@ -714,23 +903,29 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
     if not base_groups:
         return
 
-    import matplotlib.lines as mlines
-
     n_bases = len(base_groups)
     ncols = min(3, n_bases)
     nrows = (n_bases + ncols - 1) // ncols
+    plot_methods = _ordered_methods(methods)
     fig, axes = plt.subplots(nrows, ncols,
-                             figsize=(6 * ncols, 4.5 * nrows),
+                             figsize=(6.6 * ncols, 5.0 * nrows),
                              squeeze=False)
 
     for idx, (base, pairs) in enumerate(sorted(base_groups.items())):
         ax = axes[idx // ncols][idx % ncols]
         ns = [n for n, _ in pairs]
+        x_span = max(ns) - min(ns) if len(ns) > 1 else 1.0
+        x_pad_left = max(x_span * 0.05, 1.0)
+        x_pad_right = max(x_span * (0.28 if foundational_only else 0.06), 1.0)
+        x_right = max(ns) + max(x_span * 0.1, 1.0)
+        highlighted_vals = []
+        background_vals = []
+        perf_label_series = []
 
         if foundational_only:
             # Non-foundational faded, then foundational bold
             for is_foundation_pass in [False, True]:
-                for m in methods:
+                for m in plot_methods:
                     is_found = m in FOUNDATIONAL_MODELS
                     if is_found != is_foundation_pass:
                         continue
@@ -742,72 +937,95 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
                     if not valid_ns:
                         continue
                     if is_found:
-                        sty = METHOD_STYLES.get(m, {})
+                        sty = _method_style(m)
                         ax.plot(valid_ns, vals,
-                                marker='o', markersize=6,
+                                marker='o', markersize=7,
                                 color=method_colors[m],
                                 linestyle=sty.get('ls', '-'),
-                                linewidth=3.0, alpha=1.0,
-                                zorder=10, label=m)
+                                linewidth=max(3.2, sty.get('lw', 2.0) + 0.9),
+                                alpha=0.98,
+                                markeredgecolor='white',
+                                markeredgewidth=1.0,
+                                solid_capstyle='round',
+                                zorder=max(10, sty.get('zorder', 4) + 6),
+                                label=m)
+                        highlighted_vals.extend(vals)
+                        perf_label_series.append({
+                            'method': m,
+                            'x': valid_ns[-1],
+                            'label_y': vals[-1],
+                            'color': method_colors[m],
+                        })
                     else:
                         ax.plot(valid_ns, vals,
-                                marker='.', markersize=3,
-                                color='#bbbbbb', linestyle='-',
-                                linewidth=0.8, alpha=0.5,
-                                zorder=2, label=m)
+                                color='#b8b8b8', linestyle='-',
+                                linewidth=0.9, alpha=0.2,
+                                zorder=1, label=m)
+                        background_vals.extend(vals)
+
+            all_vals = highlighted_vals + background_vals
+            focus_ylim = _focus_ylim(highlighted_vals)
+            full_ylim = _focus_ylim(all_vals, pad_ratio=0.08)
+            if focus_ylim and full_ylim:
+                focus_span = focus_ylim[1] - focus_ylim[0]
+                full_span = full_ylim[1] - full_ylim[0]
+                ax.set_ylim(*(focus_ylim if full_span > focus_span * 2.5 else full_ylim))
+            elif full_ylim:
+                ax.set_ylim(*full_ylim)
         else:
-            for m in methods:
+            for m in plot_methods:
                 vals, valid_ns = [], []
                 for n, ds in pairs:
                     if m in all_results[ds] and metric in all_results[ds][m]:
                         vals.append(all_results[ds][m][metric])
                         valid_ns.append(n)
                 if valid_ns:
-                    sty = METHOD_STYLES.get(m, {})
+                    sty = _method_style(m)
                     ax.plot(valid_ns, vals,
-                            marker='o', markersize=4,
+                            marker='o', markersize=4.8,
                             color=method_colors[m],
                             linestyle=sty.get('ls', '-'),
-                            linewidth=1.5, alpha=0.85,
+                            linewidth=max(1.6, sty.get('lw', 1.5)),
+                            alpha=0.9,
+                            zorder=sty.get('zorder', 3),
                             label=m)
+                    highlighted_vals.extend(vals)
 
-        ax.set_title(base, fontsize=10, fontweight='bold')
-        ax.set_xlabel('n', fontsize=9)
-        ax.set_ylabel(label, fontsize=9)
-        ax.tick_params(labelsize=8)
+            full_ylim = _focus_ylim(highlighted_vals, pad_ratio=0.12)
+            if full_ylim:
+                ax.set_ylim(*full_ylim)
+
+        ax.set_title(base, fontsize=13, fontweight='bold')
+        ax.set_xlabel('n', fontsize=12)
+        ax.set_ylabel(label, fontsize=12)
+        ax.tick_params(labelsize=10)
         ax.set_xticks(ns)
-        ax.grid(alpha=0.3)
+        ax.set_xlim(min(ns) - x_pad_left, max(ns) + x_pad_right)
+        ax.grid(alpha=0.28, linewidth=0.8)
+
+        if foundational_only and perf_label_series:
+            _annotate_perf_labels(ax, perf_label_series, x_right)
 
     for idx in range(n_bases, nrows * ncols):
         axes[idx // ncols][idx % ncols].set_visible(False)
 
     # Legend
     if foundational_only:
-        legend_handles = []
-        for m in sorted(FOUNDATIONAL_MODELS):
-            if m in methods:
-                sty = METHOD_STYLES.get(m, {})
-                legend_handles.append(mlines.Line2D(
-                    [], [], color=method_colors[m],
-                    linestyle=sty.get('ls', '-'), linewidth=3.0,
-                    marker='o', markersize=6, label=m))
-        legend_handles.append(mlines.Line2D(
-            [], [], color='#bbbbbb', linestyle='-', linewidth=0.8,
-            marker='.', markersize=3, alpha=0.5, label='Others'))
-        fig.legend(handles=legend_handles, loc='lower center',
-                   ncol=len(legend_handles), fontsize=9,
-                   framealpha=0.9, bbox_to_anchor=(0.5, -0.02))
+        fig.text(
+            0.5, 0.025,
+            'Colored labels mark foundational models. Gray baselines are de-emphasized and may be clipped when needed for readability.',
+            ha='center', va='center', fontsize=11, color='#555555')
     else:
         handles, labels_leg = axes[0][0].get_legend_handles_labels()
         fig.legend(handles, labels_leg, loc='lower center',
-                   ncol=min(len(labels_leg), 6), fontsize=7,
+                   ncol=min(len(labels_leg), 6), fontsize=10,
                    framealpha=0.9, bbox_to_anchor=(0.5, -0.02))
 
     better = '(lower is better)' if direction == 'lower' else '(higher is better)'
     plt.suptitle(f'{label} vs Sample Size{title_suffix} {better}',
-                 fontsize=13, fontweight='bold')
-    plt.tight_layout(rect=[0, 0.06, 1, 0.96])
-    plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
+                 fontsize=16, fontweight='bold')
+    plt.tight_layout(rect=[0, 0.08 if not foundational_only else 0.06, 1, 0.95])
+    plt.savefig(output_dir / fname, dpi=220, bbox_inches='tight')
     plt.close()
     print(f"  saved {fname}")
 

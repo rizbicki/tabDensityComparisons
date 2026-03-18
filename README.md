@@ -170,6 +170,11 @@ a strict subset of larger n.
 | Diamonds | OpenML | 53940 |
 | Abalone | OpenML | 4177 |
 | Ailerons | OpenML | 13750 |
+| BikeSharing | OpenML | 17379 |
+| AmesHousing | OpenML | 2930 |
+| House16H | OpenML | 22784 |
+| Sulfur | OpenML | 10081 |
+| BrazilianHouses | OpenML | 10692 |
 | Pol | OpenML | 15000 |
 | MercedesBenz | OpenML | 4209 |
 | Protein | OpenML | 45730 |

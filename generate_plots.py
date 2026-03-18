@@ -2,10 +2,8 @@
 """
 Regenerate plots from cached results without re-running experiments.
 
-Can optionally merge results from multiple output directories.
-
 USAGE:
-  python generate_plots.py [--output-dir results] [--merge-dir OTHER_DIR]
+  python generate_plots.py [--sim-dir results_simulated] [--real-dir results_real]
 """
 
 import argparse
@@ -58,22 +56,27 @@ def _load_from_dir(output_dir, all_results, all_data):
 def main():
     parser = argparse.ArgumentParser(
         description='Regenerate plots from cached results')
-    parser.add_argument('--output-dir', default='results',
-                        help='Primary output directory containing cache/ and results.json')
-    parser.add_argument('--merge-dir',
-                        help='Optional additional directory to merge results from')
+    parser.add_argument('--sim-dir', default='results_simulated',
+                        help='Directory containing simulated results/cache '
+                             '(default: results_simulated)')
+    parser.add_argument('--real-dir', default='results_real',
+                        help='Directory containing real results/cache '
+                             '(default: results_real)')
     args = parser.parse_args()
 
-    output_dir = Path(args.output_dir)
-    output_dir.mkdir(exist_ok=True)
+    output_dirs = {
+        'sim': Path(args.sim_dir),
+        'real': Path(args.real_dir),
+    }
+    for out_dir in output_dirs.values():
+        out_dir.mkdir(parents=True, exist_ok=True)
 
     all_results = {}
     all_data = {}
 
     print("Loading results...")
-    _load_from_dir(output_dir, all_results, all_data)
-    if args.merge_dir and Path(args.merge_dir).exists():
-        _load_from_dir(args.merge_dir, all_results, all_data)
+    _load_from_dir(output_dirs['sim'], all_results, all_data)
+    _load_from_dir(output_dirs['real'], all_results, all_data)
 
     if not all_results:
         print("No results found. Run experiments first.")
@@ -82,25 +85,25 @@ def main():
     print(f"\nTotal: {len(all_results)} datasets, {len(all_data)} with cached data")
 
     print("\nGenerating plots and tables...")
-    save_html_table(all_results, output_dir)
+    save_html_table(all_results, output_dirs)
     print("  ✓ HTML table")
 
-    plot_native_tab_subset(all_data, output_dir)
+    plot_native_tab_subset(all_data, output_dirs)
     print("  ✓ Native TabPFN subset plots")
 
-    plot_rankings_by_n(all_results, output_dir, all_data=all_data)
+    plot_rankings_by_n(all_results, output_dirs, all_data=all_data)
     print("  ✓ Rankings by n")
 
-    plot_raw_metrics_by_n(all_results, output_dir, all_data=all_data)
+    plot_raw_metrics_by_n(all_results, output_dirs, all_data=all_data)
     print("  ✓ Raw metrics by n")
 
-    plot_pit_histograms(all_data, output_dir)
+    plot_pit_histograms(all_data, output_dirs)
     print("  ✓ PIT histograms")
 
-    plot_performance_vs_n(all_results, output_dir, all_data=all_data)
+    plot_performance_vs_n(all_results, output_dirs, all_data=all_data)
     print("  ✓ Performance vs n")
 
-    plot_performance_vs_n_foundational(all_results, output_dir, all_data=all_data)
+    plot_performance_vs_n_foundational(all_results, output_dirs, all_data=all_data)
     print("  ✓ Performance vs n (foundational models)")
 
     print("\nDone!")

@@ -14,7 +14,7 @@ set -euo pipefail
 #   1. Creates a Python venv in .venv/
 #   2. Installs all dependencies (TabPFN, TabICLv2, XGBoost, etc.)
 #   3. Runs the experiments
-#   4. Outputs results to results/ (or results_real/ with --real-only)
+#   4. Outputs simulated results to results_simulated/ and real results to results_real/
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
@@ -94,12 +94,13 @@ if [ "$REAL_ONLY" -eq 1 ]; then
     "$PYTHON" run_real_experiments.py --n-reps 4 "${EXTRA_ARGS[@]}"
     echo ""
     echo "============================================================"
-    echo "  Done! Results are in results/"
+    echo "  Done! Results are in results_real/"
     echo "============================================================"
 else
     "$PYTHON" run_experiments.py --n-reps 4 "${EXTRA_ARGS[@]}"
     echo ""
     echo "============================================================"
-    echo "  Done! Results are in results/"
+    echo "  Done! Simulated results are in results_simulated/"
+    echo "  Done! Real results are in results_real/"
     echo "============================================================"
 fi

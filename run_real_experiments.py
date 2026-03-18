@@ -69,8 +69,8 @@ def main():
         description='FlexCode x TFM CDE Experiments -- Real Datasets Only')
     parser.add_argument('--device', default='auto',
                         choices=['auto', 'cpu', 'cuda'])
-    parser.add_argument('--output-dir', default='results',
-                        help='Output directory (default: results)')
+    parser.add_argument('--output-dir', default='results_real',
+                        help='Output directory (default: results_real)')
     parser.add_argument('--force', action='store_true',
                         help='Re-run all datasets even if cached results exist')
     parser.add_argument('--n-reps', type=int, default=4,

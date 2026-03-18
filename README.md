@@ -13,12 +13,15 @@ chmod +x setup_and_run.sh
 ./setup_and_run.sh --cpu            # force CPU (slower)
 ```
 
-Results go to `results/` by default. If you have older real-data runs in
-`results_real/`, you can still generate combined plots from both after runs
-complete:
+Results now split by dataset type:
+
+- simulated outputs go to `results_simulated/`
+- real-data outputs go to `results_real/`
+
+You can regenerate plots/tables from both after runs complete:
 
 ```bash
-python consolidate_partial_results.py   # merges results/ and results_real/
+python consolidate_partial_results.py
 python generate_plots.py                # regenerates all plots
 ```
 
@@ -198,22 +201,28 @@ spectroscopic redshift as the target.
 
 ## Output
 
-Synthetic results and real dataset results go to `results/` by default.
-If you have older runs split across `results/` and `results_real/`, running
-`consolidate_partial_results.py` merges both into `results/results.json`.
+Simulated results go to `results_simulated/` by default. Real-dataset results
+go to `results_real/` by default. `generate_plots.py` reads both directories
+and writes each artifact back to the matching destination.
 
 ```
-results/
+results_simulated/
   results.json                      raw metric values (mean ± SE)
   results_table.html                formatted HTML table
   rankings_sim_{metric}_n{n}.png    ranking heatmap — simulated, per n
-  rankings_real_{metric}_n{n}.png   ranking heatmap — real, per n
   raw_sim_{metric}_n{n}.png         raw value heatmap — simulated, per n
-  raw_real_{metric}_n{n}.png        raw value heatmap — real, per n
   perf_vs_n_{metric}_sim_d{d}.png   performance vs n — simulated, per d
+  pit_calibration.png               PIT histograms for calibration assessment
+  native_tab_{ds}.png               density comparison plots (synthetic)
+  cache/{dataset}.npz               cached arrays (skip re-runs)
+
+results_real/
+  results.json                      raw metric values (mean ± SE)
+  results_table.html                formatted HTML table
+  rankings_real_{metric}_n{n}.png   ranking heatmap — real, per n
+  raw_real_{metric}_n{n}.png        raw value heatmap — real, per n
   perf_vs_n_{metric}_real.png       performance vs n — real datasets
   perf_vs_n_foundational_*.png      same, highlighting foundation models only
   pit_calibration.png               PIT histograms for calibration assessment
-  native_tab_{ds}.png               density comparison plots (synthetic)
   cache/{dataset}.npz               cached arrays (skip re-runs)
 ```

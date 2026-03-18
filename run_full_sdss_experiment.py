@@ -106,8 +106,8 @@ def main():
         description="Run all methods on the full SDSS spectroscopic redshift dataset"
     )
     parser.add_argument("--device", default="auto", choices=["auto", "cpu", "cuda"])
-    parser.add_argument("--output-dir", default="results/sdss_full",
-                        help="Output directory (default: results/sdss_full)")
+    parser.add_argument("--output-dir", default="results_real/sdss_full",
+                        help="Output directory (default: results_real/sdss_full)")
     parser.add_argument("--force", action="store_true",
                         help="Re-run even if cached outputs exist")
     parser.add_argument("--random-state", type=int, default=42,

@@ -9,7 +9,7 @@ plus .npz cache files for generate_plots.py.
 
 USAGE:
   python consolidate_partial_results.py
-  python consolidate_partial_results.py --output-dir results --source-dirs results results_real
+  python consolidate_partial_results.py --output-dir results --source-dirs results_simulated results_real
 """
 
 import argparse
@@ -116,33 +116,60 @@ def _consolidate_source(source_dir, all_results, output_cache_dir):
 def main():
     parser = argparse.ArgumentParser(
         description='Consolidate partial results from all sources into one results.json')
-    parser.add_argument('--output-dir', default='results',
-                        help='Where to write results.json and cache/ (default: results)')
+    parser.add_argument('--output-dir',
+                        help='Optional merged output directory. If omitted, each '
+                             'source dir is consolidated in place.')
     parser.add_argument('--source-dirs', nargs='+',
-                        default=['results', 'results_real'],
+                        default=['results_simulated', 'results_real'],
                         help='Directories to scan for partial results '
-                             '(default: results results_real)')
+                             '(default: results_simulated results_real)')
     args = parser.parse_args()
 
-    output_dir = Path(args.output_dir)
-    output_dir.mkdir(exist_ok=True)
-    output_cache_dir = output_dir / 'cache'
-    output_cache_dir.mkdir(exist_ok=True)
+    if args.output_dir:
+        output_dir = Path(args.output_dir)
+        output_dir.mkdir(exist_ok=True)
+        output_cache_dir = output_dir / 'cache'
+        output_cache_dir.mkdir(exist_ok=True)
 
-    all_results = {}
-    print("Consolidating partial results...")
-    for src in args.source_dirs:
-        _consolidate_source(src, all_results, output_cache_dir)
+        all_results = {}
+        print("Consolidating partial results...")
+        for src in args.source_dirs:
+            _consolidate_source(src, all_results, output_cache_dir)
 
-    if not all_results:
-        print("No results found.")
+        if not all_results:
+            print("No results found.")
+            return
+
+        json_path = output_dir / 'results.json'
+        with open(json_path, 'w') as f:
+            json.dump(all_results, f, indent=2)
+        print(f"\nWrote {json_path} ({len(all_results)} dataset(s))")
+        print("Ready to run: python generate_plots.py")
         return
 
-    json_path = output_dir / 'results.json'
-    with open(json_path, 'w') as f:
-        json.dump(all_results, f, indent=2)
-    print(f"\nWrote {json_path} ({len(all_results)} dataset(s))")
-    print("Ready to run: python generate_plots.py")
+    wrote_any = False
+    print("Consolidating partial results in place...")
+    for src in args.source_dirs:
+        output_dir = Path(src)
+        output_dir.mkdir(exist_ok=True)
+        output_cache_dir = output_dir / 'cache'
+        output_cache_dir.mkdir(exist_ok=True)
+
+        all_results = {}
+        _consolidate_source(src, all_results, output_cache_dir)
+        if not all_results:
+            continue
+
+        json_path = output_dir / 'results.json'
+        with open(json_path, 'w') as f:
+            json.dump(all_results, f, indent=2)
+        print(f"\nWrote {json_path} ({len(all_results)} dataset(s))")
+        wrote_any = True
+
+    if not wrote_any:
+        print("No results found.")
+    else:
+        print("Ready to run: python generate_plots.py")
 
 
 if __name__ == '__main__':

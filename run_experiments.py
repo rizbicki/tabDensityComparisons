@@ -411,32 +411,49 @@ def main():
                         choices=['auto', 'cpu', 'cuda'])
     parser.add_argument('--quick', action='store_true',
                         help='Run fewer datasets')
-    parser.add_argument('--output-dir', default='results',
-                        help='Output directory')
+    parser.add_argument('--output-dir', default='results_simulated',
+                        help='Output directory for simulated results '
+                             '(default: results_simulated)')
+    parser.add_argument('--real-output-dir', default='results_real',
+                        help='Output directory for real results '
+                             '(default: results_real)')
     parser.add_argument('--force', action='store_true',
                         help='Re-run all datasets even if cached results exist')
     parser.add_argument('--n-reps', type=int, default=4,
                         help='Number of repetitions per dataset (default 4)')
     args = parser.parse_args()
 
-    output_dir = Path(args.output_dir)
-    output_dir.mkdir(exist_ok=True)
-    cache_dir = output_dir / 'cache'
-    cache_dir.mkdir(exist_ok=True)
-    partial_dir = cache_dir / 'partial'
-    partial_dir.mkdir(exist_ok=True)
+    output_dirs = {
+        'sim': Path(args.output_dir),
+        'real': Path(args.real_output_dir),
+    }
+    dir_state = {}
+    for kind, out_dir in output_dirs.items():
+        out_dir.mkdir(parents=True, exist_ok=True)
+        cache_dir = out_dir / 'cache'
+        cache_dir.mkdir(exist_ok=True)
+        partial_dir = cache_dir / 'partial'
+        partial_dir.mkdir(exist_ok=True)
 
-    # Load previously saved results to skip already-run datasets
-    json_path = output_dir / 'results.json'
-    existing_results = {}
-    if json_path.exists() and not args.force:
-        try:
-            with open(json_path) as f:
-                existing_results = json.load(f)
-            print(f"  [cache] Found {len(existing_results)} previously "
-                  f"completed dataset(s)")
-        except Exception:
-            existing_results = {}
+        existing_results = {}
+        json_path = out_dir / 'results.json'
+        if json_path.exists() and not args.force:
+            try:
+                with open(json_path) as f:
+                    existing_results = json.load(f)
+                print(f"  [cache:{kind}] Found {len(existing_results)} "
+                      f"previously completed dataset(s)")
+            except Exception:
+                existing_results = {}
+
+        dir_state[kind] = {
+            'output_dir': out_dir,
+            'cache_dir': cache_dir,
+            'partial_dir': partial_dir,
+            'existing_results': existing_results,
+            'results': {},
+            'data': {},
+        }
 
     print("\n" + "=" * 60)
     print("FlexCode x Tabular Foundation Models")
@@ -490,10 +507,20 @@ def main():
     all_results = {}
     all_data = {}
 
+    def _dataset_kind(dataset_name, true_density_fn):
+        is_sim = (
+            true_density_fn is not None
+            or dataset_name.startswith('Friedman')
+            or re.search(r'-d\d+(?:-\d+)?$', dataset_name)
+        )
+        return 'sim' if is_sim else 'real'
+
     for X, z, name, true_density_fn in datasets:
-        cache_file = cache_dir / f"{name}.npz"
+        kind = _dataset_kind(name, true_density_fn)
+        state = dir_state[kind]
+        cache_file = state['cache_dir'] / f"{name}.npz"
         use_cache = (not args.force
-                     and name in existing_results
+                     and name in state['existing_results']
                      and cache_file.exists())
 
         if use_cache:
@@ -502,13 +529,13 @@ def main():
             cdes, zgrids, X_te, z_te, true_cde, true_zgrid, n_total = \
                 load_cache(cache_file)
             all_results[name] = {
-                m: {k: v for k, v in existing_results[name][m].items()}
-                for m in existing_results[name]
+                m: {k: v for k, v in state['existing_results'][name][m].items()}
+                for m in state['existing_results'][name]
             }
         else:
             per_rep_results = []
             for rep in range(n_reps):
-                rep_partial = partial_dir / f"rep{rep}"
+                rep_partial = state['partial_dir'] / f"rep{rep}"
                 rep_partial.mkdir(exist_ok=True)
                 print(f"\n  ── rep {rep+1}/{n_reps} (seed={rep}) ──")
                 res, cdes, zgrids, X_te, z_te, true_cde, true_zgrid = \
@@ -532,28 +559,31 @@ def main():
             'true_cde': true_cde, 'true_zgrid': true_zgrid,
             'n_total': n_total,
         }
+        state['results'][name] = all_results[name]
+        state['data'][name] = all_data[name]
 
     print_summary(all_results)
 
     print("\nGenerating plots and tables...")
-    save_html_table(all_results, output_dir)
-    plot_native_tab_subset(all_data, output_dir)
-    plot_rankings_by_n(all_results, output_dir, all_data=all_data)
-    plot_raw_metrics_by_n(all_results, output_dir, all_data=all_data)
-    plot_pit_histograms(all_data, output_dir)
-    plot_performance_vs_n(all_results, output_dir, all_data=all_data)
-    plot_performance_vs_n_foundational(all_results, output_dir, all_data=all_data)
+    save_html_table(all_results, output_dirs)
+    plot_native_tab_subset(all_data, output_dirs)
+    plot_rankings_by_n(all_results, output_dirs, all_data=all_data)
+    plot_raw_metrics_by_n(all_results, output_dirs, all_data=all_data)
+    plot_pit_histograms(all_data, output_dirs)
+    plot_performance_vs_n(all_results, output_dirs, all_data=all_data)
+    plot_performance_vs_n_foundational(all_results, output_dirs, all_data=all_data)
 
-    # Save JSON
-    json_out = {}
-    for ds, res in all_results.items():
-        json_out[ds] = {m: {k: float(v) if v is not None else None
-                            for k, v in met.items()}
-                        for m, met in res.items()}
-    with open(output_dir / 'results.json', 'w') as f:
-        json.dump(json_out, f, indent=2)
+    for kind, state in dir_state.items():
+        json_out = {}
+        for ds, res in state['results'].items():
+            json_out[ds] = {m: {k: float(v) if v is not None else None
+                                for k, v in met.items()}
+                            for m, met in res.items()}
+        with open(state['output_dir'] / 'results.json', 'w') as f:
+            json.dump(json_out, f, indent=2)
 
-    print(f"\nDone. Results in {output_dir}/")
+    print(f"\nDone. Simulated results in {output_dirs['sim']}/")
+    print(f"Done. Real results in {output_dirs['real']}/")
 
 
 if __name__ == '__main__':

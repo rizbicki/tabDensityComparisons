@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 from evaluation.metrics import eval_pit, eval_pit_ks
 
@@ -44,7 +45,42 @@ def _method_style(method, fallback_idx=0):
             'ls': '-', 'lw': 1.5, 'zorder': 3}
 
 
+def _resolve_output_dirs(output_dir):
+    """Normalize output_dir into {'sim': Path(...), 'real': Path(...)}."""
+    if isinstance(output_dir, dict):
+        dirs = {
+            'sim': Path(output_dir['sim']),
+            'real': Path(output_dir['real']),
+        }
+    else:
+        shared = Path(output_dir)
+        dirs = {'sim': shared, 'real': shared}
+
+    for path in dirs.values():
+        path.mkdir(parents=True, exist_ok=True)
+    return dirs
+
+
+def _split_by_type(items):
+    sim = {}
+    real = {}
+    for ds, payload in items.items():
+        (_is_synthetic(ds) and sim or real)[ds] = payload
+    return {'sim': sim, 'real': real}
+
+
 def plot_density_comparison(all_data, output_dir):
+    """Plot example density estimates side by side, with true density when available."""
+    output_dirs = _resolve_output_dirs(output_dir)
+    split_data = _split_by_type(all_data)
+
+    for kind, data_subset in split_data.items():
+        if not data_subset:
+            continue
+        _plot_density_comparison_single(data_subset, output_dirs[kind])
+
+
+def _plot_density_comparison_single(all_data, output_dir):
     """Plot example density estimates side by side, with true density when available."""
     datasets_to_show = list(all_data.keys())[:4]
     n_ds = len(datasets_to_show)
@@ -132,6 +168,8 @@ def _is_synthetic(ds_name):
     base, _ = _parse_base_and_n(ds_name)
     if base is None:
         base = ds_name
+    if base.startswith('Friedman'):
+        return True
     return _parse_d(base) is not None
 
 
@@ -227,6 +265,7 @@ def _plot_rankings_grid(sub_results, methods, colors, n_size, kind_label,
 
 def plot_rankings_by_n(all_results, output_dir, all_data=None):
     """Ranking bar plots for each sample size, split into real and simulated."""
+    output_dirs = _resolve_output_dirs(output_dir)
     groups = _group_by_n_and_type(all_results)
     if not groups:
         return
@@ -238,7 +277,7 @@ def plot_rankings_by_n(all_results, output_dir, all_data=None):
         for kind, label, prefix in [('sim', 'Simulated', 'rankings_sim'),
                                      ('real', 'Real', 'rankings_real')]:
             _plot_rankings_grid(groups[n_size][kind], methods, colors,
-                                n_size, label, prefix, output_dir, all_data)
+                                n_size, label, prefix, output_dirs[kind], all_data)
 
 
 def _plot_raw_grid(sub_results, methods, n_size, kind_label, fname_prefix,
@@ -301,6 +340,7 @@ def _plot_raw_grid(sub_results, methods, n_size, kind_label, fname_prefix,
 
 def plot_raw_metrics_by_n(all_results, output_dir, all_data=None):
     """Raw-value heatmaps per sample size, split into real and simulated."""
+    output_dirs = _resolve_output_dirs(output_dir)
     groups = _group_by_n_and_type(all_results)
     if not groups:
         return
@@ -311,11 +351,22 @@ def plot_raw_metrics_by_n(all_results, output_dir, all_data=None):
         for kind, label, prefix in [('sim', 'Simulated', 'raw_sim'),
                                      ('real', 'Real', 'raw_real')]:
             _plot_raw_grid(groups[n_size][kind], methods, n_size, label,
-                           prefix, output_dir, all_data)
+                           prefix, output_dirs[kind], all_data)
 
 
 def plot_pit_histograms(all_data, output_dir):
     """PIT calibration histograms."""
+    output_dirs = _resolve_output_dirs(output_dir)
+    split_data = _split_by_type(all_data)
+
+    for kind, data_subset in split_data.items():
+        if not data_subset:
+            continue
+        _plot_pit_histograms_single(data_subset, output_dirs[kind])
+
+
+def _plot_pit_histograms_single(all_data, output_dir):
+    """PIT calibration histograms for one dataset type."""
     datasets_to_show = list(all_data.keys())[:4]
     sample_methods = list(list(all_data.values())[0]['cdes'].keys())
 
@@ -355,6 +406,17 @@ def plot_pit_histograms(all_data, output_dir):
 
 
 def save_html_table(all_results, output_dir):
+    """Save a styled HTML results table with mean +/- SE and best values highlighted."""
+    output_dirs = _resolve_output_dirs(output_dir)
+    split_results = _split_by_type(all_results)
+
+    for kind, results_subset in split_results.items():
+        if not results_subset:
+            continue
+        _save_html_table_single(results_subset, output_dirs[kind])
+
+
+def _save_html_table_single(all_results, output_dir):
     """Save a styled HTML results table with mean +/- SE and best values highlighted."""
 
     METRICS = [
@@ -451,6 +513,7 @@ def plot_true_vs_estimated(all_data, output_dir, n_examples=4):
     For each synthetic dataset, plot estimated densities from all methods
     alongside the true conditional density.
     """
+    output_dir = _resolve_output_dirs(output_dir)['sim']
     synthetic_datasets = [ds for ds, d in all_data.items()
                           if d.get('true_cde') is not None]
     if not synthetic_datasets:
@@ -524,6 +587,7 @@ def plot_native_tab_subset(all_data, output_dir, n_examples=4):
     For each synthetic dataset, plot only the two native tab results
     + FlexCode-RF + MDN-2mix alongside the true density + observed y line.
     """
+    output_dir = _resolve_output_dirs(output_dir)['sim']
     synthetic_datasets = [ds for ds, d in all_data.items()
                           if d.get('true_cde') is not None]
     if not synthetic_datasets:
@@ -750,6 +814,7 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
 
 def plot_performance_vs_n(all_results, output_dir, all_data=None):
     """Performance vs n, split by real / simulated (per d)."""
+    output_dirs = _resolve_output_dirs(output_dir)
     base_groups = _build_base_groups(all_results)
     if not base_groups:
         return
@@ -764,17 +829,18 @@ def plot_performance_vs_n(all_results, output_dir, all_data=None):
             _plot_perf_grid(real, all_results, methods, mc,
                             metric, label, direction,
                             ' — Real', f'perf_vs_n_{ml}_real.png',
-                            output_dir)
+                            output_dirs['real'])
         for d in sorted(sim_by_d):
             _plot_perf_grid(sim_by_d[d], all_results, methods, mc,
                             metric, label, direction,
                             f' — Simulated (d={d})',
                             f'perf_vs_n_{ml}_sim_d{d}.png',
-                            output_dir)
+                            output_dirs['sim'])
 
 
 def plot_performance_vs_n_foundational(all_results, output_dir, all_data=None):
     """Like plot_performance_vs_n but foundational models are visually prominent."""
+    output_dirs = _resolve_output_dirs(output_dir)
     base_groups = _build_base_groups(all_results)
     if not base_groups:
         return
@@ -790,10 +856,10 @@ def plot_performance_vs_n_foundational(all_results, output_dir, all_data=None):
                             metric, label, direction,
                             ' — Real (Foundational)',
                             f'perf_vs_n_foundational_{ml}_real.png',
-                            output_dir, foundational_only=True)
+                            output_dirs['real'], foundational_only=True)
         for d in sorted(sim_by_d):
             _plot_perf_grid(sim_by_d[d], all_results, methods, mc,
                             metric, label, direction,
                             f' — Simulated d={d} (Foundational)',
                             f'perf_vs_n_foundational_{ml}_sim_d{d}.png',
-                            output_dir, foundational_only=True)
+                            output_dirs['sim'], foundational_only=True)

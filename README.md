@@ -25,6 +25,18 @@ python consolidate_partial_results.py
 python generate_plots.py                # regenerates all plots
 ```
 
+If you only need the tables plus the metric-based figures on another machine,
+you can transfer just `results_real/results.json` and/or
+`results_simulated/results.json` and regenerate from metrics only:
+
+```bash
+python generate_plots.py --metrics-only
+```
+
+This reproduces the HTML table plus the ranking, raw-metric, and performance
+plots. It intentionally skips PIT histograms and density example plots, which
+require the cached arrays under `results_*/cache/*.npz`.
+
 ### Plots from partial results (while experiments are running)
 
 You can generate preliminary plots at any point without waiting for all
@@ -65,7 +77,7 @@ generate_plots.py           Regenerate all plots from cached results
 models/
   flexcode.py               FlexCodeEstimator + RF regressor wrapper
   native.py                 TabPFN / RealTabPFN native density extraction
-  baselines.py              Parametric, GLM, quantile, and MDN baselines
+  baselines.py              Parametric, GLM, quantile, flow, and MDN baselines
 datasets/
   synthetic.py              Synthetic DGPs (with known true densities)
   real.py                   Semi-synthetic + real-world dataset loaders
@@ -134,6 +146,7 @@ with the penalty chosen by leave-one-out cross-validation (`RidgeCV`).
 |--------|-------------|
 | Quantile-Tree | Quantile regression via XGBoost/GBM |
 | Quantile-Linear | Linear quantile regression (skipped for n > 10000) |
+| Flow-Spline | Conditional neural spline flow with Gaussian base |
 
 ## Datasets
 
@@ -148,13 +161,24 @@ All synthetic datasets have known true conditional densities. Tags follow
 | Dataset | Description |
 |---------|-------------|
 | Heteroscedastic | Input-dependent Gaussian noise |
-| Bimodal | Mixture of two Gaussians with input-dependent weights |
+| Bimodal | Mixture of two Gaussians with fixed 50/50 weights |
 | Skewed | Gamma-shifted response with input-dependent shape |
 | Nonlinear | Nonlinear mean with heteroscedastic noise |
 | LinGauss-Homo | Linear Gaussian with homoscedastic noise |
 | Interaction | Interactions between covariates affecting mean and variance |
 | Friedman1 | Friedman #1 DGP; extra features (d>5) are irrelevant noise |
 | Friedman2 | Friedman #2 DGP; fixed d=4, tag `Friedman2-d4-{n}` |
+
+The benchmark `Bimodal` generator in [datasets/synthetic.py](/home/rizbicki/git/tabDensityComparisons/datasets/synthetic.py)
+uses fixed weights:
+`0.5 * N(z; x0 + x1, 0.5^2) + 0.5 * N(z; -x0 + x1, 0.5^2)`.
+
+For a concrete input-dependent mixture example, see
+[datasets/synthetic.py](/home/rizbicki/git/tabDensityComparisons/datasets/synthetic.py)
+function `make_bimodal_input_weighted_example`, which uses
+`w(x) = Phi(1.5 * x0 - 0.75 * x1)` and
+`f(z|x) = w(x) p1(z|x) + (1 - w(x)) p2(z|x)`.
+It is example-only and is not included in the default benchmark schedule.
 
 ### Real-world (n ∈ {1000, 2000, 4000, 6000, 20000} where available)
 
@@ -168,6 +192,7 @@ a strict subset of larger n.
 | Kin8nm | OpenML | 8192 |
 | Puma8NH | OpenML | 8192 |
 | Bank8FM | OpenML | 22784 |
+| CpuSmall | OpenML | 8192 |
 | CPUact | OpenML | 8192 |
 | CalHousing | OpenML | 20640 |
 | Diamonds | OpenML | 53940 |
@@ -175,12 +200,16 @@ a strict subset of larger n.
 | Ailerons | OpenML | 13750 |
 | BikeSharing | OpenML | 17379 |
 | AmesHousing | OpenML | 2930 |
+| Digits | OpenML (`optdigits`, numeric labels) | 5620 |
 | House16H | OpenML | 22784 |
+| HouseSales | OpenML | 21613 |
+| NYCTaxi | OpenML (`nyc-taxi-green-dec-2016`) | 581835 |
 | Sulfur | OpenML | 10081 |
 | BrazilianHouses | OpenML | 10692 |
 | Pol | OpenML | 15000 |
 | MercedesBenz | OpenML | 4209 |
 | Protein | OpenML | 45730 |
+| VisualizingSoil | OpenML (`visualizing_soil`) | 8641 |
 | Year | OpenML | 515345 |
 | SGEMM_GPU | OpenML | 241600 |
 | BlackFriday | OpenML | 166821 |
@@ -207,8 +236,8 @@ and writes each artifact back to the matching destination.
 
 ```
 results_simulated/
-  results.json                      raw metric values (mean ± SE)
-  results_table.html                formatted HTML table
+  results.json                      raw metric values (mean ± SE across repetitions)
+  results_table.html                formatted HTML table (±SE across repetitions)
   rankings_sim_{metric}_n{n}.png    ranking heatmap — simulated, per n
   raw_sim_{metric}_n{n}.png         raw value heatmap — simulated, per n
   perf_vs_n_{metric}_sim_d{d}.png   performance vs n — simulated, per d
@@ -217,8 +246,8 @@ results_simulated/
   cache/{dataset}.npz               cached arrays (skip re-runs)
 
 results_real/
-  results.json                      raw metric values (mean ± SE)
-  results_table.html                formatted HTML table
+  results.json                      raw metric values (mean ± SE across repetitions)
+  results_table.html                formatted HTML table (±SE across repetitions)
   rankings_real_{metric}_n{n}.png   ranking heatmap — real, per n
   raw_real_{metric}_n{n}.png        raw value heatmap — real, per n
   perf_vs_n_{metric}_real.png       performance vs n — real datasets
@@ -226,3 +255,13 @@ results_real/
   pit_calibration.png               PIT histograms for calibration assessment
   cache/{dataset}.npz               cached arrays (skip re-runs)
 ```
+
+For a lightweight cross-machine bundle, you can track or archive only
+`results_*/results.json` and run:
+
+```bash
+python generate_plots.py --metrics-only
+```
+
+That reproduces `results_table.html`, `rankings_*`, `raw_*`,
+`perf_vs_n_*`, and `perf_vs_n_foundational_*` without copying `cache/`.

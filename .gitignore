@@ -12,8 +12,10 @@ results_real/*.png
 results_real/*.html
 results_real/results.json
 results_real/*/
+!results_real/results.json
 results_simulated/cache/
 results_simulated/*.png
 results_simulated/*.html
 results_simulated/results.json
+!results_simulated/results.json
 .Rhistory

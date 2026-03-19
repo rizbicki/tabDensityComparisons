@@ -7,4 +7,4 @@ from .synthetic import (
     make_linear_gaussian_homo,
     make_interaction,
 )
-from .real import load_all_datasets, load_real_only_datasets
+from .real import load_all_datasets, load_real_only_datasets, load_sdss_dataset

@@ -117,16 +117,8 @@ def _load_real_at_n(datasets, target_n):
 
 def _load_sdss(datasets, target_n):
     """Load SDSS galaxy photo-z dataset (ugriz magnitudes → spectroscopic z)."""
-    csv_path = Path(__file__).parent / "sdss_galaxies.csv"
-    if not csv_path.exists():
-        print(f"  [SDSS skipped: {csv_path} not found]")
-        return
     try:
-        # CSV has a '#Table1' header line, then column names, then data
-        data = np.genfromtxt(csv_path, delimiter=",", skip_header=2, dtype=float)
-        # cols: objid, u, g, r, i, z, err_u, err_g, err_r, err_i, err_z, redshift
-        X_all = data[:, 1:6]   # ugriz magnitudes
-        z_all = data[:, 11]    # spectroscopic redshift
+        X_all, z_all = load_sdss_dataset()
         if len(z_all) < target_n:
             return
         X_sub, z_sub = _subsample(X_all, z_all, target_n)
@@ -134,6 +126,41 @@ def _load_sdss(datasets, target_n):
         datasets.append((X_sub, z_sub, tag, None))
     except Exception as e:
         print(f"  [SDSS-{target_n} skipped: {e}]")
+
+
+def load_sdss_dataset(target_n=None, seed=42):
+    """Load SDSS ugriz photometry and spectroscopic redshift target.
+
+    If ``target_n`` is provided, return a deterministic subsample using the
+    same permutation logic as the rest of the real-data benchmark.
+    """
+    csv_path = Path(__file__).parent / "sdss_galaxies.csv"
+    if not csv_path.exists():
+        raise FileNotFoundError(f"SDSS CSV not found: {csv_path}")
+
+    data = np.genfromtxt(csv_path, delimiter=",", skip_header=2, dtype=float)
+    if data.ndim != 2 or data.shape[1] < 12:
+        raise ValueError(
+            f"Unexpected SDSS CSV shape {data.shape}; expected 2D array with >=12 columns"
+        )
+
+    # Columns: objid, u, g, r, i, z, err_u, err_g, err_r, err_i, err_z, redshift
+    X = data[:, 1:6]
+    z = data[:, 11]
+
+    keep = np.isfinite(X).all(axis=1) & np.isfinite(z)
+    X = X[keep]
+    z = z[keep]
+
+    if target_n is None:
+        return X, z
+    if target_n < 1:
+        raise ValueError("target_n must be positive")
+    if target_n > len(z):
+        raise ValueError(
+            f"Requested target_n={target_n:,}, but SDSS only has {len(z):,} usable rows"
+        )
+    return _subsample(X, z, target_n, seed=seed)
 
 
 def load_real_only_datasets():

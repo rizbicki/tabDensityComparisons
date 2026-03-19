@@ -11,6 +11,7 @@ chmod +x setup_and_run.sh
 ./setup_and_run.sh                  # full run (synthetic + real datasets)
 ./setup_and_run.sh --real-only      # real/semi-synthetic datasets only
 ./setup_and_run.sh --cpu            # force CPU (slower)
+.venv/bin/python run_sdss_scaling_experiment.py --device cuda   # SDSS scaling study
 ```
 
 Results now split by dataset type:
@@ -72,6 +73,7 @@ so pip doesn't overwrite your CUDA build with a CPU-only one.
 ```
 run_experiments.py          Synthetic experiments entry point + CLI
 run_real_experiments.py     Real/semi-synthetic experiments entry point
+run_sdss_scaling_experiment.py  SDSS-only scaling benchmark over multiple n
 consolidate_partial_results.py  Build results.json from partial checkpoints
 generate_plots.py           Regenerate all plots from cached results
 models/
@@ -217,6 +219,22 @@ a strict subset of larger n.
 
 The SDSS dataset uses ugriz photometric magnitudes as features and
 spectroscopic redshift as the target.
+
+## SDSS Scaling Study
+
+To compare methods on SDSS across larger sample sizes:
+
+```bash
+.venv/bin/python run_sdss_scaling_experiment.py --device cuda
+```
+
+By default this runs `n = 10k, 50k, 100k, 250k, full`, writes outputs to
+`results_real/sdss_scaling/`, averages metrics over `4` repetitions per sample
+size by default, and generates performance-vs-`n` plots there. The script uses
+a conservative default schedule that drops methods once they hit explicit
+package limits or are likely to be impractical for a repeated scaling
+benchmark. You can override that with `--methods ...`,
+`--all-methods-at-all-sizes`, or change the repetition count with `--n-reps`.
 
 ## Evaluation Metrics
 

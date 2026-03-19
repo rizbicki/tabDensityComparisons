@@ -1022,7 +1022,7 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
         ns = [n for n, _ in pairs]
         x_span = max(ns) - min(ns) if len(ns) > 1 else 1.0
         x_pad_left = max(x_span * 0.05, 1.0)
-        x_pad_right = max(x_span * (0.36 if foundational_only else 0.08), 1.0)
+        x_pad_right = max(x_span * (0.36 if foundational_only else 0.26), 1.0)
         x_right = max(ns) + max(x_span * 0.1, 1.0)
         highlighted_vals = []
         background_vals = []
@@ -1085,15 +1085,29 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
                         valid_ns.append(n)
                 if valid_ns:
                     sty = _perf_style(m, method_colors)
+                    is_foundational = m in FOUNDATIONAL_MODELS
                     ax.plot(valid_ns, vals,
-                            marker='o', markersize=5.8,
+                            marker='o',
+                            markersize=7.4 if is_foundational else 5.8,
                             color=sty['color'],
                             linestyle=sty.get('ls', '-'),
-                            linewidth=max(2.1, sty.get('lw', 1.5) + 0.2),
+                            linewidth=max(
+                                3.0 if is_foundational else 2.1,
+                                sty.get('lw', 1.5) + (0.7 if is_foundational else 0.2),
+                            ),
                             alpha=sty.get('alpha', 0.9),
+                            markeredgecolor='white' if is_foundational else None,
+                            markeredgewidth=1.0 if is_foundational else 0.0,
                             zorder=sty.get('zorder', 3),
                             label=m)
                     highlighted_vals.extend(vals)
+                    if is_foundational:
+                        perf_label_series.append({
+                            'method': m,
+                            'x': valid_ns[-1],
+                            'label_y': vals[-1],
+                            'color': sty['color'],
+                        })
 
             full_ylim = _focus_ylim(highlighted_vals, pad_ratio=0.12)
             if full_ylim:
@@ -1107,7 +1121,7 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
         ax.set_xlim(min(ns) - x_pad_left, max(ns) + x_pad_right)
         ax.grid(alpha=0.28, linewidth=0.8)
 
-        if foundational_only and perf_label_series:
+        if perf_label_series:
             _annotate_perf_labels(ax, perf_label_series, x_right)
 
     for idx in range(n_bases, nrows * ncols):
@@ -1124,15 +1138,14 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
                    borderpad=0.7, framealpha=0.94, bbox_to_anchor=(0.5, 0.93))
     else:
         handles, labels_leg = axes[0][0].get_legend_handles_labels()
-        fig.legend(handles, labels_leg, loc='lower center',
+        fig.legend(handles, labels_leg, loc='upper center',
                    ncol=min(len(labels_leg), 6), fontsize=PERF_LEGEND_FONTSIZE,
-                   framealpha=0.9, bbox_to_anchor=(0.5, -0.02))
+                   framealpha=0.92, bbox_to_anchor=(0.5, 0.94))
 
     better = '(lower is better)' if direction == 'lower' else '(higher is better)'
     plt.suptitle(f'{label} vs Sample Size{title_suffix} {better}',
                  fontsize=PERF_SUPTITLE_FONTSIZE, fontweight='bold', y=0.995)
-    plt.tight_layout(rect=[0, 0.1 if not foundational_only else 0.08, 1,
-                           0.78 if foundational_only else 0.95])
+    plt.tight_layout(rect=[0, 0.06, 1, 0.80 if foundational_only else 0.84])
     plt.savefig(output_dir / fname, dpi=220, bbox_inches='tight')
     plt.close()
     print(f"  saved {fname}")

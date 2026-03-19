@@ -20,6 +20,7 @@ from pathlib import Path
 
 import numpy as np
 
+from datasets import load_sdss_dataset
 from run_experiments import run_experiment
 from utils import save_cache, print_summary
 
@@ -82,24 +83,7 @@ def _load_cached_arrays(partial_dir, dataset_name, methods):
 
 def load_full_sdss():
     """Load the full SDSS photo-z CSV as (X, z)."""
-    csv_path = Path(__file__).parent / "datasets" / "sdss_galaxies.csv"
-    if not csv_path.exists():
-        raise FileNotFoundError(f"SDSS CSV not found: {csv_path}")
-
-    data = np.genfromtxt(csv_path, delimiter=",", skip_header=2, dtype=float)
-    if data.ndim != 2 or data.shape[1] < 12:
-        raise ValueError(
-            f"Unexpected SDSS CSV shape {data.shape}; expected 2D array with >=12 columns"
-        )
-
-    # Columns: objid, u, g, r, i, z, err_u, err_g, err_r, err_i, err_z, redshift
-    X = data[:, 1:6]
-    z = data[:, 11]
-
-    keep = np.isfinite(X).all(axis=1) & np.isfinite(z)
-    X = X[keep]
-    z = z[keep]
-    return X, z
+    return load_sdss_dataset()
 
 
 def main():

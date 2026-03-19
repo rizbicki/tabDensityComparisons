@@ -61,7 +61,7 @@ DEFAULT_METHOD_ORDER = [
     "FlexCode-RF",
 ]
 
-DEFAULT_SAMPLE_SIZE_SPEC = "10000,50000,100000,250000,full"
+DEFAULT_SAMPLE_SIZE_SPEC = "10000,50000,100000,250000,500000,full"
 TABPFN_METHODS = {"TabPFN-Native", "TabPFN-2.5", "RealTabPFN-2.5"}
 MEAN_METRICS = [
     "CDE_loss",
@@ -188,8 +188,8 @@ def _default_skip_reason(method, n_total, runtime_device):
     if method == "Quantile-Linear" and n_total > 10_000:
         return "disabled above n=10,000 by the linear-quantile baseline itself"
 
-    if method == "FlexCode-RF" and n_total > 50_000:
-        return "5-fold CV over many random-forest basis regressions is conservatively capped at n=50,000"
+    if method == "FlexCode-RF" and n_total > 500_000:
+        return "5-fold CV over many random-forest basis regressions is conservatively capped at n=500,000"
 
     if method in TABPFN_METHODS:
         limit = 1_000 if runtime_device == "cpu" else 50_000
@@ -206,14 +206,14 @@ def _default_skip_reason(method, n_total, runtime_device):
                 f"for {runtime_device.upper()} scaling runs"
             )
 
-    if method in {"BART-Homo", "BART-Hetero"} and n_total > 50_000:
-        return "XBART baselines are conservatively capped at n=50,000 for this scaling study"
+    if method in {"BART-Homo", "BART-Hetero"} and n_total > 100_000:
+        return "XBART baselines are conservatively capped at n=100,000 for this scaling study"
 
     if method == "Quantile-Tree" and n_total > 100_000:
         return "fits many quantile models and is conservatively capped at n=100,000"
 
     if method == "MDN-2mix":
-        limit = 100_000 if runtime_device == "cpu" else 250_000
+        limit = 500_000
         if n_total > limit:
             return (
                 f"full-batch MDN training is conservatively capped at n={limit:,} "
@@ -221,7 +221,7 @@ def _default_skip_reason(method, n_total, runtime_device):
             )
 
     if method == "Flow-Spline":
-        limit = 100_000 if runtime_device == "cpu" else 250_000
+        limit = 100_000 if runtime_device == "cpu" else 500_000
         if n_total > limit:
             return (
                 f"flow training/inference is conservatively capped at n={limit:,} "

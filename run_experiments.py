@@ -224,7 +224,7 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
         return None
 
     n_train = len(z_train)
-    max_basis = min(20, max(15, int(np.sqrt(n_train))))
+    max_basis = 30
 
     # ── Helper to run a FlexCode method ──────────────────────────────────
     def run_flexcode(name, factory, params):

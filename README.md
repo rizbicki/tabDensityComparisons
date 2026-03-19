@@ -228,7 +228,7 @@ To compare methods on SDSS across larger sample sizes:
 .venv/bin/python run_sdss_scaling_experiment.py --device cuda
 ```
 
-By default this runs `n = 10k, 50k, 100k, 250k, full`, writes outputs to
+By default this runs `n = 10k, 50k, 100k, 250k, 500k, full`, writes outputs to
 `results_real/sdss_scaling/`, averages metrics over `4` repetitions per sample
 size by default, and generates performance-vs-`n` plots there. The script uses
 a conservative default schedule that drops methods once they hit explicit

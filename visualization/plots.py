@@ -215,6 +215,38 @@ def _annotate_perf_labels(ax, series, x_right):
         )
 
 
+def _is_sdss_base(base_name):
+    return base_name == 'SDSS'
+
+
+def _top_non_tab_label_series(series, direction, top_k=2):
+    candidates = [s for s in series if np.isfinite(s.get('score', np.nan))]
+    if not candidates:
+        return []
+
+    if direction == 'lower':
+        ranked = sorted(
+            candidates,
+            key=lambda s: (
+                s['score'],
+                -s['x'],
+                METHOD_ORDER_INDEX.get(s['method'], len(METHOD_ORDER_INDEX)),
+                s['method'],
+            ),
+        )
+    else:
+        ranked = sorted(
+            candidates,
+            key=lambda s: (
+                -s['score'],
+                -s['x'],
+                METHOD_ORDER_INDEX.get(s['method'], len(METHOD_ORDER_INDEX)),
+                s['method'],
+            ),
+        )
+    return ranked[:top_k]
+
+
 def _method_group(method):
     if method in FOUNDATIONAL_MODELS:
         return 'foundational'
@@ -1019,6 +1051,7 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
 
     for idx, (base, pairs) in enumerate(sorted(base_groups.items())):
         ax = axes[idx // ncols][idx % ncols]
+        is_sdss = _is_sdss_base(base)
         ns = [n for n, _ in pairs]
         x_span = max(ns) - min(ns) if len(ns) > 1 else 1.0
         x_pad_left = max(x_span * 0.05, 1.0)
@@ -1027,6 +1060,7 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
         highlighted_vals = []
         background_vals = []
         perf_label_series = []
+        sdss_non_tab_candidates = []
 
         if foundational_only:
             # Non-foundational faded, then foundational bold
@@ -1056,12 +1090,13 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
                                 zorder=max(10, perf_sty.get('zorder', 4)),
                                 label=m)
                         highlighted_vals.extend(vals)
-                        perf_label_series.append({
-                            'method': m,
-                            'x': valid_ns[-1],
-                            'label_y': vals[-1],
-                            'color': perf_sty['color'],
-                        })
+                        if not is_sdss:
+                            perf_label_series.append({
+                                'method': m,
+                                'x': valid_ns[-1],
+                                'label_y': vals[-1],
+                                'color': perf_sty['color'],
+                            })
                     else:
                         ax.plot(valid_ns, vals,
                                 color=perf_sty['color'],
@@ -1071,6 +1106,14 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
                                 zorder=perf_sty.get('zorder', 1),
                                 label=m)
                         background_vals.extend(vals)
+                        if is_sdss:
+                            sdss_non_tab_candidates.append({
+                                'method': m,
+                                'x': valid_ns[-1],
+                                'label_y': vals[-1],
+                                'score': vals[-1],
+                                'color': method_colors[m],
+                            })
 
             all_vals = highlighted_vals + background_vals
             full_ylim = _focus_ylim(all_vals, pad_ratio=0.08)
@@ -1101,7 +1144,15 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
                             zorder=sty.get('zorder', 3),
                             label=m)
                     highlighted_vals.extend(vals)
-                    if is_foundational:
+                    if is_sdss and not is_foundational:
+                        sdss_non_tab_candidates.append({
+                            'method': m,
+                            'x': valid_ns[-1],
+                            'label_y': vals[-1],
+                            'score': vals[-1],
+                            'color': sty['color'],
+                        })
+                    elif is_foundational:
                         perf_label_series.append({
                             'method': m,
                             'x': valid_ns[-1],
@@ -1121,6 +1172,10 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
         ax.set_xlim(min(ns) - x_pad_left, max(ns) + x_pad_right)
         ax.grid(alpha=0.28, linewidth=0.8)
 
+        if is_sdss:
+            perf_label_series = _top_non_tab_label_series(
+                sdss_non_tab_candidates, direction, top_k=2
+            )
         if perf_label_series:
             _annotate_perf_labels(ax, perf_label_series, x_right)
 

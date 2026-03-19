@@ -163,10 +163,13 @@ def load_sdss_dataset(target_n=None, seed=42):
     return _subsample(X, z, target_n, seed=seed)
 
 
+_REAL_TARGET_NS = [500, 1000, 5000, 10000, 20000]
+
+
 def load_real_only_datasets():
     """Load only real (OpenML + SDSS) datasets."""
     datasets = []
-    for target_n in [1000, 2000, 4000, 6000, 20000]:
+    for target_n in _REAL_TARGET_NS:
         _load_real_at_n(datasets, target_n)
         _load_sdss(datasets, target_n)
     return datasets
@@ -194,12 +197,12 @@ def load_all_datasets(quick=False):
         datasets.append(make_friedman2(n=n))
 
     if not quick:
-        # Real datasets at n=1000, 2000, 4000, 6000, 20000
-        for target_n in [1000, 2000, 4000, 6000, 20000]:
+        # Real datasets at n=500, 1000, 5000, 10000, 20000
+        for target_n in _REAL_TARGET_NS:
             _load_real_at_n(datasets, target_n)
 
         # SDSS photo-z dataset
-        for target_n in [1000, 2000, 4000, 6000, 20000]:
+        for target_n in _REAL_TARGET_NS:
             _load_sdss(datasets, target_n)
 
     return datasets

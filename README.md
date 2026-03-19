@@ -181,7 +181,7 @@ function `make_bimodal_input_weighted_example`, which uses
 `f(z|x) = w(x) p1(z|x) + (1 - w(x)) p2(z|x)`.
 It is example-only and is not included in the default benchmark schedule.
 
-### Real-world (n ∈ {1000, 2000, 4000, 6000, 20000} where available)
+### Real-world (n ∈ {500, 1000, 5000, 10000, 20000} where available)
 
 From OpenML and SDSS DR18, subsampled consistently so smaller n is always
 a strict subset of larger n.

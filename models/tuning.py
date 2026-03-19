@@ -41,6 +41,13 @@ QUANTILE_LINEAR_SPACE = {
     'regularization': [0.0, 1e-4, 1e-3, 1e-2, 0.1, 1.0],
 }
 
+CATEGORICAL_MLP_SPACE = {
+    'n_bins':   [30, 50, 100],
+    'n_hidden': [32, 64, 128],
+    'lr':       [0.005, 0.01, 0.02],
+    'n_epochs': [300, 500, 800],
+}
+
 
 def _sample_configs(space, n_configs, rng):
     """Draw n_configs random configurations from a search space."""
@@ -221,3 +228,18 @@ def bart_hetero_density_tuned(X_train, z_train, X_test, n_grid=200,
     )
     return bart_hetero_density(X_train, z_train, X_test, n_grid=n_grid,
                                z_min=z_min, z_max=z_max, **best_params)
+
+
+def categorical_mlp_density_tuned(X_train, z_train, X_test, n_grid=200,
+                                   z_min=None, z_max=None, n_configs=8,
+                                   n_folds=3, random_state=42):
+    """Categorical MLP with random-search tuning over bins, hidden size, and lr."""
+    from models.baselines import categorical_mlp_density
+
+    best_params, _ = tune_density_method(
+        categorical_mlp_density, X_train, z_train, CATEGORICAL_MLP_SPACE,
+        n_configs=n_configs, n_folds=n_folds, n_grid=n_grid,
+        random_state=random_state,
+    )
+    return categorical_mlp_density(X_train, z_train, X_test, n_grid=n_grid,
+                                    z_min=z_min, z_max=z_max, **best_params)

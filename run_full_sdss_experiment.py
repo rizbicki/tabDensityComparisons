@@ -43,7 +43,6 @@ DEFAULT_METHOD_ORDER = [
     "RealTabPFN-2.5",
     "TabICL-Quantiles",
     "Quantile-Tree",
-    "Quantile-Linear",
     "MDN-2mix",
     "Flow-Spline",
     "BART-Homo",

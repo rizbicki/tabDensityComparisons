@@ -784,3 +784,86 @@ def bart_hetero_density(X_train, z_train, X_test, n_grid=200,
     z_grid = np.linspace(z_min, z_max, n_grid)
     cdes = stats.norm.pdf(z_grid[None, :], mu_test[:, None], sigma_test[:, None])
     return cdes, z_grid
+
+
+# ── Categorical MLP density estimator ───────────────────────────────────────
+
+def categorical_mlp_density(X_train, z_train, X_test, n_grid=200,
+                             z_min=None, z_max=None, n_bins=50,
+                             n_hidden=64, n_epochs=500, lr=0.01):
+    """Categorical MLP: discretize the response into bins and predict via softmax.
+
+    Architecture: X -> Linear(d, h) -> ReLU -> Linear(h, h) -> ReLU
+    -> Linear(h, n_bins).  Trained with cross-entropy loss.
+    The softmax output (probability per bin) is converted to a density by
+    dividing by bin width, then linearly interpolated onto the evaluation grid.
+    """
+    import torch
+    import torch.nn as nn
+
+    d = X_train.shape[1]
+
+    # Bin edges span the training range with a small margin
+    margin = 0.05 * np.ptp(z_train)
+    bin_lo = z_train.min() - margin
+    bin_hi = z_train.max() + margin
+    bin_edges = np.linspace(bin_lo, bin_hi, n_bins + 1)
+    bin_width = bin_edges[1] - bin_edges[0]
+    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+    # Assign each training y to a bin (clip to valid range)
+    bin_idx = np.clip(
+        np.digitize(z_train, bin_edges) - 1, 0, n_bins - 1
+    ).astype(np.int64)
+
+    X_tr_t = torch.tensor(X_train, dtype=torch.float32)
+    y_tr_t = torch.tensor(bin_idx, dtype=torch.long)
+    X_te_t = torch.tensor(X_test, dtype=torch.float32)
+
+    class CatMLP(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.net = nn.Sequential(
+                nn.Linear(d, n_hidden),
+                nn.ReLU(),
+                nn.Linear(n_hidden, n_hidden),
+                nn.ReLU(),
+                nn.Linear(n_hidden, n_bins),
+            )
+
+        def forward(self, x):
+            return self.net(x)
+
+    model = CatMLP()
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    loss_fn = nn.CrossEntropyLoss()
+
+    for _ in range(n_epochs):
+        logits = model(X_tr_t)
+        loss = loss_fn(logits, y_tr_t)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    model.eval()
+    with torch.no_grad():
+        logits = model(X_te_t)
+        probs = torch.softmax(logits, dim=1).numpy()
+
+    # Convert bin probabilities to density and interpolate onto z_grid
+    bin_density = probs / bin_width  # (n_test, n_bins)
+
+    if z_min is None:
+        z_min = z_train.min() - 0.1 * np.ptp(z_train)
+    if z_max is None:
+        z_max = z_train.max() + 0.1 * np.ptp(z_train)
+    z_grid = np.linspace(z_min, z_max, n_grid)
+
+    n_test = X_test.shape[0]
+    cdes = np.zeros((n_test, n_grid))
+    for i in range(n_test):
+        cdes[i, :] = np.interp(z_grid, bin_centers, bin_density[i],
+                                left=0, right=0)
+
+    cdes = _normalize_density_rows(cdes, z_grid)
+    return cdes, z_grid

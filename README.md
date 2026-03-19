@@ -147,7 +147,6 @@ with the penalty chosen by leave-one-out cross-validation (`RidgeCV`).
 | Method | Description |
 |--------|-------------|
 | Quantile-Tree | Quantile regression via XGBoost/GBM |
-| Quantile-Linear | Linear quantile regression (skipped for n > 10000) |
 | Flow-Spline | Conditional neural spline flow with Gaussian base |
 
 ## Datasets

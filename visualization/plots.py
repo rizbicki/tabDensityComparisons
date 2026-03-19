@@ -20,7 +20,6 @@ METHOD_STYLES = {
     'RealTabPFN-2.5':      {'color': '#d55e00', 'ls': '-.',  'lw': 2.4, 'zorder': 5},
     'TabICL-Quantiles':    {'color': '#009e73', 'ls': '--',  'lw': 2.0, 'zorder': 4},
     'Quantile-Tree':       {'color': '#888888', 'ls': ':',   'lw': 1.8, 'zorder': 3},
-    'Quantile-Linear':     {'color': '#b3b3b3', 'ls': ':',   'lw': 1.5, 'zorder': 2},
     'LinearGauss-Homo':    {'color': '#66c2a5', 'ls': ':',   'lw': 1.5, 'zorder': 2},
     'LinearGauss-Hetero':  {'color': '#fc8d62', 'ls': ':',   'lw': 1.5, 'zorder': 2},
     'Student-t':           {'color': '#4daf4a', 'ls': ':',   'lw': 1.5, 'zorder': 2},
@@ -106,6 +105,8 @@ PERF_LEGEND_FONTSIZE = 14
 PERF_FOUNDATIONAL_LEGEND_FONTSIZE = 17
 PERF_SUPTITLE_FONTSIZE = 22
 
+EXCLUDED_METHODS = {'Quantile-Linear'}
+
 METHOD_ORDER_HINTS = [
     'LinearGauss-Homo',
     'LinearGauss-Hetero',
@@ -113,7 +114,6 @@ METHOD_ORDER_HINTS = [
     'LogNormal-Homo',
     'LogNormal-Hetero',
     'Gamma-GLM',
-    'Quantile-Linear',
     'LinGauss-Homo-Ridge',
     'LinGauss-Hetero-Ridge',
     'Student-t-Ridge',
@@ -146,6 +146,10 @@ def _method_style(method, fallback_idx=0):
         return METHOD_STYLES[method]
     return {'color': _FALLBACK_COLORS[fallback_idx % len(_FALLBACK_COLORS)],
             'ls': '-', 'lw': 1.5, 'zorder': 3}
+
+
+def _visible_methods(methods):
+    return [m for m in methods if m not in EXCLUDED_METHODS]
 
 
 def _perf_label(method):
@@ -256,7 +260,7 @@ def _method_group(method):
 
 
 def _ordered_methods(methods, score_map=None):
-    methods = list(dict.fromkeys(methods))
+    methods = list(dict.fromkeys(_visible_methods(methods)))
     ordered = []
     for group in METHOD_GROUP_ORDER:
         grouped_methods = [m for m in methods if _method_group(m) == group]
@@ -285,7 +289,7 @@ def _method_group_spans(methods):
 
 
 def _decorate_grouped_method_axis(ax, methods, label_x, show_labels=True,
-                                  show_lines=True):
+                                  show_lines=True, fontsize=10):
     spans = _method_group_spans(methods)
     if not spans:
         return
@@ -296,7 +300,7 @@ def _decorate_grouped_method_axis(ax, methods, label_x, show_labels=True,
         if show_labels:
             ax.text(label_x, 0.5 * (start + end), meta['label'],
                     transform=trans, ha='right', va='center',
-                    fontsize=10, fontweight='bold', color=meta['accent'],
+                    fontsize=fontsize, fontweight='bold', color=meta['accent'],
                     clip_on=False)
         if show_lines and end < len(methods) - 1:
             ax.axhline(end + 0.5, color=meta['accent'],
@@ -347,7 +351,7 @@ def _plot_density_comparison_single(all_data, output_dir):
     n_ds = len(datasets_to_show)
     n_examples = 3
 
-    sample_methods = list(list(all_data.values())[0]['cdes'].keys())
+    sample_methods = _visible_methods(list(list(all_data.values())[0]['cdes'].keys()))
 
     fig, axes = plt.subplots(n_ds, n_examples, figsize=(5 * n_examples, 4 * n_ds))
     if n_ds == 1:
@@ -403,10 +407,10 @@ METRICS_INFO = [
 ]
 
 
-def _ds_labels(datasets, all_data):
+def _ds_labels(datasets, all_data, max_chars=20):
     labels = []
     for ds in datasets:
-        short = ds[:12]
+        short = ds if len(ds) <= max_chars else ds[:max_chars - 1] + '…'
         n_total = all_data[ds].get('n_total', '') if all_data and ds in all_data else ''
         n_str = f"\n(n={n_total})" if n_total else ''
         labels.append(f"{short}{n_str}")
@@ -461,6 +465,19 @@ def _plot_rankings_grid(sub_results, methods, colors, n_size, kind_label,
     ds_labels = _ds_labels(datasets, all_data)
     method_index = {m: i for i, m in enumerate(methods)}
 
+    # Adaptive sizing: fixed per-cell dimensions that scale gracefully
+    cell_w = 0.55                           # width per dataset column
+    cell_h = 0.34                           # height per method row
+    bar_w  = 2.8                            # fixed width for bar chart panel
+    fig_w = n_ds * cell_w + bar_w + 1.0
+    fig_h = max(3.5, n_methods * cell_h + 1.8)  # extra for title + x-labels
+
+    # Adaptive font sizes (clamped)
+    method_fs  = max(7, min(11, 140 / n_methods))
+    ds_fs      = max(6, min(9,  110 / n_ds))
+    cell_fs    = max(6, min(9,  120 / max(n_methods, n_ds)))
+    title_fs   = max(10, min(14, 180 / max(n_methods, n_ds)))
+
     for metric, label, direction in METRICS_INFO:
         matrix = np.full((n_methods, n_ds), np.nan)
         for di, ds in enumerate(datasets):
@@ -487,51 +504,71 @@ def _plot_rankings_grid(sub_results, methods, colors, n_size, kind_label,
         row_order = [method_index[m] for m in ordered_methods]
         plot_matrix = matrix[row_order, :]
 
+        # Layout: heatmap | gap | bar chart, with explicit widths
+        heatmap_w = n_ds * cell_w
+        width_ratios = [heatmap_w, bar_w]
         fig, (ax1, ax2) = plt.subplots(
-            1, 2,
-            figsize=(max(10, n_ds * 0.9), max(4, n_methods * 0.6)),
-            gridspec_kw={'width_ratios': [3, 1]})
+            1, 2, figsize=(fig_w, fig_h),
+            gridspec_kw={'width_ratios': width_ratios, 'wspace': 0.35})
 
         im = ax1.imshow(plot_matrix, cmap='RdYlGn_r', aspect='auto',
                         vmin=1, vmax=n_methods)
         ax1.set_yticks(range(n_methods))
-        ax1.set_yticklabels(ordered_methods, fontsize=11)
+        ax1.set_yticklabels(ordered_methods, fontsize=method_fs)
         ax1.set_xticks(range(n_ds))
-        ax1.set_xticklabels(ds_labels, fontsize=9, rotation=45, ha='right')
-        _decorate_grouped_method_axis(ax1, ordered_methods, label_x=-0.34)
+        ax1.set_xticklabels(ds_labels, fontsize=ds_fs, rotation=50, ha='right')
+        # Separator lines + colored tick labels only (no side text)
+        _decorate_grouped_method_axis(ax1, ordered_methods, label_x=0,
+                                      show_labels=False, fontsize=method_fs)
 
         for i in range(n_methods):
             for j in range(n_ds):
                 if not np.isnan(plot_matrix[i, j]):
                     ax1.text(j, i, f'{int(plot_matrix[i, j])}', ha='center',
-                             va='center', fontsize=9, fontweight='bold',
+                             va='center', fontsize=cell_fs, fontweight='bold',
                              color='white' if plot_matrix[i, j] > n_methods * 0.6
                              else 'black')
 
-        cbar = plt.colorbar(im, ax=ax1, label='Rank', shrink=0.8)
-        cbar.ax.tick_params(labelsize=10)
-        cbar.set_label('Rank', fontsize=11)
+        # Colorbar: horizontal, below the heatmap, so it never overlaps the bar chart
+        cbar = fig.colorbar(im, ax=ax1, orientation='horizontal',
+                            fraction=0.04, pad=0.18, shrink=0.6)
+        cbar.ax.tick_params(labelsize=max(7, method_fs - 2))
+        cbar.set_label('Rank', fontsize=max(8, method_fs - 1))
         ax1.set_title(f'{label} — Rankings (n={n_size}, {kind_label})',
-                      fontsize=14, fontweight='bold')
+                      fontsize=title_fs, fontweight='bold')
 
         sorted_methods = sorted(avg_ranks, key=avg_ranks.get)
         y_pos = range(len(sorted_methods))
         ax2.barh(y_pos, [avg_ranks[m] for m in sorted_methods],
                  color=[colors[m] for m in sorted_methods], alpha=0.8)
         ax2.set_yticks(y_pos)
-        ax2.set_yticklabels(sorted_methods, fontsize=11)
-        ax2.set_xlabel('Avg Rank', fontsize=11)
-        ax2.set_title(f'Overall (n={n_size})', fontsize=14, fontweight='bold')
+        ax2.set_yticklabels(sorted_methods, fontsize=method_fs)
+        ax2.set_xlabel('Avg Rank', fontsize=max(8, method_fs - 1))
+        ax2.set_title(f'Overall (n={n_size})', fontsize=title_fs,
+                      fontweight='bold')
         ax2.grid(axis='x', alpha=0.3)
-        ax2.tick_params(axis='x', labelsize=10)
+        ax2.tick_params(axis='x', labelsize=max(7, method_fs - 2))
         ax2.invert_yaxis()
         _decorate_grouped_method_axis(ax2, sorted_methods, label_x=0,
                                       show_labels=False, show_lines=False)
 
-        plt.tight_layout(rect=[0.08, 0, 1, 1])
+        # Compact group legend above the title
+        from matplotlib.patches import Patch
+        legend_handles = []
+        for group in METHOD_GROUP_ORDER:
+            meta = METHOD_GROUP_META[group]
+            legend_handles.append(
+                Patch(facecolor=meta['accent'], alpha=0.25,
+                      edgecolor=meta['accent'], linewidth=1.5,
+                      label=meta['label']))
+        fig.legend(handles=legend_handles, loc='upper center',
+                   ncol=len(legend_handles), frameon=False,
+                   fontsize=max(8, method_fs), bbox_to_anchor=(0.5, 1.0))
+
+        fig.subplots_adjust(right=0.97, top=0.92, bottom=0.15)
         fname = f"{fname_prefix}_{metric.lower()}_n{n_size}.png"
-        plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
-        plt.close()
+        fig.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
+        plt.close(fig)
         print(f"  saved {fname}")
 
 
@@ -542,7 +579,8 @@ def plot_rankings_by_n(all_results, output_dir, all_data=None):
     if not groups:
         return
 
-    methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
+    methods = sorted(set(m for ds in all_results.values() for m in ds.keys())
+                     - EXCLUDED_METHODS)
     colors = _method_colors_map(methods)
 
     for n_size in sorted(groups):
@@ -619,7 +657,8 @@ def plot_raw_metrics_by_n(all_results, output_dir, all_data=None):
     if not groups:
         return
 
-    methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
+    methods = sorted(set(m for ds in all_results.values() for m in ds.keys())
+                     - EXCLUDED_METHODS)
 
     for n_size in sorted(groups):
         for kind, label, prefix in [('sim', 'Simulated', 'raw_sim'),
@@ -642,7 +681,7 @@ def plot_pit_histograms(all_data, output_dir):
 def _plot_pit_histograms_single(all_data, output_dir):
     """PIT calibration histograms for one dataset type."""
     datasets_to_show = list(all_data.keys())[:4]
-    sample_methods = list(list(all_data.values())[0]['cdes'].keys())
+    sample_methods = _visible_methods(list(list(all_data.values())[0]['cdes'].keys()))
 
     n_ds = len(datasets_to_show)
     n_m = len(sample_methods)
@@ -705,7 +744,8 @@ def _save_html_table_single(all_results, output_dir,
         ('interval_width', 'Width',       'lower'),
     ]
 
-    methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
+    methods = sorted(set(m for ds in all_results.values() for m in ds.keys())
+                     - EXCLUDED_METHODS)
 
     css = """
     <style>
@@ -796,7 +836,7 @@ def plot_true_vs_estimated(all_data, output_dir, n_examples=4):
     if not synthetic_datasets:
         return
 
-    methods = list(list(all_data.values())[0]['cdes'].keys())
+    methods = _visible_methods(list(list(all_data.values())[0]['cdes'].keys()))
 
     for ds in synthetic_datasets:
         d = all_data[ds]
@@ -1213,7 +1253,8 @@ def plot_performance_vs_n(all_results, output_dir, all_data=None):
     if not base_groups:
         return
 
-    methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
+    methods = sorted(set(m for ds in all_results.values() for m in ds.keys())
+                     - EXCLUDED_METHODS)
     mc = _method_colors_map(methods)
     real, sim_by_d = _split_real_sim(base_groups)
 
@@ -1239,7 +1280,8 @@ def plot_performance_vs_n_foundational(all_results, output_dir, all_data=None):
     if not base_groups:
         return
 
-    methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
+    methods = sorted(set(m for ds in all_results.values() for m in ds.keys())
+                     - EXCLUDED_METHODS)
     mc = _method_colors_map(methods)
     real, sim_by_d = _split_real_sim(base_groups)
 

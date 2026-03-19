@@ -56,8 +56,9 @@ from models import (
     gamma_glm_density,
     student_t_density, lognormal_homo_density, lognormal_hetero_density,
     mdn_density_tuned, normalizing_flow_density_tuned,
-    quantile_gbm_density_tuned, quantile_linear_density_tuned,
+    quantile_gbm_density_tuned,
     bart_homo_density_tuned, bart_hetero_density_tuned,
+    categorical_mlp_density_tuned,
 )
 from datasets import load_all_datasets
 from evaluation import compute_all_metrics
@@ -383,9 +384,6 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
                               device=device, random_state=random_state)
     if _want('Quantile-Tree'):
         _run_density_baseline('Quantile-Tree', quantile_gbm_density_tuned,
-                              random_state=random_state)
-    if n_train <= 10000 and _want('Quantile-Linear'):
-        _run_density_baseline('Quantile-Linear', quantile_linear_density_tuned,
                               random_state=random_state)
     if _want('Gamma-GLM'):
         _run_density_baseline('Gamma-GLM', gamma_glm_density)

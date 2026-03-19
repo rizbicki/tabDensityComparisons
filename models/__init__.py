@@ -6,19 +6,19 @@ from .baselines import (
     mdn_density,
     normalizing_flow_density,
     quantile_gbm_density,
-    quantile_linear_density,
     gamma_glm_density,
     student_t_density,
     lognormal_homo_density,
     lognormal_hetero_density,
     bart_homo_density,
     bart_hetero_density,
+    categorical_mlp_density,
 )
 from .tuning import (
     mdn_density_tuned,
     normalizing_flow_density_tuned,
     quantile_gbm_density_tuned,
-    quantile_linear_density_tuned,
     bart_homo_density_tuned,
     bart_hetero_density_tuned,
+    categorical_mlp_density_tuned,
 )

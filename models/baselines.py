@@ -1,7 +1,9 @@
 """
-Classical density estimation baselines: Linear-Gaussian, MDN, Quantile methods, GLMs.
+Classical density estimation baselines: Linear-Gaussian, flows, MDN,
+Quantile methods, GLMs, and BART.
 """
 
+import math
 import numpy as np
 from scipy import stats
 from sklearn.linear_model import LinearRegression, RidgeCV
@@ -12,6 +14,131 @@ def _make_reg(regularized=False):
     if regularized:
         return RidgeCV(alphas=np.logspace(-4, 4, 20), cv=None)  # cv=None → LOO
     return LinearRegression()
+
+
+def _normalize_density_rows(cdes, z_grid):
+    """Normalize each row so it integrates to one on z_grid."""
+    dz = z_grid[1] - z_grid[0]
+    row_sums = cdes.sum(axis=1) * dz
+    row_sums[row_sums <= 0] = 1.0
+    return cdes / row_sums[:, None]
+
+
+def _flow_torch_device(requested):
+    """Map the CLI-style device string onto a PyTorch device."""
+    import torch
+
+    if requested == 'cuda':
+        if not torch.cuda.is_available():
+            raise ValueError("CUDA requested for Flow-Spline, but no CUDA device is available")
+        return torch.device('cuda')
+    if requested == 'cpu':
+        return torch.device('cpu')
+    return torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+
+def _rational_quadratic_spline(inputs, widths, heights, derivatives,
+                               tail_bound, inverse=False,
+                               min_bin_width=1e-3, min_bin_height=1e-3,
+                               min_derivative=1e-3):
+    """Apply a monotone rational-quadratic spline with linear tails."""
+    import torch
+
+    outputs = inputs.clone()
+    logabsdet = torch.zeros_like(inputs)
+    inside = (inputs >= -tail_bound) & (inputs <= tail_bound)
+    if not torch.any(inside):
+        return outputs, logabsdet
+
+    x_in = inputs[inside]
+    w_in = widths[inside]
+    h_in = heights[inside]
+    d_in = derivatives[inside].clone()
+    n_bins = w_in.shape[1]
+
+    width_budget = 2 * tail_bound - min_bin_width * n_bins
+    height_budget = 2 * tail_bound - min_bin_height * n_bins
+    if width_budget <= 0 or height_budget <= 0:
+        raise ValueError("tail_bound is too small for the requested spline configuration")
+
+    w_in = min_bin_width + width_budget * torch.softmax(w_in, dim=1)
+    h_in = min_bin_height + height_budget * torch.softmax(h_in, dim=1)
+    d_in = min_derivative + torch.nn.functional.softplus(d_in)
+    d_in[:, 0] = 1.0
+    d_in[:, -1] = 1.0
+
+    cumwidths = torch.cumsum(w_in, dim=1)
+    cumwidths = torch.cat(
+        [torch.full((w_in.shape[0], 1), -tail_bound, device=w_in.device, dtype=w_in.dtype),
+         -tail_bound + cumwidths],
+        dim=1,
+    )
+    cumheights = torch.cumsum(h_in, dim=1)
+    cumheights = torch.cat(
+        [torch.full((h_in.shape[0], 1), -tail_bound, device=h_in.device, dtype=h_in.dtype),
+         -tail_bound + cumheights],
+        dim=1,
+    )
+    delta = h_in / w_in
+
+    bin_locations = cumheights[:, 1:-1] if inverse else cumwidths[:, 1:-1]
+    bin_idx = torch.sum(x_in[:, None] >= bin_locations, dim=1).unsqueeze(1)
+
+    input_cumwidths = cumwidths.gather(1, bin_idx).squeeze(1)
+    input_bin_widths = w_in.gather(1, bin_idx).squeeze(1)
+    input_cumheights = cumheights.gather(1, bin_idx).squeeze(1)
+    input_bin_heights = h_in.gather(1, bin_idx).squeeze(1)
+    input_delta = delta.gather(1, bin_idx).squeeze(1)
+    input_derivatives = d_in.gather(1, bin_idx).squeeze(1)
+    input_derivatives_plus_one = d_in[:, 1:].gather(1, bin_idx).squeeze(1)
+
+    if inverse:
+        y = x_in
+        a = ((y - input_cumheights)
+             * (input_derivatives + input_derivatives_plus_one - 2 * input_delta)
+             + input_bin_heights * (input_delta - input_derivatives))
+        b = (input_bin_heights * input_derivatives
+             - (y - input_cumheights)
+             * (input_derivatives + input_derivatives_plus_one - 2 * input_delta))
+        c = -input_delta * (y - input_cumheights)
+        discriminant = b.pow(2) - 4 * a * c
+        discriminant = torch.clamp(discriminant, min=0.0)
+        root = (2 * c) / (-b - torch.sqrt(discriminant) + 1e-12)
+        theta = torch.clamp(root, 0.0, 1.0)
+        x = theta * input_bin_widths + input_cumwidths
+        theta_one_minus_theta = theta * (1 - theta)
+        denominator = (input_delta
+                       + (input_derivatives + input_derivatives_plus_one
+                          - 2 * input_delta) * theta_one_minus_theta)
+        derivative_numerator = input_delta.pow(2) * (
+            input_derivatives_plus_one * theta.pow(2)
+            + 2 * input_delta * theta_one_minus_theta
+            + input_derivatives * (1 - theta).pow(2)
+        )
+        lad = torch.log(derivative_numerator + 1e-12) - 2 * torch.log(denominator + 1e-12)
+        outputs[inside] = x
+        logabsdet[inside] = -lad
+        return outputs, logabsdet
+
+    theta = (x_in - input_cumwidths) / input_bin_widths
+    theta = torch.clamp(theta, 0.0, 1.0)
+    theta_one_minus_theta = theta * (1 - theta)
+    numerator = input_bin_heights * (
+        input_delta * theta.pow(2) + input_derivatives * theta_one_minus_theta
+    )
+    denominator = (input_delta
+                   + (input_derivatives + input_derivatives_plus_one
+                      - 2 * input_delta) * theta_one_minus_theta)
+    y = input_cumheights + numerator / (denominator + 1e-12)
+    derivative_numerator = input_delta.pow(2) * (
+        input_derivatives_plus_one * theta.pow(2)
+        + 2 * input_delta * theta_one_minus_theta
+        + input_derivatives * (1 - theta).pow(2)
+    )
+    lad = torch.log(derivative_numerator + 1e-12) - 2 * torch.log(denominator + 1e-12)
+    outputs[inside] = y
+    logabsdet[inside] = lad
+    return outputs, logabsdet
 
 
 def linear_gaussian_homo_density(X_train, z_train, X_test, n_grid=200,
@@ -130,6 +257,174 @@ def mdn_density(X_train, z_train, X_test, n_grid=200,
         cdes += pi[:, k:k+1] * stats.norm.pdf(
             z_grid[None, :], mus_np[:, k:k+1], sigmas_np[:, k:k+1]
         )
+    return cdes, z_grid
+
+
+def normalizing_flow_density(X_train, z_train, X_test, n_grid=200,
+                             z_min=None, z_max=None, device='auto',
+                             n_bins=8, n_layers=2, hidden_units=64,
+                             n_epochs=120, batch_size=512, lr=2e-3,
+                             weight_decay=1e-5, patience=12,
+                             val_fraction=0.1, random_state=42):
+    """Conditional neural spline flow baseline for scalar responses.
+
+    The model learns a monotone spline transform of a standard Gaussian base,
+    with the spline parameters produced by an MLP conditioned on x.
+    """
+    import torch
+    import torch.nn as nn
+
+    class _Conditioner(nn.Module):
+        def __init__(self, in_dim, out_dim):
+            super().__init__()
+            self.net = nn.Sequential(
+                nn.Linear(in_dim, hidden_units),
+                nn.ReLU(),
+                nn.Linear(hidden_units, hidden_units),
+                nn.ReLU(),
+                nn.Linear(hidden_units, out_dim),
+            )
+
+        def forward(self, x):
+            return self.net(x)
+
+    class _ConditionalSplineFlow(nn.Module):
+        def __init__(self, in_dim, tail_bound):
+            super().__init__()
+            self.tail_bound = float(tail_bound)
+            self.n_bins = int(n_bins)
+            self.n_params = 3 * self.n_bins + 1
+            self.layers = nn.ModuleList(
+                [_Conditioner(in_dim, self.n_params) for _ in range(n_layers)]
+            )
+
+        def _split_params(self, raw_params):
+            widths = raw_params[:, :self.n_bins]
+            heights = raw_params[:, self.n_bins:2 * self.n_bins]
+            derivatives = raw_params[:, 2 * self.n_bins:]
+            return widths, heights, derivatives
+
+        def log_prob(self, x, z):
+            u = z
+            logabsdet = torch.zeros_like(z)
+            for layer in reversed(self.layers):
+                params = layer(x)
+                widths, heights, derivatives = self._split_params(params)
+                u, lad = _rational_quadratic_spline(
+                    u, widths, heights, derivatives,
+                    tail_bound=self.tail_bound, inverse=True,
+                )
+                logabsdet += lad
+            base_log_prob = -0.5 * (u.pow(2) + math.log(2 * math.pi))
+            return base_log_prob + logabsdet
+
+    torch.manual_seed(random_state)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(random_state)
+
+    flow_device = _flow_torch_device(device)
+
+    z_mean = float(np.mean(z_train))
+    z_scale = float(np.std(z_train))
+    z_scale = max(z_scale, 1e-6)
+    z_train_std = (z_train - z_mean) / z_scale
+
+    if z_min is None:
+        z_min = z_train.min() - 0.1 * np.ptp(z_train)
+    if z_max is None:
+        z_max = z_train.max() + 0.1 * np.ptp(z_train)
+    z_grid = np.linspace(z_min, z_max, n_grid)
+    z_grid_std = (z_grid - z_mean) / z_scale
+
+    tail_bound = max(3.0, float(np.quantile(np.abs(z_train_std), 0.995)) + 0.5)
+
+    n_train = X_train.shape[0]
+    rng = np.random.default_rng(random_state)
+    perm = rng.permutation(n_train)
+    val_size = max(1, int(round(val_fraction * n_train)))
+    val_size = min(val_size, max(1, n_train // 5))
+    if n_train - val_size < 1:
+        val_size = 0
+
+    val_idx = perm[:val_size]
+    fit_idx = perm[val_size:] if val_size > 0 else perm
+
+    X_fit_t = torch.tensor(X_train[fit_idx], dtype=torch.float32, device=flow_device)
+    z_fit_t = torch.tensor(z_train_std[fit_idx], dtype=torch.float32, device=flow_device)
+    X_val_t = torch.tensor(X_train[val_idx], dtype=torch.float32, device=flow_device) if val_size > 0 else None
+    z_val_t = torch.tensor(z_train_std[val_idx], dtype=torch.float32, device=flow_device) if val_size > 0 else None
+    X_test_t = torch.tensor(X_test, dtype=torch.float32, device=flow_device)
+    z_grid_t = torch.tensor(z_grid_std, dtype=torch.float32, device=flow_device)
+
+    model = _ConditionalSplineFlow(X_train.shape[1], tail_bound=tail_bound).to(flow_device)
+    optimizer = torch.optim.Adam(
+        model.parameters(), lr=lr, weight_decay=weight_decay
+    )
+
+    batch_size = min(batch_size, len(X_fit_t))
+    if len(X_fit_t) >= 20000:
+        batch_size = min(1024, len(X_fit_t))
+    steps_per_epoch = max(1, int(np.ceil(len(X_fit_t) / batch_size)))
+    effective_epochs = min(n_epochs, max(15, int(np.ceil(2500 / steps_per_epoch))))
+
+    best_state = None
+    best_val = float('inf')
+    stale_epochs = 0
+
+    for _ in range(effective_epochs):
+        model.train()
+        epoch_perm = torch.randperm(len(X_fit_t), device=flow_device)
+        for start in range(0, len(X_fit_t), batch_size):
+            idx = epoch_perm[start:start + batch_size]
+            loss = -model.log_prob(X_fit_t[idx], z_fit_t[idx]).mean()
+            optimizer.zero_grad()
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
+            optimizer.step()
+
+        model.eval()
+        with torch.no_grad():
+            if X_val_t is None:
+                val_loss = float(-model.log_prob(X_fit_t, z_fit_t).mean().item())
+            else:
+                val_loss = float(-model.log_prob(X_val_t, z_val_t).mean().item())
+
+        if val_loss < best_val - 1e-4:
+            best_val = val_loss
+            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+            stale_epochs = 0
+        else:
+            stale_epochs += 1
+            if stale_epochs >= patience:
+                break
+
+    if best_state is not None:
+        model.load_state_dict(best_state)
+    model.eval()
+
+    test_batch = max(16, min(256, 32768 // max(n_grid, 1)))
+    grid_pair_batch = 32768
+    log_prob_chunks = []
+    with torch.no_grad():
+        for start in range(0, len(X_test_t), test_batch):
+            xb = X_test_t[start:start + test_batch]
+            z_block = z_grid_t.unsqueeze(0).expand(len(xb), -1)
+            x_block = xb[:, None, :].expand(-1, n_grid, -1).reshape(-1, X_test.shape[1])
+            z_flat = z_block.reshape(-1)
+            lp_parts = []
+            for inner in range(0, len(z_flat), grid_pair_batch):
+                lp_parts.append(
+                    model.log_prob(
+                        x_block[inner:inner + grid_pair_batch],
+                        z_flat[inner:inner + grid_pair_batch],
+                    ).cpu()
+                )
+            log_prob_chunks.append(torch.cat(lp_parts).reshape(len(xb), n_grid).numpy())
+
+    log_cdes = np.vstack(log_prob_chunks) - math.log(z_scale)
+    log_cdes -= log_cdes.max(axis=1, keepdims=True)
+    cdes = np.exp(log_cdes)
+    cdes = _normalize_density_rows(cdes, z_grid)
     return cdes, z_grid
 
 

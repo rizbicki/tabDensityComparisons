@@ -45,7 +45,7 @@ def fmt_metric(val, se, fmt='.4f'):
     return f"{val:{fmt}} ({se:{fmt}})"
 
 
-def print_summary(all_results):
+def print_summary(all_results, se_caption='mean +/- SE'):
     methods = sorted(set(m for ds in all_results.values() for m in ds.keys()))
     datasets = list(all_results.keys())
 
@@ -53,7 +53,7 @@ def print_summary(all_results):
     C = 18
 
     print(f"\n{'='*130}")
-    print("FULL RESULTS TABLE  (mean +/- SE over test samples)")
+    print(f"FULL RESULTS TABLE  ({se_caption})")
     print(f"{'='*130}")
 
     for ds, res in all_results.items():

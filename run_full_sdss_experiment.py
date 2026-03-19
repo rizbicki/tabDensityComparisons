@@ -44,6 +44,7 @@ DEFAULT_METHOD_ORDER = [
     "Quantile-Tree",
     "Quantile-Linear",
     "MDN-2mix",
+    "Flow-Spline",
     "BART-Homo",
     "BART-Hetero",
     "FlexCode-RF",
@@ -201,7 +202,8 @@ def main():
         print(f"  wrote incremental metrics to {json_file}")
 
     final_metrics = _load_partial_metrics(partial_dir, dataset_name)
-    print_summary({dataset_name: final_metrics})
+    print_summary({dataset_name: final_metrics},
+                  se_caption='mean +/- SE over test samples')
     print(f"\nSaved metrics to {json_file}")
     print(f"Saved cache to {cache_file}")
 

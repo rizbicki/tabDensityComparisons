@@ -17,7 +17,11 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-from run_experiments import run_experiment
+from run_experiments import (
+    run_experiment,
+    prioritize_dataset_schedule,
+    report_sdss_schedule,
+)
 from datasets import load_real_only_datasets
 from evaluation import compute_all_metrics
 from visualization import (
@@ -100,7 +104,8 @@ def main():
     print("CDE Experiments -- Real Datasets Only")
     print("=" * 60)
 
-    datasets = load_real_only_datasets()
+    datasets = prioritize_dataset_schedule(load_real_only_datasets())
+    report_sdss_schedule(datasets)
     n_reps = args.n_reps
 
     all_results = {}
@@ -147,7 +152,7 @@ def main():
             'n_total': n_total,
         }
 
-    print_summary(all_results)
+    print_summary(all_results, se_caption='mean +/- SE across repetitions')
 
     print("\nGenerating plots and tables...")
     save_html_table(all_results, output_dir)

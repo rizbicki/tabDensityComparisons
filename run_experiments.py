@@ -53,7 +53,7 @@ from models import (
     FlexCodeEstimator, RFFlexRegressor,
     tabpfn_native_density, tabicl_quantile_density,
     linear_gaussian_homo_density, linear_gaussian_hetero_density,
-    mdn_density, quantile_gbm_density,
+    mdn_density, normalizing_flow_density, quantile_gbm_density,
     quantile_linear_density, gamma_glm_density,
     student_t_density, lognormal_homo_density, lognormal_hetero_density,
     bart_homo_density, bart_hetero_density,
@@ -72,6 +72,53 @@ from utils import save_cache, load_cache, print_summary
 # ============================================================================
 # Experiment Runner
 # ============================================================================
+
+_SDSS_PREFIX = 'SDSS-'
+
+
+def dataset_kind(dataset_name, true_density_fn=None):
+    is_sim = (
+        true_density_fn is not None
+        or dataset_name.startswith('Friedman')
+        or re.search(r'-d\d+(?:-\d+)?$', dataset_name)
+    )
+    return 'sim' if is_sim else 'real'
+
+
+def _parse_dataset_n(dataset_name):
+    m = re.search(r'-(\d+)$', dataset_name)
+    return int(m.group(1)) if m else None
+
+
+def prioritize_dataset_schedule(datasets):
+    """Keep the existing order, but run SDSS first within each real-data n block."""
+    indexed = list(enumerate(datasets))
+
+    def sort_key(item):
+        idx, (_, _, name, true_density_fn) = item
+        kind = dataset_kind(name, true_density_fn)
+        if kind != 'real':
+            return (0, idx, 1, idx)
+
+        n_size = _parse_dataset_n(name)
+        sdss_priority = 0 if name.startswith(_SDSS_PREFIX) else 1
+        return (1, n_size if n_size is not None else float('inf'),
+                sdss_priority, idx)
+
+    return [dataset for _, dataset in sorted(indexed, key=sort_key)]
+
+
+def report_sdss_schedule(datasets):
+    sdss_names = [
+        name for _, _, name, true_density_fn in datasets
+        if dataset_kind(name, true_density_fn) == 'real'
+        and name.startswith(_SDSS_PREFIX)
+    ]
+    if sdss_names:
+        print(f"  [schedule] SDSS queued at: {', '.join(sdss_names)}")
+    else:
+        print("  [schedule] No SDSS runs queued")
+
 
 def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
                    true_density_fn=None, partial_dir=None, force=False,
@@ -358,6 +405,8 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
         _run_density_baseline('LogNormal-Hetero', lognormal_hetero_density)
     if _want('MDN-2mix'):
         _run_density_baseline('MDN-2mix', mdn_density, n_components=2, n_hidden=16)
+    if _want('Flow-Spline'):
+        _run_density_baseline('Flow-Spline', normalizing_flow_density, device=device)
     if n_train <= 10000 and _want('Quantile-Linear'):
         _run_density_baseline('Quantile-Linear', quantile_linear_density)
     if _want('Gamma-GLM'):
@@ -465,7 +514,8 @@ def main():
         print("  Install with: pip install tabpfn tabicl")
         print("  Running with sklearn baselines only.\n")
 
-    datasets = load_all_datasets(quick=args.quick)
+    datasets = prioritize_dataset_schedule(load_all_datasets(quick=args.quick))
+    report_sdss_schedule(datasets)
     n_reps = args.n_reps
 
     # ── Metrics that are averaged across repetitions ──────────────────────
@@ -507,16 +557,8 @@ def main():
     all_results = {}
     all_data = {}
 
-    def _dataset_kind(dataset_name, true_density_fn):
-        is_sim = (
-            true_density_fn is not None
-            or dataset_name.startswith('Friedman')
-            or re.search(r'-d\d+(?:-\d+)?$', dataset_name)
-        )
-        return 'sim' if is_sim else 'real'
-
     for X, z, name, true_density_fn in datasets:
-        kind = _dataset_kind(name, true_density_fn)
+        kind = dataset_kind(name, true_density_fn)
         state = dir_state[kind]
         cache_file = state['cache_dir'] / f"{name}.npz"
         use_cache = (not args.force
@@ -562,7 +604,7 @@ def main():
         state['results'][name] = all_results[name]
         state['data'][name] = all_data[name]
 
-    print_summary(all_results)
+    print_summary(all_results, se_caption='mean +/- SE across repetitions')
 
     print("\nGenerating plots and tables...")
     save_html_table(all_results, output_dirs)

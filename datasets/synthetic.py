@@ -61,6 +61,41 @@ def make_bimodal(n=1000, d=5, seed=42):
     return X, z, tag, true_density
 
 
+def make_bimodal_input_weighted_example(n=1000, d=5, seed=42):
+    """Example-only bimodal DGP with input-dependent mixture weights.
+
+    This generator is intentionally not part of the default benchmark
+    schedule in ``load_all_datasets``. It exists as a concrete reference
+    for how to implement a conditional mixture where the component
+    probability depends on X.
+    """
+    data_rng = np.random.RandomState(seed + 1000)
+    X_all = data_rng.randn(_MAX_N, d)
+    logits_all = 1.5 * X_all[:, 0] - 0.75 * X_all[:, 1]
+    weight_all = stats.norm.cdf(logits_all)
+    comp_all = data_rng.binomial(1, weight_all)
+    eps1_all = data_rng.randn(_MAX_N)
+    eps2_all = data_rng.randn(_MAX_N)
+
+    X = X_all[:n]
+    mu1 = X[:, 0] + X[:, 1]
+    mu2 = -X[:, 0] + X[:, 1]
+    comp = comp_all[:n]
+    z = np.where(comp, mu1 + 0.5 * eps1_all[:n], mu2 + 0.5 * eps2_all[:n])
+
+    def true_density(X_test, z_grid):
+        m1 = X_test[:, 0] + X_test[:, 1]
+        m2 = -X_test[:, 0] + X_test[:, 1]
+        logits = 1.5 * X_test[:, 0] - 0.75 * X_test[:, 1]
+        weight = stats.norm.cdf(logits)
+        p1 = stats.norm.pdf(z_grid[None, :], m1[:, None], 0.5)
+        p2 = stats.norm.pdf(z_grid[None, :], m2[:, None], 0.5)
+        return weight[:, None] * p1 + (1.0 - weight[:, None]) * p2
+
+    tag = f"BimodalInputWeightedExample-d{d}-{n}"
+    return X, z, tag, true_density
+
+
 def make_skewed(n=1000, d=5, seed=42):
     data_rng = np.random.RandomState(seed + 1000)
     X_all = data_rng.randn(_MAX_N, d)

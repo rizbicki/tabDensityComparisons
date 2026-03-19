@@ -4,6 +4,7 @@ from .baselines import (
     linear_gaussian_homo_density,
     linear_gaussian_hetero_density,
     mdn_density,
+    normalizing_flow_density,
     quantile_gbm_density,
     quantile_linear_density,
     gamma_glm_density,

@@ -3,8 +3,8 @@
 Build results.json from partial results saved during experiments.
 
 Scans partial/rep*/ directories under each source dir for
-{dataset_name}_metrics.json files, aggregates across repetitions
-(mean +/- SE), merges all sources, and writes a single results.json
+{dataset_name}_metrics.json files, aggregates across repetitions,
+computes mean +/- SE, merges all sources, and writes a single results.json
 plus .npz cache files for generate_plots.py.
 
 USAGE:
@@ -23,7 +23,7 @@ MEAN_METRICS = ['CDE_loss', 'log_lik', 'CRPS', 'PIT_KS',
 
 
 def _aggregate_reps(per_rep_results):
-    """Aggregate metrics across repetitions: mean +/- SE."""
+    """Aggregate metrics across repetitions and compute mean +/- SE."""
     methods = sorted(set(m for rep in per_rep_results for m in rep))
     agg = {}
     for m in methods:

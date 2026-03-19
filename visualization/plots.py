@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 from pathlib import Path
 from matplotlib.lines import Line2D
 from matplotlib.transforms import blended_transform_factory
@@ -65,29 +66,35 @@ METHOD_GROUP_META = {
     'foundational': {'label': 'Foundational', 'accent': '#e67e22'},
 }
 
+_FOUNDATIONAL_ACCENT = METHOD_GROUP_META['foundational']['accent']
+
 PERF_FOUNDATIONAL_STYLES = {
     'TabPFN-Native': {
-        'color': METHOD_STYLES['TabPFN-Native']['color'],
+        'color': _FOUNDATIONAL_ACCENT,
         'ls': '--',
         'lw': 4.2,
+        'marker': 's',
         'zorder': 10,
     },
     'TabPFN-2.5': {
-        'color': METHOD_STYLES['TabPFN-2.5']['color'],
+        'color': _FOUNDATIONAL_ACCENT,
         'ls': '-',
         'lw': 4.5,
+        'marker': 'o',
         'zorder': 11,
     },
     'RealTabPFN-2.5': {
-        'color': METHOD_STYLES['RealTabPFN-2.5']['color'],
+        'color': _FOUNDATIONAL_ACCENT,
         'ls': '-.',
         'lw': 4.3,
+        'marker': '^',
         'zorder': 10,
     },
     'TabICL-Quantiles': {
-        'color': METHOD_STYLES['TabICL-Quantiles']['color'],
+        'color': _FOUNDATIONAL_ACCENT,
         'ls': ':',
         'lw': 4.2,
+        'marker': 'D',
         'zorder': 10,
     },
 }
@@ -98,6 +105,25 @@ PERF_BACKGROUND_GROUP_STYLES = {
     'nonparametric': {'color': METHOD_GROUP_META['nonparametric']['accent'],
                       'lw': 2.0, 'alpha': 0.5, 'zorder': 2},
 }
+
+_GROUP_LINESTYLES = ['-', '--', '-.', ':', (0, (3, 1, 1, 1)), (0, (5, 1)),
+                     (0, (1, 1)), (0, (3, 1, 1, 1, 1, 1))]
+_GROUP_MARKERS = ['o', 's', '^', 'D', 'v', 'P', 'X', '*', 'p', 'h', '<', '>',
+                  'd', '8', 'H']
+
+_group_style_cache = {}
+
+
+def _group_method_style(method):
+    """Return (linestyle, marker) unique within the method's group."""
+    if method in _group_style_cache:
+        return _group_style_cache[method]
+    group = _method_group(method)
+    idx = sum(1 for m in _group_style_cache if _method_group(m) == group)
+    ls = _GROUP_LINESTYLES[idx % len(_GROUP_LINESTYLES)]
+    marker = _GROUP_MARKERS[idx % len(_GROUP_MARKERS)]
+    _group_style_cache[method] = (ls, marker)
+    return ls, marker
 
 PERF_ANNOTATION_FONTSIZE = 13.0
 PERF_SUBPLOT_TITLE_FONTSIZE = 18
@@ -157,6 +183,15 @@ def _visible_methods(methods):
 
 def _perf_label(method):
     return PERF_LABEL_ALIASES.get(method, method)
+
+
+def _fmt_n(v):
+    """Format sample-size tick labels: 1K, 50K, 1M, etc."""
+    if v >= 1_000_000 and v % 1_000_000 == 0:
+        return f'{v // 1_000_000}M'
+    if v >= 1_000 and v % 1_000 == 0:
+        return f'{v // 1_000}K'
+    return str(v)
 
 
 def _focus_ylim(values, pad_ratio=0.22):
@@ -1022,17 +1057,11 @@ def _method_colors_map(methods):
 
 def _perf_style(method, method_colors, foundational_only=False):
     group = _method_group(method)
-    if foundational_only and group == 'foundational':
-        sty = dict(_method_style(method))
-        sty.update(PERF_FOUNDATIONAL_STYLES.get(method, {}))
-        sty['color'] = sty.get('color', method_colors[method])
-        return sty
+    group_color = METHOD_GROUP_META[group]['accent']
+    sty = {'color': group_color, 'ls': '-', 'lw': 1.8, 'zorder': 3}
 
-    sty = dict(_method_style(method))
-    sty['color'] = method_colors[method]
     if foundational_only and group in PERF_BACKGROUND_GROUP_STYLES:
         group_sty = PERF_BACKGROUND_GROUP_STYLES[group]
-        sty['color'] = group_sty['color']
         sty['lw'] = group_sty['lw']
         sty['alpha'] = group_sty['alpha']
         sty['zorder'] = group_sty['zorder']
@@ -1040,39 +1069,20 @@ def _perf_style(method, method_colors, foundational_only=False):
 
 
 def _foundational_perf_legend_handles():
-    handles = []
-    for method in [
-        'TabPFN-Native',
-        'TabPFN-2.5',
-        'RealTabPFN-2.5',
-        'TabICL-Quantiles',
-    ]:
-        sty = PERF_FOUNDATIONAL_STYLES[method]
-        handles.append(Line2D(
-            [0], [0],
-            color=sty['color'],
-            linestyle=sty['ls'],
-            linewidth=max(sty['lw'], 4.4),
-            marker='o',
-            markersize=8.5,
-            markerfacecolor=sty['color'],
-            markeredgecolor='white',
-            markeredgewidth=1.1,
-            label=method,
-        ))
+    return _group_perf_legend_handles()
 
-    for label, group in [
-        ('Parametric baselines', 'parametric'),
-        ('Nonparametric baselines', 'nonparametric'),
-    ]:
-        sty = PERF_BACKGROUND_GROUP_STYLES[group]
+
+def _group_perf_legend_handles():
+    """Three-entry legend: Parametric, Nonparametric, Foundational."""
+    handles = []
+    for group in METHOD_GROUP_ORDER:
+        meta = METHOD_GROUP_META[group]
         handles.append(Line2D(
             [0], [0],
-            color=sty['color'],
+            color=meta['accent'],
             linestyle='-',
-            linewidth=max(sty['lw'], 3.2),
-            alpha=min(0.8, sty['alpha'] + 0.2),
-            label=label,
+            linewidth=3.5,
+            label=meta['label'],
         ))
     return handles
 
@@ -1088,8 +1098,10 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
     ncols = min(4, n_bases)
     nrows = (n_bases + ncols - 1) // ncols
     plot_methods = _ordered_methods(methods)
+    fig_w = max(8.0, 6.4 * ncols) if n_bases == 1 else 6.4 * ncols
+    fig_h = 5.6 * nrows
     fig, axes = plt.subplots(nrows, ncols,
-                             figsize=(6.4 * ncols, 5.2 * nrows),
+                             figsize=(fig_w, fig_h),
                              squeeze=False)
 
     for idx, (base, pairs) in enumerate(sorted(base_groups.items())):
@@ -1122,13 +1134,10 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
                     perf_sty = _perf_style(m, method_colors, foundational_only=True)
                     if is_found:
                         ax.plot(valid_ns, vals,
-                                marker='o', markersize=8.6,
                                 color=perf_sty['color'],
-                                linestyle=perf_sty.get('ls', '-'),
+                                linestyle='-',
                                 linewidth=max(4.2, perf_sty.get('lw', 2.0)),
                                 alpha=0.98,
-                                markeredgecolor='white',
-                                markeredgewidth=1.2,
                                 solid_capstyle='round',
                                 zorder=max(10, perf_sty.get('zorder', 4)),
                                 label=m)
@@ -1155,7 +1164,7 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
                                 'x': valid_ns[-1],
                                 'label_y': vals[-1],
                                 'score': vals[-1],
-                                'color': method_colors[m],
+                                'color': perf_sty['color'],
                             })
 
             all_vals = highlighted_vals + background_vals
@@ -1173,35 +1182,13 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
                     sty = _perf_style(m, method_colors)
                     is_foundational = m in FOUNDATIONAL_MODELS
                     ax.plot(valid_ns, vals,
-                            marker='o',
-                            markersize=7.4 if is_foundational else 5.8,
                             color=sty['color'],
-                            linestyle=sty.get('ls', '-'),
-                            linewidth=max(
-                                3.0 if is_foundational else 2.1,
-                                sty.get('lw', 1.5) + (0.7 if is_foundational else 0.2),
-                            ),
+                            linestyle='-',
+                            linewidth=3.0 if is_foundational else 2.1,
                             alpha=sty.get('alpha', 0.9),
-                            markeredgecolor='white' if is_foundational else None,
-                            markeredgewidth=1.0 if is_foundational else 0.0,
                             zorder=sty.get('zorder', 3),
                             label=m)
                     highlighted_vals.extend(vals)
-                    if is_sdss and not is_foundational:
-                        sdss_non_tab_candidates.append({
-                            'method': m,
-                            'x': valid_ns[-1],
-                            'label_y': vals[-1],
-                            'score': vals[-1],
-                            'color': sty['color'],
-                        })
-                    elif is_foundational:
-                        perf_label_series.append({
-                            'method': m,
-                            'x': valid_ns[-1],
-                            'label_y': vals[-1],
-                            'color': sty['color'],
-                        })
 
             full_ylim = _focus_ylim(highlighted_vals, pad_ratio=0.12)
             if full_ylim:
@@ -1211,8 +1198,22 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
         ax.set_xlabel('n', fontsize=PERF_AXIS_LABEL_FONTSIZE)
         ax.set_ylabel(label, fontsize=PERF_AXIS_LABEL_FONTSIZE)
         ax.tick_params(labelsize=PERF_TICK_FONTSIZE)
-        ax.set_xticks(ns)
-        ax.set_xlim(min(ns) - x_pad_left, max(ns) + x_pad_right)
+
+        use_log = max(ns) / max(min(ns), 1) >= 8
+        if use_log:
+            ax.set_xscale('log')
+            ax.set_xticks(ns)
+            ax.set_xticklabels([_fmt_n(v) for v in ns])
+            ax.xaxis.set_minor_locator(mticker.NullLocator())
+            log_pad_left = 10 ** (np.log10(min(ns)) - 0.08)
+            log_pad_right = 10 ** (np.log10(max(ns)) +
+                                   (0.38 if foundational_only else 0.28))
+            ax.set_xlim(log_pad_left, log_pad_right)
+            x_right = 10 ** (np.log10(max(ns)) + 0.08)
+        else:
+            ax.set_xticks(ns)
+            ax.set_xticklabels([_fmt_n(v) for v in ns])
+            ax.set_xlim(min(ns) - x_pad_left, max(ns) + x_pad_right)
         ax.grid(alpha=0.28, linewidth=0.8)
 
         if is_sdss:
@@ -1226,24 +1227,25 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
         axes[idx // ncols][idx % ncols].set_visible(False)
 
     # Legend
+    better = '(lower is better)' if direction == 'lower' else '(higher is better)'
     if foundational_only:
         handles = _foundational_perf_legend_handles()
         fig.legend(handles, [h.get_label() for h in handles],
                    loc='upper center', ncol=3,
                    fontsize=PERF_FOUNDATIONAL_LEGEND_FONTSIZE,
-                   title='Curves', title_fontsize=PERF_FOUNDATIONAL_LEGEND_FONTSIZE,
                    handlelength=2.8, columnspacing=1.7, labelspacing=0.9,
-                   borderpad=0.7, framealpha=0.94, bbox_to_anchor=(0.5, 0.93))
+                   borderpad=0.7, framealpha=0.94, bbox_to_anchor=(0.5, 0.99))
     else:
-        handles, labels_leg = axes[0][0].get_legend_handles_labels()
-        fig.legend(handles, labels_leg, loc='upper center',
-                   ncol=min(len(labels_leg), 6), fontsize=PERF_LEGEND_FONTSIZE,
-                   framealpha=0.92, bbox_to_anchor=(0.5, 0.94))
+        handles = _group_perf_legend_handles()
+        fig.legend(handles, [h.get_label() for h in handles],
+                   loc='upper center', ncol=3,
+                   fontsize=PERF_LEGEND_FONTSIZE + 2,
+                   handlelength=2.5, columnspacing=2.0,
+                   framealpha=0.92, bbox_to_anchor=(0.5, 0.99))
 
-    better = '(lower is better)' if direction == 'lower' else '(higher is better)'
     plt.suptitle(f'{label} vs Sample Size{title_suffix} {better}',
-                 fontsize=PERF_SUPTITLE_FONTSIZE, fontweight='bold', y=0.995)
-    plt.tight_layout(rect=[0, 0.06, 1, 0.80 if foundational_only else 0.84])
+                 fontsize=PERF_SUPTITLE_FONTSIZE, fontweight='bold', y=1.06)
+    plt.tight_layout(rect=[0, 0, 1, 0.88 if foundational_only else 0.92])
     plt.savefig(output_dir / fname, dpi=220, bbox_inches='tight')
     plt.close()
     print(f"  saved {fname}")

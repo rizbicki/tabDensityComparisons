@@ -179,7 +179,6 @@ Running SDSS-10000: Quantile-Linear
   SDSS-10000  (train=7500, test=2500, d=5)
 ======================================================================
   [resume] 23 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, TabPFN-Native, TabPFN-2.5, RealTabPFN-2.5, TabICL-Quantiles, Quantile-Tree, Quantile-Linear, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
-  Quantile-Linear... [cached] CDE=-4.8466, LL=0.761
 
 Running SDSS-10000: MDN-2mix
 
@@ -365,7 +364,6 @@ Running SDSS-10000: Quantile-Linear
   SDSS-10000  (train=7500, test=2500, d=5)
 ======================================================================
   [resume] 23 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, TabPFN-Native, TabPFN-2.5, RealTabPFN-2.5, TabICL-Quantiles, Quantile-Tree, Quantile-Linear, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
-  Quantile-Linear... [cached] CDE=-5.0826, LL=0.782
 
 Running SDSS-10000: MDN-2mix
 
@@ -551,7 +549,6 @@ Running SDSS-10000: Quantile-Linear
   SDSS-10000  (train=7500, test=2500, d=5)
 ======================================================================
   [resume] 23 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, TabPFN-Native, TabPFN-2.5, RealTabPFN-2.5, TabICL-Quantiles, Quantile-Tree, Quantile-Linear, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
-  Quantile-Linear... [cached] CDE=-4.8384, LL=0.697
 
 Running SDSS-10000: MDN-2mix
 
@@ -737,7 +734,6 @@ Running SDSS-10000: Quantile-Linear
   SDSS-10000  (train=7500, test=2500, d=5)
 ======================================================================
   [resume] 23 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, TabPFN-Native, TabPFN-2.5, RealTabPFN-2.5, TabICL-Quantiles, Quantile-Tree, Quantile-Linear, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
-  Quantile-Linear... [cached] CDE=-4.6275, LL=0.536
 
 Running SDSS-10000: MDN-2mix
 
@@ -1560,7 +1556,7 @@ Running SDSS-100000: LinearGauss-Homo
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 12 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
   LinearGauss-Homo... [cached] CDE=-4.5062, LL=1.159
 
 Running SDSS-100000: LinearGauss-Hetero
@@ -1568,7 +1564,7 @@ Running SDSS-100000: LinearGauss-Hetero
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 12 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
   LinearGauss-Hetero... [cached] CDE=-3.1602, LL=0.536
 
 Running SDSS-100000: Student-t
@@ -1576,7 +1572,7 @@ Running SDSS-100000: Student-t
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 12 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
   Student-t... [cached] CDE=-4.8355, LL=1.286
 
 Running SDSS-100000: LogNormal-Homo
@@ -1584,7 +1580,7 @@ Running SDSS-100000: LogNormal-Homo
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 12 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
   LogNormal-Homo... [cached] CDE=-4.0155, LL=0.972
 
 Running SDSS-100000: LogNormal-Hetero
@@ -1592,7 +1588,7 @@ Running SDSS-100000: LogNormal-Hetero
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 12 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
   LogNormal-Hetero... [cached] CDE=-2.3467, LL=0.370
 
 Running SDSS-100000: Gamma-GLM
@@ -1600,7 +1596,7 @@ Running SDSS-100000: Gamma-GLM
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 12 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
   Gamma-GLM... [cached] CDE=-3.9756, LL=0.978
 
 Running SDSS-100000: LinGauss-Homo-Ridge
@@ -1608,7 +1604,7 @@ Running SDSS-100000: LinGauss-Homo-Ridge
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 12 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
   LinGauss-Homo-Ridge... [cached] CDE=-4.5062, LL=1.159
 
 Running SDSS-100000: LinGauss-Hetero-Ridge
@@ -1616,7 +1612,7 @@ Running SDSS-100000: LinGauss-Hetero-Ridge
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 12 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
   LinGauss-Hetero-Ridge... [cached] CDE=-3.1619, LL=0.536
 
 Running SDSS-100000: Student-t-Ridge
@@ -1624,7 +1620,7 @@ Running SDSS-100000: Student-t-Ridge
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 12 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
   Student-t-Ridge... [cached] CDE=-4.8359, LL=1.285
 
 Running SDSS-100000: LogNormal-Homo-Ridge
@@ -1632,7 +1628,7 @@ Running SDSS-100000: LogNormal-Homo-Ridge
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 12 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
   LogNormal-Homo-Ridge... [cached] CDE=-4.0157, LL=0.972
 
 Running SDSS-100000: LogNormal-Hetero-Ridge
@@ -1640,7 +1636,7 @@ Running SDSS-100000: LogNormal-Hetero-Ridge
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 12 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
   LogNormal-Hetero-Ridge... [cached] CDE=-2.3472, LL=0.369
 
 Running SDSS-100000: Gamma-GLM-Ridge
@@ -1648,7 +1644,7 @@ Running SDSS-100000: Gamma-GLM-Ridge
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 12 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
   Gamma-GLM-Ridge... [cached] CDE=-3.9758, LL=0.978
 
 Running SDSS-100000: Quantile-Tree
@@ -1656,93 +1652,48 @@ Running SDSS-100000: Quantile-Tree
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 12 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge
-  Quantile-Tree...     [tune] config 0: {'n_estimators': 200, 'max_depth': 3, 'learning_rate': 0.2} -> CDE=-7.4046
-    [tune] config 1: {'n_estimators': 200, 'max_depth': 3, 'learning_rate': 0.05} -> CDE=-6.1402
-    [tune] config 2: {'n_estimators': 200, 'max_depth': 4, 'learning_rate': 0.2} -> CDE=-7.9189
-    [tune] config 3: {'n_estimators': 200, 'max_depth': 6, 'learning_rate': 0.2} -> CDE=-8.2430
-    [tune] config 4: {'n_estimators': 50, 'max_depth': 6, 'learning_rate': 0.1} -> CDE=-7.2028
-    [tune] config 5: {'n_estimators': 50, 'max_depth': 4, 'learning_rate': 0.1} -> CDE=-6.2777
-    [tune] config 6: {'n_estimators': 100, 'max_depth': 4, 'learning_rate': 0.05} -> CDE=-6.2939
-    [tune] config 7: {'n_estimators': 50, 'max_depth': 4, 'learning_rate': 0.1} -> CDE=-6.2777
-    [tune] best: {'n_estimators': 200, 'max_depth': 6, 'learning_rate': 0.2} -> CDE=-8.2430
-CDE=-8.4832, LL=1.108, CRPS=0.0255, KS=0.039
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Quantile-Tree... [cached] CDE=-8.4832, LL=1.108
 
 Running SDSS-100000: MDN-2mix
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 13 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree
-  MDN-2mix...     [tune] config 0: {'n_components': 5, 'n_hidden': 16, 'lr': 0.02, 'n_epochs': 800} -> CDE=-9.0251
-    [tune] config 1: {'n_components': 2, 'n_hidden': 16, 'lr': 0.02, 'n_epochs': 500} -> CDE=-8.4530
-    [tune] config 2: {'n_components': 5, 'n_hidden': 64, 'lr': 0.02, 'n_epochs': 800} -> CDE=-9.2243
-    [tune] config 3: {'n_components': 2, 'n_hidden': 64, 'lr': 0.01, 'n_epochs': 300} -> CDE=-8.6698
-    [tune] config 4: {'n_components': 3, 'n_hidden': 32, 'lr': 0.01, 'n_epochs': 500} -> CDE=-8.8542
-    [tune] config 5: {'n_components': 2, 'n_hidden': 16, 'lr': 0.01, 'n_epochs': 500} -> CDE=-8.3943
-    [tune] config 6: {'n_components': 2, 'n_hidden': 16, 'lr': 0.005, 'n_epochs': 800} -> CDE=-8.5544
-    [tune] config 7: {'n_components': 5, 'n_hidden': 64, 'lr': 0.01, 'n_epochs': 800} -> CDE=-9.5212
-    [tune] best: {'n_components': 5, 'n_hidden': 64, 'lr': 0.01, 'n_epochs': 800} -> CDE=-9.5212
-CDE=-9.3504, LL=1.894, CRPS=0.0256, KS=0.113
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  MDN-2mix... [cached] CDE=-9.3504, LL=1.894
 
 Running SDSS-100000: Flow-Spline
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 14 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix
-  Flow-Spline...     [tune] config 0: {'n_bins': 12, 'n_layers': 2, 'hidden_units': 128, 'lr': 0.005, 'weight_decay': 1e-06} -> CDE=-10.2751
-    [tune] config 1: {'n_bins': 4, 'n_layers': 4, 'hidden_units': 64, 'lr': 0.005, 'weight_decay': 0.0001} -> CDE=-10.0166
-    [tune] config 2: {'n_bins': 12, 'n_layers': 4, 'hidden_units': 32, 'lr': 0.005, 'weight_decay': 1e-05} -> CDE=-10.1948
-    [tune] config 3: {'n_bins': 4, 'n_layers': 3, 'hidden_units': 64, 'lr': 0.002, 'weight_decay': 1e-05} -> CDE=-9.9341
-    [tune] config 4: {'n_bins': 4, 'n_layers': 2, 'hidden_units': 64, 'lr': 0.002, 'weight_decay': 1e-06} -> CDE=-9.8273
-    [tune] config 5: {'n_bins': 4, 'n_layers': 2, 'hidden_units': 128, 'lr': 0.005, 'weight_decay': 0.0001} -> CDE=-10.1286
-    [tune] config 6: {'n_bins': 8, 'n_layers': 4, 'hidden_units': 64, 'lr': 0.002, 'weight_decay': 0.0001} -> CDE=-10.0506
-    [tune] config 7: {'n_bins': 8, 'n_layers': 4, 'hidden_units': 128, 'lr': 0.001, 'weight_decay': 0.0001} -> CDE=-10.0980
-    [tune] best: {'n_bins': 12, 'n_layers': 2, 'hidden_units': 128, 'lr': 0.005, 'weight_decay': 1e-06} -> CDE=-10.2751
-CDE=-10.3847, LL=1.973, CRPS=0.0240, KS=0.029
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Flow-Spline... [cached] CDE=-10.3847, LL=1.973
 
 Running SDSS-100000: BART-Homo
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline
-  BART-Homo...     [tune] config 0: {'num_trees': 50, 'num_sweeps': 40} -> CDE=-6.7099
-    [tune] config 1: {'num_trees': 50, 'num_sweeps': 80} -> CDE=-6.7579
-    [tune] config 2: {'num_trees': 20, 'num_sweeps': 40} -> CDE=-6.6069
-    [tune] config 3: {'num_trees': 50, 'num_sweeps': 60} -> CDE=-6.7454
-    [tune] config 4: {'num_trees': 50, 'num_sweeps': 80} -> CDE=-6.7579
-    [tune] config 5: {'num_trees': 50, 'num_sweeps': 80} -> CDE=-6.7579
-    [tune] config 6: {'num_trees': 20, 'num_sweeps': 80} -> CDE=-6.6715
-    [tune] config 7: {'num_trees': 30, 'num_sweeps': 40} -> CDE=-6.6412
-    [tune] best: {'num_trees': 50, 'num_sweeps': 80} -> CDE=-6.7579
-CDE=-6.8136, LL=1.449, CRPS=0.0280, KS=0.096
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  BART-Homo... [cached] CDE=-6.8136, LL=1.449
 
 Running SDSS-100000: BART-Hetero
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 16 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo
-  BART-Hetero...     [tune] config 0: {'num_trees': 50, 'num_sweeps': 40} -> CDE=-4.9904
-    [tune] config 1: {'num_trees': 50, 'num_sweeps': 80} -> CDE=-5.0103
-    [tune] config 2: {'num_trees': 20, 'num_sweeps': 40} -> CDE=-4.8004
-    [tune] config 3: {'num_trees': 50, 'num_sweeps': 60} -> CDE=-5.0281
-    [tune] config 4: {'num_trees': 50, 'num_sweeps': 80} -> CDE=-5.0103
-    [tune] config 5: {'num_trees': 50, 'num_sweeps': 80} -> CDE=-5.0103
-    [tune] config 6: {'num_trees': 20, 'num_sweeps': 80} -> CDE=-4.8694
-    [tune] config 7: {'num_trees': 30, 'num_sweeps': 40} -> CDE=-4.8512
-    [tune] best: {'num_trees': 50, 'num_sweeps': 60} -> CDE=-5.0281
-CDE=-5.2974, LL=0.688, CRPS=0.0284, KS=0.173
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  BART-Hetero... [cached] CDE=-5.2974, LL=0.688
 
 Running SDSS-100000: FlexCode-RF
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 17 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero
-  FlexCode-RF... I=30, CDE=-7.0144, LL=1.476, CRPS=0.0326, KS=0.095, t=88.4s
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  FlexCode-RF... [cached] CDE=-7.0144, LL=1.476
 
   ── rep 2/4 (seed=43) ──
 
@@ -1751,188 +1702,144 @@ Running SDSS-100000: LinearGauss-Homo
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  LinearGauss-Homo... CDE=-4.5396, LL=1.171, CRPS=0.0418, KS=0.101
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LinearGauss-Homo... [cached] CDE=-4.5396, LL=1.171
 
 Running SDSS-100000: LinearGauss-Hetero
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 1 method(s) already done: LinearGauss-Homo
-  LinearGauss-Hetero... CDE=-3.3246, LL=0.588, CRPS=0.0411, KS=0.148
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LinearGauss-Hetero... [cached] CDE=-3.3246, LL=0.588
 
 Running SDSS-100000: Student-t
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 2 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero
-  Student-t... CDE=-4.9153, LL=1.298, CRPS=0.0405, KS=0.028
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Student-t... [cached] CDE=-4.9153, LL=1.298
 
 Running SDSS-100000: LogNormal-Homo
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 3 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t
-  LogNormal-Homo... CDE=-4.0487, LL=0.985, CRPS=0.0509, KS=0.120
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LogNormal-Homo... [cached] CDE=-4.0487, LL=0.985
 
 Running SDSS-100000: LogNormal-Hetero
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 4 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo
-  LogNormal-Hetero... CDE=-2.4319, LL=0.410, CRPS=0.0577, KS=0.180
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LogNormal-Hetero... [cached] CDE=-2.4319, LL=0.410
 
 Running SDSS-100000: Gamma-GLM
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 5 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero
-  Gamma-GLM... CDE=-4.0117, LL=0.989, CRPS=0.0528, KS=0.167
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Gamma-GLM... [cached] CDE=-4.0117, LL=0.989
 
 Running SDSS-100000: LinGauss-Homo-Ridge
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 6 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM
-  LinGauss-Homo-Ridge... CDE=-4.5397, LL=1.171, CRPS=0.0418, KS=0.101
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LinGauss-Homo-Ridge... [cached] CDE=-4.5397, LL=1.171
 
 Running SDSS-100000: LinGauss-Hetero-Ridge
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 7 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge
-  LinGauss-Hetero-Ridge... CDE=-3.3217, LL=0.588, CRPS=0.0411, KS=0.148
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LinGauss-Hetero-Ridge... [cached] CDE=-3.3217, LL=0.588
 
 Running SDSS-100000: Student-t-Ridge
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 8 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge
-  Student-t-Ridge... CDE=-4.9156, LL=1.298, CRPS=0.0405, KS=0.028
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Student-t-Ridge... [cached] CDE=-4.9156, LL=1.298
 
 Running SDSS-100000: LogNormal-Homo-Ridge
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 9 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge
-  LogNormal-Homo-Ridge... CDE=-4.0490, LL=0.985, CRPS=0.0509, KS=0.121
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LogNormal-Homo-Ridge... [cached] CDE=-4.0490, LL=0.985
 
 Running SDSS-100000: LogNormal-Hetero-Ridge
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 10 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge
-  LogNormal-Hetero-Ridge... CDE=-2.4327, LL=0.411, CRPS=0.0577, KS=0.180
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LogNormal-Hetero-Ridge... [cached] CDE=-2.4327, LL=0.411
 
 Running SDSS-100000: Gamma-GLM-Ridge
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 11 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge
-  Gamma-GLM-Ridge... CDE=-4.0120, LL=0.989, CRPS=0.0528, KS=0.167
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Gamma-GLM-Ridge... [cached] CDE=-4.0120, LL=0.989
 
 Running SDSS-100000: Quantile-Tree
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 12 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge
-  Quantile-Tree...     [tune] config 0: {'n_estimators': 50, 'max_depth': 3, 'learning_rate': 0.1} -> CDE=-5.6413
-    [tune] config 1: {'n_estimators': 100, 'max_depth': 6, 'learning_rate': 0.05} -> CDE=-7.1606
-    [tune] config 2: {'n_estimators': 100, 'max_depth': 6, 'learning_rate': 0.2} -> CDE=-8.1034
-    [tune] config 3: {'n_estimators': 200, 'max_depth': 3, 'learning_rate': 0.2} -> CDE=-7.4253
-    [tune] config 4: {'n_estimators': 100, 'max_depth': 4, 'learning_rate': 0.2} -> CDE=-7.4256
-    [tune] config 5: {'n_estimators': 200, 'max_depth': 4, 'learning_rate': 0.05} -> CDE=-6.8101
-    [tune] config 6: {'n_estimators': 50, 'max_depth': 3, 'learning_rate': 0.1} -> CDE=-5.6413
-    [tune] config 7: {'n_estimators': 50, 'max_depth': 3, 'learning_rate': 0.05} -> CDE=-4.8086
-    [tune] best: {'n_estimators': 100, 'max_depth': 6, 'learning_rate': 0.2} -> CDE=-8.1034
-CDE=-8.3045, LL=1.205, CRPS=0.0257, KS=0.038
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Quantile-Tree... [cached] CDE=-8.3045, LL=1.205
 
 Running SDSS-100000: MDN-2mix
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 13 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree
-  MDN-2mix...     [tune] config 0: {'n_components': 2, 'n_hidden': 16, 'lr': 0.01, 'n_epochs': 500} -> CDE=-8.4109
-    [tune] config 1: {'n_components': 5, 'n_hidden': 16, 'lr': 0.01, 'n_epochs': 800} -> CDE=-9.3943
-    [tune] config 2: {'n_components': 5, 'n_hidden': 64, 'lr': 0.005, 'n_epochs': 800} -> CDE=-9.6654
-    [tune] config 3: {'n_components': 3, 'n_hidden': 32, 'lr': 0.02, 'n_epochs': 800} -> CDE=-9.0798
-    [tune] config 4: {'n_components': 3, 'n_hidden': 16, 'lr': 0.005, 'n_epochs': 300} -> CDE=-7.9336
-    [tune] config 5: {'n_components': 3, 'n_hidden': 16, 'lr': 0.005, 'n_epochs': 300} -> CDE=-7.9685
-    [tune] config 6: {'n_components': 2, 'n_hidden': 64, 'lr': 0.005, 'n_epochs': 300} -> CDE=-8.3984
-    [tune] config 7: {'n_components': 3, 'n_hidden': 64, 'lr': 0.005, 'n_epochs': 300} -> CDE=-8.5983
-    [tune] best: {'n_components': 5, 'n_hidden': 64, 'lr': 0.005, 'n_epochs': 800} -> CDE=-9.6654
-CDE=-9.7393, LL=1.913, CRPS=0.0252, KS=0.041
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  MDN-2mix... [cached] CDE=-9.7393, LL=1.913
 
 Running SDSS-100000: Flow-Spline
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 14 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix
-  Flow-Spline...     [tune] config 0: {'n_bins': 4, 'n_layers': 2, 'hidden_units': 64, 'lr': 0.002, 'weight_decay': 0.0001} -> CDE=-9.6463
-    [tune] config 1: {'n_bins': 4, 'n_layers': 3, 'hidden_units': 128, 'lr': 0.005, 'weight_decay': 0.0001} -> CDE=-10.1709
-    [tune] config 2: {'n_bins': 4, 'n_layers': 4, 'hidden_units': 64, 'lr': 0.002, 'weight_decay': 0.0001} -> CDE=-10.0175
-    [tune] config 3: {'n_bins': 12, 'n_layers': 3, 'hidden_units': 32, 'lr': 0.001, 'weight_decay': 1e-06} -> CDE=-9.7284
-    [tune] config 4: {'n_bins': 8, 'n_layers': 2, 'hidden_units': 32, 'lr': 0.001, 'weight_decay': 1e-06} -> CDE=-9.6177
-    [tune] config 5: {'n_bins': 12, 'n_layers': 2, 'hidden_units': 32, 'lr': 0.002, 'weight_decay': 0.0001} -> CDE=-9.8712
-    [tune] config 6: {'n_bins': 4, 'n_layers': 2, 'hidden_units': 32, 'lr': 0.001, 'weight_decay': 1e-06} -> CDE=-9.4801
-    [tune] config 7: {'n_bins': 8, 'n_layers': 3, 'hidden_units': 32, 'lr': 0.001, 'weight_decay': 1e-05} -> CDE=-9.7305
-    [tune] best: {'n_bins': 4, 'n_layers': 3, 'hidden_units': 128, 'lr': 0.005, 'weight_decay': 0.0001} -> CDE=-10.1709
-CDE=-10.1250, LL=1.956, CRPS=0.0240, KS=0.032
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Flow-Spline... [cached] CDE=-10.1250, LL=1.956
 
 Running SDSS-100000: BART-Homo
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline
-  BART-Homo...     [tune] config 0: {'num_trees': 20, 'num_sweeps': 40} -> CDE=-6.6241
-    [tune] config 1: {'num_trees': 30, 'num_sweeps': 60} -> CDE=-6.7007
-    [tune] config 2: {'num_trees': 50, 'num_sweeps': 40} -> CDE=-6.6999
-    [tune] config 3: {'num_trees': 30, 'num_sweeps': 80} -> CDE=-6.7161
-    [tune] config 4: {'num_trees': 50, 'num_sweeps': 80} -> CDE=-6.7551
-    [tune] config 5: {'num_trees': 20, 'num_sweeps': 80} -> CDE=-6.6924
-    [tune] config 6: {'num_trees': 30, 'num_sweeps': 60} -> CDE=-6.7007
-    [tune] config 7: {'num_trees': 50, 'num_sweeps': 80} -> CDE=-6.7551
-    [tune] best: {'num_trees': 50, 'num_sweeps': 80} -> CDE=-6.7551
-CDE=-6.8600, LL=1.452, CRPS=0.0279, KS=0.097
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  BART-Homo... [cached] CDE=-6.8600, LL=1.452
 
 Running SDSS-100000: BART-Hetero
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 16 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo
-  BART-Hetero...     [tune] config 0: {'num_trees': 20, 'num_sweeps': 40} -> CDE=-4.7529
-    [tune] config 1: {'num_trees': 30, 'num_sweeps': 60} -> CDE=-4.8800
-    [tune] config 2: {'num_trees': 50, 'num_sweeps': 40} -> CDE=-4.9221
-    [tune] config 3: {'num_trees': 30, 'num_sweeps': 80} -> CDE=-4.9206
-    [tune] config 4: {'num_trees': 50, 'num_sweeps': 80} -> CDE=-4.9941
-    [tune] config 5: {'num_trees': 20, 'num_sweeps': 80} -> CDE=-4.8776
-    [tune] config 6: {'num_trees': 30, 'num_sweeps': 60} -> CDE=-4.8800
-    [tune] config 7: {'num_trees': 50, 'num_sweeps': 80} -> CDE=-4.9941
-    [tune] best: {'num_trees': 50, 'num_sweeps': 80} -> CDE=-4.9941
-CDE=-5.1151, LL=0.660, CRPS=0.0282, KS=0.174
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  BART-Hetero... [cached] CDE=-5.1151, LL=0.660
 
 Running SDSS-100000: FlexCode-RF
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 17 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero
-  FlexCode-RF... I=30, CDE=-7.0414, LL=1.484, CRPS=0.0324, KS=0.099, t=88.5s
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  FlexCode-RF... [cached] CDE=-7.0414, LL=1.484
 
   ── rep 3/4 (seed=44) ──
 
@@ -1941,134 +1848,1488 @@ Running SDSS-100000: LinearGauss-Homo
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  LinearGauss-Homo... CDE=-4.5084, LL=1.154, CRPS=0.0421, KS=0.095
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LinearGauss-Homo... [cached] CDE=-4.5084, LL=1.154
 
 Running SDSS-100000: LinearGauss-Hetero
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 1 method(s) already done: LinearGauss-Homo
-  LinearGauss-Hetero... CDE=-3.1823, LL=0.544, CRPS=0.0415, KS=0.155
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LinearGauss-Hetero... [cached] CDE=-3.1823, LL=0.544
 
 Running SDSS-100000: Student-t
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 2 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero
-  Student-t... CDE=-4.8525, LL=1.283, CRPS=0.0409, KS=0.021
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Student-t... [cached] CDE=-4.8525, LL=1.283
 
 Running SDSS-100000: LogNormal-Homo
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 3 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t
-  LogNormal-Homo... CDE=-4.0136, LL=0.965, CRPS=0.0516, KS=0.120
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LogNormal-Homo... [cached] CDE=-4.0136, LL=0.965
 
 Running SDSS-100000: LogNormal-Hetero
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 4 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo
-  LogNormal-Hetero... CDE=-2.3811, LL=0.373, CRPS=0.0585, KS=0.182
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LogNormal-Hetero... [cached] CDE=-2.3811, LL=0.373
 
 Running SDSS-100000: Gamma-GLM
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 5 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero
-  Gamma-GLM... CDE=-3.9759, LL=0.975, CRPS=0.0535, KS=0.167
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Gamma-GLM... [cached] CDE=-3.9759, LL=0.975
 
 Running SDSS-100000: LinGauss-Homo-Ridge
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 6 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM
-  LinGauss-Homo-Ridge... CDE=-4.5084, LL=1.154, CRPS=0.0421, KS=0.095
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LinGauss-Homo-Ridge... [cached] CDE=-4.5084, LL=1.154
 
 Running SDSS-100000: LinGauss-Hetero-Ridge
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 7 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge
-  LinGauss-Hetero-Ridge... CDE=-3.1793, LL=0.542, CRPS=0.0415, KS=0.155
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LinGauss-Hetero-Ridge... [cached] CDE=-3.1793, LL=0.542
 
 Running SDSS-100000: Student-t-Ridge
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 8 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge
-  Student-t-Ridge... CDE=-4.8527, LL=1.283, CRPS=0.0409, KS=0.021
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Student-t-Ridge... [cached] CDE=-4.8527, LL=1.283
 
 Running SDSS-100000: LogNormal-Homo-Ridge
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 9 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge
-  LogNormal-Homo-Ridge... CDE=-4.0138, LL=0.965, CRPS=0.0516, KS=0.120
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LogNormal-Homo-Ridge... [cached] CDE=-4.0138, LL=0.965
 
 Running SDSS-100000: LogNormal-Hetero-Ridge
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 10 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge
-  LogNormal-Hetero-Ridge... CDE=-2.3816, LL=0.373, CRPS=0.0585, KS=0.182
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LogNormal-Hetero-Ridge... [cached] CDE=-2.3816, LL=0.373
 
 Running SDSS-100000: Gamma-GLM-Ridge
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 11 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge
-  Gamma-GLM-Ridge... CDE=-3.9761, LL=0.975, CRPS=0.0535, KS=0.166
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Gamma-GLM-Ridge... [cached] CDE=-3.9761, LL=0.975
 
 Running SDSS-100000: Quantile-Tree
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 12 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge
-  Quantile-Tree...     [tune] config 0: {'n_estimators': 50, 'max_depth': 4, 'learning_rate': 0.1} -> CDE=-6.3016
-    [tune] config 1: {'n_estimators': 50, 'max_depth': 3, 'learning_rate': 0.2} -> CDE=-6.0531
-    [tune] config 2: {'n_estimators': 50, 'max_depth': 6, 'learning_rate': 0.1} -> CDE=-7.2040
-    [tune] config 3: {'n_estimators': 200, 'max_depth': 4, 'learning_rate': 0.1} -> CDE=-7.3988
-    [tune] config 4: {'n_estimators': 50, 'max_depth': 4, 'learning_rate': 0.1} -> CDE=-6.3016
-    [tune] config 5: {'n_estimators': 100, 'max_depth': 6, 'learning_rate': 0.05} -> CDE=-7.1963
-    [tune] config 6: {'n_estimators': 50, 'max_depth': 4, 'learning_rate': 0.1} -> CDE=-6.3016
-    [tune] config 7: {'n_estimators': 50, 'max_depth': 6, 'learning_rate': 0.05} -> CDE=-5.8115
-    [tune] best: {'n_estimators': 200, 'max_depth': 4, 'learning_rate': 0.1} -> CDE=-7.3988
-CDE=-7.4746, LL=1.124, CRPS=0.0280, KS=0.032
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Quantile-Tree... [cached] CDE=-7.4746, LL=1.124
 
 Running SDSS-100000: MDN-2mix
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 13 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree
-  MDN-2mix...     [tune] config 0: {'n_components': 2, 'n_hidden': 32, 'lr': 0.01, 'n_epochs': 300} -> CDE=-8.2188
-    [tune] config 1: {'n_components': 2, 'n_hidden': 64, 'lr': 0.005, 'n_epochs': 800} -> CDE=-9.2471
-    [tune] config 2: {'n_components': 3, 'n_hidden': 64, 'lr': 0.01, 'n_epochs': 500} -> CDE=-9.1987
-    [tune] config 3: {'n_components': 2, 'n_hidden': 32, 'lr': 0.01, 'n_epochs': 500} -> CDE=-8.6429
-    [tune] config 4: {'n_components': 5, 'n_hidden': 16, 'lr': 0.005, 'n_epochs': 500} -> CDE=-8.6510
-    [tune] config 5: {'n_components': 3, 'n_hidden': 16, 'lr': 0.02, 'n_epochs': 300} -> CDE=-8.3667
-    [tune] config 6: {'n_components': 3, 'n_hidden': 64, 'lr': 0.005, 'n_epochs': 500} -> CDE=-8.8923
-    [tune] config 7: {'n_components': 3, 'n_hidden': 16, 'lr': 0.02, 'n_epochs': 800} -> CDE=-9.0148
-    [tune] best: {'n_components': 2, 'n_hidden': 64, 'lr': 0.005, 'n_epochs': 800} -> CDE=-9.2471
-CDE=-9.0971, LL=1.854, CRPS=0.0260, KS=0.032
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  MDN-2mix... [cached] CDE=-9.0971, LL=1.854
 
 Running SDSS-100000: Flow-Spline
 
 ======================================================================
   SDSS-100000  (train=75000, test=25000, d=5)
 ======================================================================
-  [resume] 14 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix
-  Flow-Spline... 
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Flow-Spline... [cached] CDE=-9.9917, LL=1.945
+
+Running SDSS-100000: BART-Homo
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  BART-Homo... [cached] CDE=-6.7777, LL=1.455
+
+Running SDSS-100000: BART-Hetero
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  BART-Hetero... [cached] CDE=-4.8398, LL=0.635
+
+Running SDSS-100000: FlexCode-RF
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  FlexCode-RF... [cached] CDE=-7.0008, LL=1.489
+
+  ── rep 4/4 (seed=45) ──
+
+Running SDSS-100000: LinearGauss-Homo
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LinearGauss-Homo... [cached] CDE=-4.5379, LL=1.153
+
+Running SDSS-100000: LinearGauss-Hetero
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LinearGauss-Hetero... [cached] CDE=-3.3067, LL=0.560
+
+Running SDSS-100000: Student-t
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Student-t... [cached] CDE=-4.9041, LL=1.292
+
+Running SDSS-100000: LogNormal-Homo
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LogNormal-Homo... [cached] CDE=-4.0463, LL=0.990
+
+Running SDSS-100000: LogNormal-Hetero
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LogNormal-Hetero... [cached] CDE=-2.4273, LL=0.412
+
+Running SDSS-100000: Gamma-GLM
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Gamma-GLM... [cached] CDE=-4.0024, LL=0.981
+
+Running SDSS-100000: LinGauss-Homo-Ridge
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LinGauss-Homo-Ridge... [cached] CDE=-4.5379, LL=1.153
+
+Running SDSS-100000: LinGauss-Hetero-Ridge
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LinGauss-Hetero-Ridge... [cached] CDE=-3.3079, LL=0.560
+
+Running SDSS-100000: Student-t-Ridge
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Student-t-Ridge... [cached] CDE=-4.9044, LL=1.292
+
+Running SDSS-100000: LogNormal-Homo-Ridge
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LogNormal-Homo-Ridge... [cached] CDE=-4.0466, LL=0.990
+
+Running SDSS-100000: LogNormal-Hetero-Ridge
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  LogNormal-Hetero-Ridge... [cached] CDE=-2.4282, LL=0.412
+
+Running SDSS-100000: Gamma-GLM-Ridge
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Gamma-GLM-Ridge... [cached] CDE=-4.0027, LL=0.981
+
+Running SDSS-100000: Quantile-Tree
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Quantile-Tree... [cached] CDE=-7.4684, LL=1.141
+
+Running SDSS-100000: MDN-2mix
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  MDN-2mix... [cached] CDE=-8.9497, LL=1.855
+
+Running SDSS-100000: Flow-Spline
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  Flow-Spline... [cached] CDE=-10.1877, LL=1.948
+
+Running SDSS-100000: BART-Homo
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  BART-Homo... [cached] CDE=-6.7907, LL=1.437
+
+Running SDSS-100000: BART-Hetero
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  BART-Hetero... [cached] CDE=-5.0145, LL=0.625
+
+Running SDSS-100000: FlexCode-RF
+
+======================================================================
+  SDSS-100000  (train=75000, test=25000, d=5)
+======================================================================
+  [resume] 18 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, Quantile-Tree, MDN-2mix, Flow-Spline, BART-Homo, BART-Hetero, FlexCode-RF
+  FlexCode-RF... [cached] CDE=-6.9866, LL=1.470
+
+Updated results_real/sdss_scaling/results.json
+
+========================================================================
+SDSS-250000  (n=250,000, d=5)
+========================================================================
+Selected methods:
+  - LinearGauss-Homo
+  - LinearGauss-Hetero
+  - Student-t
+  - LogNormal-Homo
+  - LogNormal-Hetero
+  - Gamma-GLM
+  - LinGauss-Homo-Ridge
+  - LinGauss-Hetero-Ridge
+  - Student-t-Ridge
+  - LogNormal-Homo-Ridge
+  - LogNormal-Hetero-Ridge
+  - Gamma-GLM-Ridge
+  - MDN-2mix
+  - Flow-Spline
+  - FlexCode-RF
+Policy skips:
+  - TabPFN-Native: the installed TabPFN v2.5 configuration supports up to n=50,000
+  - TabPFN-2.5: the installed TabPFN v2.5 configuration supports up to n=50,000
+  - RealTabPFN-2.5: the installed TabPFN v2.5 configuration supports up to n=50,000
+  - TabICL-Quantiles: native TabICL quantile inference is conservatively capped at n=50,000 for CUDA scaling runs
+  - Quantile-Tree: fits many quantile models and is conservatively capped at n=100,000
+  - Quantile-Linear: disabled above n=10,000 by the linear-quantile baseline itself
+  - BART-Homo: XBART baselines are conservatively capped at n=100,000 for this scaling study
+  - BART-Hetero: XBART baselines are conservatively capped at n=100,000 for this scaling study
+
+  ── rep 1/4 (seed=42) ──
+
+Running SDSS-250000: LinearGauss-Homo
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinearGauss-Homo... [cached] CDE=-4.5386, LL=1.162
+
+Running SDSS-250000: LinearGauss-Hetero
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinearGauss-Hetero... [cached] CDE=-3.1521, LL=0.544
+
+Running SDSS-250000: Student-t
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Student-t... [cached] CDE=-4.8755, LL=1.292
+
+Running SDSS-250000: LogNormal-Homo
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Homo... [cached] CDE=-4.0610, LL=0.972
+
+Running SDSS-250000: LogNormal-Hetero
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Hetero... [cached] CDE=-2.3869, LL=0.396
+
+Running SDSS-250000: Gamma-GLM
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Gamma-GLM... [cached] CDE=-4.0237, LL=0.979
+
+Running SDSS-250000: LinGauss-Homo-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinGauss-Homo-Ridge... [cached] CDE=-4.5386, LL=1.162
+
+Running SDSS-250000: LinGauss-Hetero-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinGauss-Hetero-Ridge... [cached] CDE=-3.1538, LL=0.544
+
+Running SDSS-250000: Student-t-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Student-t-Ridge... [cached] CDE=-4.8756, LL=1.292
+
+Running SDSS-250000: LogNormal-Homo-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Homo-Ridge... [cached] CDE=-4.0611, LL=0.972
+
+Running SDSS-250000: LogNormal-Hetero-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Hetero-Ridge... [cached] CDE=-2.3878, LL=0.397
+
+Running SDSS-250000: Gamma-GLM-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Gamma-GLM-Ridge... [cached] CDE=-4.0238, LL=0.979
+
+Running SDSS-250000: MDN-2mix
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  MDN-2mix... [cached] CDE=-9.5300, LL=1.890
+
+Running SDSS-250000: Flow-Spline
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Flow-Spline... [cached] CDE=-10.3088, LL=1.980
+
+Running SDSS-250000: FlexCode-RF
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  FlexCode-RF... [cached] CDE=-7.0397, LL=1.466
+
+  ── rep 2/4 (seed=43) ──
+
+Running SDSS-250000: LinearGauss-Homo
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinearGauss-Homo... [cached] CDE=-4.5502, LL=1.154
+
+Running SDSS-250000: LinearGauss-Hetero
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinearGauss-Hetero... [cached] CDE=-3.2127, LL=0.549
+
+Running SDSS-250000: Student-t
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Student-t... [cached] CDE=-4.8948, LL=1.291
+
+Running SDSS-250000: LogNormal-Homo
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Homo... [cached] CDE=-4.0659, LL=0.975
+
+Running SDSS-250000: LogNormal-Hetero
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Hetero... [cached] CDE=-2.4405, LL=0.384
+
+Running SDSS-250000: Gamma-GLM
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Gamma-GLM... [cached] CDE=-4.0264, LL=0.979
+
+Running SDSS-250000: LinGauss-Homo-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinGauss-Homo-Ridge... [cached] CDE=-4.5502, LL=1.154
+
+Running SDSS-250000: LinGauss-Hetero-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinGauss-Hetero-Ridge... [cached] CDE=-3.2127, LL=0.549
+
+Running SDSS-250000: Student-t-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Student-t-Ridge... [cached] CDE=-4.8949, LL=1.291
+
+Running SDSS-250000: LogNormal-Homo-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Homo-Ridge... [cached] CDE=-4.0660, LL=0.975
+
+Running SDSS-250000: LogNormal-Hetero-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Hetero-Ridge... [cached] CDE=-2.4404, LL=0.384
+
+Running SDSS-250000: Gamma-GLM-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Gamma-GLM-Ridge... [cached] CDE=-4.0265, LL=0.979
+
+Running SDSS-250000: MDN-2mix
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  MDN-2mix... [cached] CDE=-9.9041, LL=1.919
+
+Running SDSS-250000: Flow-Spline
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Flow-Spline... [cached] CDE=-10.1171, LL=1.950
+
+Running SDSS-250000: FlexCode-RF
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  FlexCode-RF... [cached] CDE=-7.0440, LL=1.458
+
+  ── rep 3/4 (seed=44) ──
+
+Running SDSS-250000: LinearGauss-Homo
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinearGauss-Homo... [cached] CDE=-4.5548, LL=1.168
+
+Running SDSS-250000: LinearGauss-Hetero
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinearGauss-Hetero... [cached] CDE=-3.1981, LL=0.571
+
+Running SDSS-250000: Student-t
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Student-t... [cached] CDE=-4.9014, LL=1.300
+
+Running SDSS-250000: LogNormal-Homo
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Homo... [cached] CDE=-4.0609, LL=0.984
+
+Running SDSS-250000: LogNormal-Hetero
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Hetero... [cached] CDE=-2.4529, LL=0.413
+
+Running SDSS-250000: Gamma-GLM
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Gamma-GLM... [cached] CDE=-4.0210, LL=0.985
+
+Running SDSS-250000: LinGauss-Homo-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinGauss-Homo-Ridge... [cached] CDE=-4.5549, LL=1.168
+
+Running SDSS-250000: LinGauss-Hetero-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinGauss-Hetero-Ridge... [cached] CDE=-3.1985, LL=0.571
+
+Running SDSS-250000: Student-t-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Student-t-Ridge... [cached] CDE=-4.9015, LL=1.300
+
+Running SDSS-250000: LogNormal-Homo-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Homo-Ridge... [cached] CDE=-4.0610, LL=0.984
+
+Running SDSS-250000: LogNormal-Hetero-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Hetero-Ridge... [cached] CDE=-2.4531, LL=0.413
+
+Running SDSS-250000: Gamma-GLM-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Gamma-GLM-Ridge... [cached] CDE=-4.0212, LL=0.985
+
+Running SDSS-250000: MDN-2mix
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  MDN-2mix... [cached] CDE=-9.1552, LL=1.880
+
+Running SDSS-250000: Flow-Spline
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Flow-Spline... [cached] CDE=-10.1712, LL=1.973
+
+Running SDSS-250000: FlexCode-RF
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  FlexCode-RF... [cached] CDE=-7.0219, LL=1.469
+
+  ── rep 4/4 (seed=45) ──
+
+Running SDSS-250000: LinearGauss-Homo
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinearGauss-Homo... [cached] CDE=-4.5503, LL=1.172
+
+Running SDSS-250000: LinearGauss-Hetero
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinearGauss-Hetero... [cached] CDE=-3.2655, LL=0.573
+
+Running SDSS-250000: Student-t
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Student-t... [cached] CDE=-4.9116, LL=1.300
+
+Running SDSS-250000: LogNormal-Homo
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Homo... [cached] CDE=-4.0834, LL=0.986
+
+Running SDSS-250000: LogNormal-Hetero
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Hetero... [cached] CDE=-2.5209, LL=0.413
+
+Running SDSS-250000: Gamma-GLM
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Gamma-GLM... [cached] CDE=-4.0447, LL=0.991
+
+Running SDSS-250000: LinGauss-Homo-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinGauss-Homo-Ridge... [cached] CDE=-4.5503, LL=1.172
+
+Running SDSS-250000: LinGauss-Hetero-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinGauss-Hetero-Ridge... [cached] CDE=-3.2659, LL=0.573
+
+Running SDSS-250000: Student-t-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Student-t-Ridge... [cached] CDE=-4.9117, LL=1.300
+
+Running SDSS-250000: LogNormal-Homo-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Homo-Ridge... [cached] CDE=-4.0834, LL=0.986
+
+Running SDSS-250000: LogNormal-Hetero-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Hetero-Ridge... [cached] CDE=-2.5216, LL=0.413
+
+Running SDSS-250000: Gamma-GLM-Ridge
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Gamma-GLM-Ridge... [cached] CDE=-4.0448, LL=0.991
+
+Running SDSS-250000: MDN-2mix
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  MDN-2mix... [cached] CDE=-8.8045, LL=1.791
+
+Running SDSS-250000: Flow-Spline
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Flow-Spline... [cached] CDE=-10.1840, LL=1.957
+
+Running SDSS-250000: FlexCode-RF
+
+======================================================================
+  SDSS-250000  (train=187500, test=62500, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  FlexCode-RF... [cached] CDE=-7.0130, LL=1.468
+
+Updated results_real/sdss_scaling/results.json
+
+========================================================================
+SDSS-500000  (n=500,000, d=5)
+========================================================================
+Selected methods:
+  - LinearGauss-Homo
+  - LinearGauss-Hetero
+  - Student-t
+  - LogNormal-Homo
+  - LogNormal-Hetero
+  - Gamma-GLM
+  - LinGauss-Homo-Ridge
+  - LinGauss-Hetero-Ridge
+  - Student-t-Ridge
+  - LogNormal-Homo-Ridge
+  - LogNormal-Hetero-Ridge
+  - Gamma-GLM-Ridge
+  - MDN-2mix
+  - Flow-Spline
+  - FlexCode-RF
+Policy skips:
+  - TabPFN-Native: the installed TabPFN v2.5 configuration supports up to n=50,000
+  - TabPFN-2.5: the installed TabPFN v2.5 configuration supports up to n=50,000
+  - RealTabPFN-2.5: the installed TabPFN v2.5 configuration supports up to n=50,000
+  - TabICL-Quantiles: native TabICL quantile inference is conservatively capped at n=50,000 for CUDA scaling runs
+  - Quantile-Tree: fits many quantile models and is conservatively capped at n=100,000
+  - Quantile-Linear: disabled above n=10,000 by the linear-quantile baseline itself
+  - BART-Homo: XBART baselines are conservatively capped at n=100,000 for this scaling study
+  - BART-Hetero: XBART baselines are conservatively capped at n=100,000 for this scaling study
+
+  ── rep 1/4 (seed=42) ──
+
+Running SDSS-500000: LinearGauss-Homo
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinearGauss-Homo... [cached] CDE=-4.5600, LL=1.163
+
+Running SDSS-500000: LinearGauss-Hetero
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinearGauss-Hetero... [cached] CDE=-3.2182, LL=0.560
+
+Running SDSS-500000: Student-t
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Student-t... [cached] CDE=-4.8992, LL=1.296
+
+Running SDSS-500000: LogNormal-Homo
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Homo... [cached] CDE=-4.0674, LL=0.983
+
+Running SDSS-500000: LogNormal-Hetero
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Hetero... [cached] CDE=-2.4397, LL=0.395
+
+Running SDSS-500000: Gamma-GLM
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Gamma-GLM... [cached] CDE=-4.0261, LL=0.984
+
+Running SDSS-500000: LinGauss-Homo-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinGauss-Homo-Ridge... [cached] CDE=-4.5600, LL=1.163
+
+Running SDSS-500000: LinGauss-Hetero-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinGauss-Hetero-Ridge... [cached] CDE=-3.2185, LL=0.560
+
+Running SDSS-500000: Student-t-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Student-t-Ridge... [cached] CDE=-4.8992, LL=1.296
+
+Running SDSS-500000: LogNormal-Homo-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Homo-Ridge... [cached] CDE=-4.0675, LL=0.983
+
+Running SDSS-500000: LogNormal-Hetero-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Hetero-Ridge... [cached] CDE=-2.4393, LL=0.395
+
+Running SDSS-500000: Gamma-GLM-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Gamma-GLM-Ridge... [cached] CDE=-4.0262, LL=0.984
+
+Running SDSS-500000: MDN-2mix
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  MDN-2mix... [cached] CDE=-9.6663, LL=1.921
+
+Running SDSS-500000: Flow-Spline
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Flow-Spline... [cached] CDE=-10.7450, LL=1.997
+
+Running SDSS-500000: FlexCode-RF
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  FlexCode-RF... [cached] CDE=-6.9966, LL=1.452
+
+  ── rep 2/4 (seed=43) ──
+
+Running SDSS-500000: LinearGauss-Homo
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinearGauss-Homo... [cached] CDE=-4.5652, LL=1.171
+
+Running SDSS-500000: LinearGauss-Hetero
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinearGauss-Hetero... [cached] CDE=-3.2467, LL=0.580
+
+Running SDSS-500000: Student-t
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Student-t... [cached] CDE=-4.9194, LL=1.302
+
+Running SDSS-500000: LogNormal-Homo
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Homo... [cached] CDE=-4.0618, LL=0.986
+
+Running SDSS-500000: LogNormal-Hetero
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Hetero... [cached] CDE=-2.4366, LL=0.406
+
+Running SDSS-500000: Gamma-GLM
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Gamma-GLM... [cached] CDE=-4.0239, LL=0.987
+
+Running SDSS-500000: LinGauss-Homo-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinGauss-Homo-Ridge... [cached] CDE=-4.5652, LL=1.171
+
+Running SDSS-500000: LinGauss-Hetero-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinGauss-Hetero-Ridge... [cached] CDE=-3.2472, LL=0.580
+
+Running SDSS-500000: Student-t-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Student-t-Ridge... [cached] CDE=-4.9194, LL=1.302
+
+Running SDSS-500000: LogNormal-Homo-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Homo-Ridge... [cached] CDE=-4.0618, LL=0.986
+
+Running SDSS-500000: LogNormal-Hetero-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Hetero-Ridge... [cached] CDE=-2.4365, LL=0.406
+
+Running SDSS-500000: Gamma-GLM-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Gamma-GLM-Ridge... [cached] CDE=-4.0239, LL=0.987
+
+Running SDSS-500000: MDN-2mix
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  MDN-2mix... [cached] CDE=-9.8363, LL=1.920
+
+Running SDSS-500000: Flow-Spline
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Flow-Spline... [cached] CDE=-10.4128, LL=1.977
+
+Running SDSS-500000: FlexCode-RF
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  FlexCode-RF... [cached] CDE=-6.9996, LL=1.447
+
+  ── rep 3/4 (seed=44) ──
+
+Running SDSS-500000: LinearGauss-Homo
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinearGauss-Homo... [cached] CDE=-4.5483, LL=1.166
+
+Running SDSS-500000: LinearGauss-Hetero
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinearGauss-Hetero... [cached] CDE=-3.2228, LL=0.548
+
+Running SDSS-500000: Student-t
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Student-t... [cached] CDE=-4.8846, LL=1.294
+
+Running SDSS-500000: LogNormal-Homo
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Homo... [cached] CDE=-4.0489, LL=0.985
+
+Running SDSS-500000: LogNormal-Hetero
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Hetero... [cached] CDE=-2.3789, LL=0.394
+
+Running SDSS-500000: Gamma-GLM
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Gamma-GLM... [cached] CDE=-4.0102, LL=0.983
+
+Running SDSS-500000: LinGauss-Homo-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinGauss-Homo-Ridge... [cached] CDE=-4.5483, LL=1.166
+
+Running SDSS-500000: LinGauss-Hetero-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinGauss-Hetero-Ridge... [cached] CDE=-3.2230, LL=0.548
+
+Running SDSS-500000: Student-t-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Student-t-Ridge... [cached] CDE=-4.8846, LL=1.294
+
+Running SDSS-500000: LogNormal-Homo-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Homo-Ridge... [cached] CDE=-4.0489, LL=0.985
+
+Running SDSS-500000: LogNormal-Hetero-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Hetero-Ridge... [cached] CDE=-2.3791, LL=0.394
+
+Running SDSS-500000: Gamma-GLM-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Gamma-GLM-Ridge... [cached] CDE=-4.0103, LL=0.983
+
+Running SDSS-500000: MDN-2mix
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  MDN-2mix... [cached] CDE=-9.3018, LL=1.871
+
+Running SDSS-500000: Flow-Spline
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Flow-Spline... [cached] CDE=-10.5904, LL=1.991
+
+Running SDSS-500000: FlexCode-RF
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  FlexCode-RF... [cached] CDE=-6.9701, LL=1.446
+
+  ── rep 4/4 (seed=45) ──
+
+Running SDSS-500000: LinearGauss-Homo
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinearGauss-Homo... [cached] CDE=-4.5599, LL=1.168
+
+Running SDSS-500000: LinearGauss-Hetero
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinearGauss-Hetero... [cached] CDE=-3.2486, LL=0.563
+
+Running SDSS-500000: Student-t
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Student-t... [cached] CDE=-4.9126, LL=1.299
+
+Running SDSS-500000: LogNormal-Homo
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Homo... [cached] CDE=-4.0601, LL=0.990
+
+Running SDSS-500000: LogNormal-Hetero
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Hetero... [cached] CDE=-2.4029, LL=0.396
+
+Running SDSS-500000: Gamma-GLM
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Gamma-GLM... [cached] CDE=-4.0230, LL=0.988
+
+Running SDSS-500000: LinGauss-Homo-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinGauss-Homo-Ridge... [cached] CDE=-4.5599, LL=1.168
+
+Running SDSS-500000: LinGauss-Hetero-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LinGauss-Hetero-Ridge... [cached] CDE=-3.2488, LL=0.563
+
+Running SDSS-500000: Student-t-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Student-t-Ridge... [cached] CDE=-4.9126, LL=1.299
+
+Running SDSS-500000: LogNormal-Homo-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Homo-Ridge... [cached] CDE=-4.0602, LL=0.990
+
+Running SDSS-500000: LogNormal-Hetero-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  LogNormal-Hetero-Ridge... [cached] CDE=-2.4029, LL=0.396
+
+Running SDSS-500000: Gamma-GLM-Ridge
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Gamma-GLM-Ridge... [cached] CDE=-4.0230, LL=0.988
+
+Running SDSS-500000: MDN-2mix
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  MDN-2mix... [cached] CDE=-9.4078, LL=1.893
+
+Running SDSS-500000: Flow-Spline
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  Flow-Spline... [cached] CDE=-10.4313, LL=1.980
+
+Running SDSS-500000: FlexCode-RF
+
+======================================================================
+  SDSS-500000  (train=375000, test=125000, d=5)
+======================================================================
+  [resume] 15 method(s) already done: LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, MDN-2mix, Flow-Spline, FlexCode-RF
+  FlexCode-RF... [cached] CDE=-6.9964, LL=1.449
+
+Updated results_real/sdss_scaling/results.json
+
+==================================================================================================================================
+FULL RESULTS TABLE  (mean +/- SE across 4 repetitions)
+==================================================================================================================================
+
+--- SDSS-10000 ---
+Method                   CDE loss           Log-lik            CRPS               PIT KS         90% Cov            Width              Basis    Time
+----------------------------------------------------------------------------------------------------------------------------------------------------
+BART-Hetero              -3.8077 (0.1292)   0.348 (0.039)      0.0326 (0.0003)    0.180          0.586 (0.005)      0.070 (0.001)          -   23.2s
+BART-Homo                -6.0011 (0.0561)   1.327 (0.005)      0.0317 (0.0002)    0.089          0.919 (0.003)      0.190 (0.001)          -   14.0s
+FlexCode-RF              -6.7376 (0.0460)   1.389 (0.020)      0.0325 (0.0003)    0.087          0.974 (0.002)      0.435 (0.004)       28.0    8.6s
+Flow-Spline              -9.4092 (0.0553)   1.884 (0.008)      0.0256 (0.0002)    0.028          0.898 (0.008)      0.146 (0.004)          -   90.2s
+Gamma-GLM                -3.8771 (0.0432)   0.973 (0.009)      0.0534 (0.0004)    0.169          0.935 (0.002)      0.366 (0.002)          -    0.1s
+Gamma-GLM-Ridge          -3.8778 (0.0431)   0.973 (0.009)      0.0534 (0.0003)    0.169          0.935 (0.002)      0.366 (0.002)          -    0.1s
+LinGauss-Hetero-Ridge    -3.0730 (0.0746)   0.523 (0.041)      0.0419 (0.0002)    0.157          0.627 (0.004)      0.117 (0.000)          -    0.0s
+LinGauss-Homo-Ridge      -4.5104 (0.0163)   1.151 (0.002)      0.0423 (0.0002)    0.095          0.930 (0.002)      0.311 (0.002)          -    0.0s
+LinearGauss-Hetero       -3.0665 (0.0743)   0.524 (0.041)      0.0418 (0.0002)    0.158          0.627 (0.004)      0.117 (0.000)          -    0.0s
+LinearGauss-Homo         -4.5104 (0.0163)   1.151 (0.002)      0.0423 (0.0002)    0.095          0.930 (0.002)      0.311 (0.002)          -    0.0s
+LogNormal-Hetero         -2.2284 (0.0482)   0.397 (0.019)      0.0585 (0.0006)    0.186          0.627 (0.003)      0.163 (0.001)          -    0.1s
+LogNormal-Hetero-Ridge   -2.2201 (0.0443)   0.392 (0.019)      0.0585 (0.0006)    0.187          0.626 (0.003)      0.162 (0.001)          -    0.1s
+LogNormal-Homo           -3.9104 (0.0389)   0.966 (0.011)      0.0514 (0.0003)    0.121          0.940 (0.002)      0.371 (0.001)          -    0.1s
+LogNormal-Homo-Ridge     -3.9111 (0.0388)   0.966 (0.011)      0.0514 (0.0003)    0.122          0.940 (0.002)      0.371 (0.001)          -    0.1s
+MDN-2mix                 -9.2809 (0.1150)   1.872 (0.017)      0.0258 (0.0004)    0.034          0.896 (0.005)      0.148 (0.001)          -   12.5s
+Quantile-Linear          -4.8488 (0.0930)   0.694 (0.056)      0.0365 (0.0001)    0.031          0.903 (0.005)      0.217 (0.001)          -  331.0s
+Quantile-Tree            -6.3666 (0.0751)   0.785 (0.087)      0.0302 (0.0006)    0.037          0.890 (0.004)      0.183 (0.007)          -   59.6s
+RealTabPFN-2.5           -10.8516 (0.0781)  2.000 (0.011)      0.0238 (0.0002)    0.045          0.894 (0.004)      0.131 (0.001)          -    1.4s
+Student-t                -4.8259 (0.0255)   1.286 (0.005)      0.0410 (0.0002)    0.023          0.905 (0.002)      0.262 (0.002)          -    0.0s
+Student-t-Ridge          -4.8263 (0.0255)   1.285 (0.005)      0.0410 (0.0002)    0.023          0.905 (0.002)      0.262 (0.002)          -    0.0s
+TabICL-Quantiles         -10.9010 (0.0521)  1.887 (0.010)      0.0238 (0.0002)    0.044          0.906 (0.003)      0.138 (0.001)          -   19.5s
+TabPFN-2.5               -10.9167 (0.0821)  2.002 (0.010)      0.0238 (0.0002)    0.041          0.891 (0.005)      0.129 (0.001)          -    1.4s
+TabPFN-Native            -10.9167 (0.0821)  2.002 (0.010)      0.0238 (0.0002)    0.041          0.891 (0.005)      0.129 (0.001)          -    1.5s
+
+--- SDSS-50000 ---
+Method                   CDE loss           Log-lik            CRPS               PIT KS         90% Cov            Width              Basis    Time
+----------------------------------------------------------------------------------------------------------------------------------------------------
+BART-Hetero              -4.8400 (0.0666)   0.568 (0.031)      0.0291 (0.0002)    0.174          0.598 (0.002)      0.065 (0.000)          -  128.2s
+BART-Homo                -6.6845 (0.0178)   1.427 (0.007)      0.0286 (0.0001)    0.097          0.913 (0.002)      0.170 (0.001)          -   77.8s
+FlexCode-RF              -7.0049 (0.0159)   1.477 (0.008)      0.0323 (0.0001)    0.091          0.977 (0.001)      0.468 (0.002)       30.0   41.7s
+Flow-Spline              -10.0972 (0.0859)  1.950 (0.005)      0.0243 (0.0002)    0.033          0.900 (0.002)      0.141 (0.003)          -  225.5s
+Gamma-GLM                -3.9941 (0.0354)   0.977 (0.004)      0.0535 (0.0002)    0.173          0.931 (0.002)      0.369 (0.001)          -    0.3s
+Gamma-GLM-Ridge          -3.9943 (0.0353)   0.977 (0.004)      0.0535 (0.0002)    0.173          0.931 (0.002)      0.369 (0.001)          -    0.3s
+LinGauss-Hetero-Ridge    -3.3238 (0.0413)   0.583 (0.018)      0.0411 (0.0002)    0.147          0.640 (0.002)      0.118 (0.000)          -    0.1s
+LinGauss-Homo-Ridge      -4.5508 (0.0134)   1.158 (0.009)      0.0417 (0.0002)    0.100          0.932 (0.002)      0.307 (0.002)          -    0.0s
+LinearGauss-Hetero       -3.3245 (0.0421)   0.584 (0.019)      0.0411 (0.0002)    0.147          0.640 (0.002)      0.118 (0.000)          -    0.0s
+LinearGauss-Homo         -4.5509 (0.0134)   1.158 (0.009)      0.0417 (0.0002)    0.100          0.932 (0.002)      0.307 (0.002)          -    0.0s
+LogNormal-Hetero         -2.4362 (0.0770)   0.421 (0.010)      0.0582 (0.0002)    0.182          0.628 (0.002)      0.161 (0.000)          -    0.4s
+LogNormal-Hetero-Ridge   -2.4371 (0.0768)   0.420 (0.010)      0.0582 (0.0002)    0.182          0.628 (0.002)      0.161 (0.000)          -    0.4s
+LogNormal-Homo           -4.0372 (0.0370)   0.978 (0.006)      0.0516 (0.0002)    0.126          0.939 (0.001)      0.374 (0.001)          -    0.4s
+LogNormal-Homo-Ridge     -4.0374 (0.0369)   0.978 (0.006)      0.0516 (0.0002)    0.126          0.939 (0.001)      0.374 (0.001)          -    0.4s
+MDN-2mix                 -9.0753 (0.2276)   1.864 (0.024)      0.0259 (0.0006)    0.069          0.908 (0.006)      0.155 (0.004)          -   39.2s
+Quantile-Tree            -7.6537 (0.2249)   1.084 (0.038)      0.0271 (0.0007)    0.034          0.894 (0.003)      0.161 (0.005)          -  235.7s
+RealTabPFN-2.5           -10.8413 (0.0356)  2.004 (0.006)      0.0233 (0.0001)    0.037          0.888 (0.002)      0.128 (0.000)          -   14.8s
+Student-t                -4.9241 (0.0218)   1.297 (0.005)      0.0404 (0.0002)    0.028          0.907 (0.002)      0.262 (0.001)          -    0.1s
+Student-t-Ridge          -4.9243 (0.0218)   1.297 (0.005)      0.0404 (0.0002)    0.028          0.907 (0.002)      0.262 (0.001)          -    0.1s
+TabICL-Quantiles         -11.0606 (0.0474)  1.917 (0.011)      0.0232 (0.0001)    0.045          0.906 (0.003)      0.137 (0.001)          -  190.1s
+TabPFN-2.5               -10.9499 (0.0487)  2.008 (0.005)      0.0232 (0.0001)    0.032          0.890 (0.002)      0.128 (0.000)          -   14.7s
+TabPFN-Native            -10.9499 (0.0487)  2.008 (0.005)      0.0232 (0.0001)    0.032          0.890 (0.002)      0.128 (0.000)          -   14.8s
+
+--- SDSS-100000 ---
+Method                   CDE loss           Log-lik            CRPS               PIT KS         90% Cov            Width              Basis    Time
+----------------------------------------------------------------------------------------------------------------------------------------------------
+BART-Hetero              -5.0667 (0.0956)   0.652 (0.014)      0.0284 (0.0001)    0.175          0.599 (0.003)      0.065 (0.000)          -  270.4s
+BART-Homo                -6.8105 (0.0181)   1.448 (0.004)      0.0280 (0.0001)    0.094          0.911 (0.000)      0.166 (0.000)          -  163.5s
+FlexCode-RF              -7.0108 (0.0117)   1.480 (0.004)      0.0326 (0.0001)    0.096          0.977 (0.001)      0.490 (0.002)       30.0   90.1s
+Flow-Spline              -10.1723 (0.0818)  1.956 (0.006)      0.0243 (0.0001)    0.045          0.904 (0.003)      0.143 (0.002)          -  333.3s
+Gamma-GLM                -3.9914 (0.0092)   0.981 (0.003)      0.0533 (0.0002)    0.168          0.930 (0.001)      0.367 (0.001)          -    0.6s
+Gamma-GLM-Ridge          -3.9917 (0.0093)   0.981 (0.003)      0.0533 (0.0002)    0.168          0.930 (0.001)      0.367 (0.001)          -    0.6s
+LinGauss-Hetero-Ridge    -3.2427 (0.0419)   0.556 (0.012)      0.0414 (0.0001)    0.150          0.634 (0.002)      0.118 (0.000)          -    0.1s
+LinGauss-Homo-Ridge      -4.5230 (0.0091)   1.159 (0.004)      0.0420 (0.0001)    0.098          0.930 (0.001)      0.308 (0.001)          -    0.1s
+LinearGauss-Hetero       -3.2434 (0.0421)   0.557 (0.012)      0.0414 (0.0001)    0.150          0.634 (0.002)      0.118 (0.000)          -    0.1s
+LinearGauss-Homo         -4.5230 (0.0091)   1.159 (0.004)      0.0420 (0.0001)    0.098          0.930 (0.001)      0.308 (0.001)          -    0.0s
+LogNormal-Hetero         -2.3967 (0.0202)   0.391 (0.012)      0.0583 (0.0002)    0.183          0.625 (0.002)      0.160 (0.001)          -    0.7s
+LogNormal-Hetero-Ridge   -2.3974 (0.0203)   0.391 (0.012)      0.0583 (0.0002)    0.183          0.625 (0.002)      0.160 (0.001)          -    0.8s
+LogNormal-Homo           -4.0311 (0.0095)   0.978 (0.006)      0.0514 (0.0002)    0.122          0.937 (0.001)      0.372 (0.001)          -    0.7s
+LogNormal-Homo-Ridge     -4.0313 (0.0095)   0.978 (0.006)      0.0514 (0.0002)    0.122          0.937 (0.001)      0.372 (0.001)          -    0.7s
+MDN-2mix                 -9.2841 (0.1728)   1.879 (0.015)      0.0258 (0.0002)    0.070          0.903 (0.002)      0.152 (0.001)          -   80.8s
+Quantile-Tree            -7.9327 (0.2687)   1.145 (0.021)      0.0268 (0.0007)    0.036          0.897 (0.003)      0.160 (0.005)          -  475.9s
+Student-t                -4.8769 (0.0194)   1.290 (0.003)      0.0407 (0.0001)    0.025          0.904 (0.001)      0.262 (0.001)          -    0.2s
+Student-t-Ridge          -4.8771 (0.0194)   1.290 (0.003)      0.0407 (0.0001)    0.025          0.904 (0.001)      0.262 (0.001)          -    0.2s
+
+--- SDSS-250000 ---
+Method                   CDE loss           Log-lik            CRPS               PIT KS         90% Cov            Width              Basis    Time
+----------------------------------------------------------------------------------------------------------------------------------------------------
+FlexCode-RF              -7.0297 (0.0073)   1.465 (0.002)      0.0331 (0.0000)    0.098          0.978 (0.000)      0.519 (0.001)       30.0  284.4s
+Flow-Spline              -10.1953 (0.0405)  1.965 (0.007)      0.0241 (0.0001)    0.050          0.901 (0.003)      0.140 (0.002)          -  372.5s
+Gamma-GLM                -4.0290 (0.0054)   0.984 (0.003)      0.0530 (0.0001)    0.167          0.931 (0.001)      0.366 (0.001)          -    1.4s
+Gamma-GLM-Ridge          -4.0291 (0.0053)   0.984 (0.003)      0.0530 (0.0001)    0.167          0.931 (0.001)      0.366 (0.001)          -    1.5s
+LinGauss-Hetero-Ridge    -3.2077 (0.0231)   0.559 (0.008)      0.0412 (0.0001)    0.151          0.633 (0.002)      0.117 (0.000)          -    0.3s
+LinGauss-Homo-Ridge      -4.5485 (0.0035)   1.164 (0.004)      0.0417 (0.0001)    0.096          0.932 (0.001)      0.306 (0.000)          -    0.2s
+LinearGauss-Hetero       -3.2071 (0.0234)   0.559 (0.008)      0.0412 (0.0001)    0.151          0.633 (0.002)      0.117 (0.000)          -    0.2s
+LinearGauss-Homo         -4.5485 (0.0035)   1.164 (0.004)      0.0417 (0.0001)    0.096          0.932 (0.001)      0.306 (0.000)          -    0.1s
+LogNormal-Hetero         -2.4503 (0.0276)   0.402 (0.007)      0.0579 (0.0002)    0.179          0.627 (0.001)      0.160 (0.000)          -    1.8s
+LogNormal-Hetero-Ridge   -2.4507 (0.0275)   0.402 (0.007)      0.0579 (0.0002)    0.179          0.627 (0.001)      0.160 (0.000)          -    2.0s
+LogNormal-Homo           -4.0678 (0.0053)   0.979 (0.003)      0.0512 (0.0001)    0.121          0.937 (0.001)      0.371 (0.001)          -    1.8s
+LogNormal-Homo-Ridge     -4.0679 (0.0053)   0.979 (0.003)      0.0512 (0.0001)    0.121          0.937 (0.001)      0.371 (0.001)          -    1.9s
+MDN-2mix                 -9.3485 (0.2372)   1.870 (0.028)      0.0262 (0.0006)    0.038          0.902 (0.003)      0.154 (0.002)          -  281.5s
+Student-t                -4.8958 (0.0076)   1.296 (0.002)      0.0404 (0.0001)    0.024          0.906 (0.001)      0.262 (0.000)          -    0.6s
+Student-t-Ridge          -4.8959 (0.0076)   1.296 (0.002)      0.0404 (0.0001)    0.024          0.906 (0.001)      0.262 (0.000)          -    0.6s
+
+--- SDSS-500000 ---
+Method                   CDE loss           Log-lik            CRPS               PIT KS         90% Cov            Width              Basis    Time
+----------------------------------------------------------------------------------------------------------------------------------------------------
+FlexCode-RF              -6.9907 (0.0069)   1.449 (0.001)      0.0337 (0.0000)    0.103          0.978 (0.000)      0.548 (0.001)       30.0  718.4s
+Flow-Spline              -10.5449 (0.0777)  1.986 (0.005)      0.0238 (0.0001)    0.051          0.909 (0.006)      0.141 (0.002)          -  530.6s
+Gamma-GLM                -4.0208 (0.0036)   0.986 (0.001)      0.0531 (0.0001)    0.169          0.932 (0.000)      0.367 (0.000)          -    2.8s
+Gamma-GLM-Ridge          -4.0208 (0.0036)   0.986 (0.001)      0.0531 (0.0001)    0.169          0.932 (0.000)      0.367 (0.000)          -    3.0s
+LinGauss-Hetero-Ridge    -3.2344 (0.0079)   0.563 (0.006)      0.0410 (0.0001)    0.150          0.633 (0.000)      0.117 (0.000)          -    0.7s
+LinGauss-Homo-Ridge      -4.5583 (0.0036)   1.167 (0.002)      0.0415 (0.0001)    0.096          0.931 (0.000)      0.305 (0.000)          -    0.4s
+LinearGauss-Hetero       -3.2341 (0.0079)   0.563 (0.006)      0.0410 (0.0001)    0.150          0.633 (0.000)      0.117 (0.000)          -    0.3s
+LinearGauss-Homo         -4.5583 (0.0036)   1.167 (0.002)      0.0415 (0.0001)    0.096          0.931 (0.000)      0.305 (0.000)          -    0.3s
+LogNormal-Hetero         -2.4145 (0.0145)   0.398 (0.003)      0.0581 (0.0001)    0.181          0.626 (0.001)      0.160 (0.000)          -    3.6s
+LogNormal-Hetero-Ridge   -2.4145 (0.0144)   0.398 (0.003)      0.0581 (0.0001)    0.181          0.626 (0.001)      0.160 (0.000)          -    3.9s
+LogNormal-Homo           -4.0596 (0.0039)   0.986 (0.001)      0.0512 (0.0001)    0.122          0.938 (0.000)      0.372 (0.000)          -    3.5s
+LogNormal-Homo-Ridge     -4.0596 (0.0039)   0.986 (0.001)      0.0512 (0.0001)    0.122          0.938 (0.000)      0.372 (0.000)          -    3.7s
+MDN-2mix                 -9.5531 (0.1215)   1.901 (0.012)      0.0252 (0.0002)    0.026          0.901 (0.001)      0.150 (0.002)          -  834.9s
+Student-t                -4.9040 (0.0077)   1.298 (0.002)      0.0403 (0.0001)    0.024          0.906 (0.001)      0.261 (0.000)          -    1.1s
+Student-t-Ridge          -4.9040 (0.0077)   1.298 (0.002)      0.0403 (0.0001)    0.024          0.906 (0.001)      0.261 (0.000)          -    1.3s
+
+==================================================
+OVERALL AVERAGE RANKINGS
+==================================================
+  TabPFN-2.5             avg rank = 2.25
+  Flow-Spline            avg rank = 2.90
+  TabPFN-Native          avg rank = 3.25
+  MDN-2mix               avg rank = 3.95
+  TabICL-Quantiles       avg rank = 4.38
+  RealTabPFN-2.5         avg rank = 4.75
+  Student-t              avg rank = 5.75
+  FlexCode-RF            avg rank = 6.05
+  Student-t-Ridge        avg rank = 6.25
+  Quantile-Tree          avg rank = 7.42
+  BART-Homo              avg rank = 7.67
+  LinearGauss-Homo       avg rank = 9.65
+  LinGauss-Homo-Ridge    avg rank = 10.25
+  Quantile-Linear        avg rank = 10.75
+  LogNormal-Homo         avg rank = 12.25
+  LogNormal-Homo-Ridge   avg rank = 12.65
+  LinearGauss-Hetero     avg rank = 13.70
+  LinGauss-Hetero-Ridge  avg rank = 14.00
+  Gamma-GLM-Ridge        avg rank = 14.30
+  Gamma-GLM              avg rank = 14.40
+  BART-Hetero            avg rank = 14.58
+  LogNormal-Hetero       avg rank = 17.90
+  LogNormal-Hetero-Ridge avg rank = 18.20
+
+Generating SDSS scaling plots...
+  saved results_table.html
+  saved perf_vs_n_cde_loss_real.png
+  saved perf_vs_n_log_lik_real.png
+  saved perf_vs_n_crps_real.png
+  saved perf_vs_n_pit_ks_real.png
+  saved perf_vs_n_fit_time_real.png
+  saved perf_vs_n_foundational_cde_loss_real.png
+  saved perf_vs_n_foundational_log_lik_real.png
+  saved perf_vs_n_foundational_crps_real.png
+  saved perf_vs_n_foundational_pit_ks_real.png
+  saved perf_vs_n_foundational_fit_time_real.png
+
+Saved metrics to results_real/sdss_scaling/results.json
+Saved method schedule to results_real/sdss_scaling/method_policy.json
+Saved plots to results_real/sdss_scaling

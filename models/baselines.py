@@ -429,7 +429,8 @@ def normalizing_flow_density(X_train, z_train, X_test, n_grid=200,
 
 
 def quantile_gbm_density(X_train, z_train, X_test, n_grid=200,
-                          z_min=None, z_max=None):
+                          z_min=None, z_max=None, n_estimators=100,
+                          max_depth=4, learning_rate=0.1):
     """Quantile GBM/XGBoost baseline."""
     try:
         import xgboost as xgb
@@ -448,13 +449,15 @@ def quantile_gbm_density(X_train, z_train, X_test, n_grid=200,
         if has_xgb:
             reg = xgb.XGBRegressor(
                 objective='reg:quantileerror', quantile_alpha=alpha,
-                n_estimators=100, max_depth=4, learning_rate=0.1,
+                n_estimators=n_estimators, max_depth=max_depth,
+                learning_rate=learning_rate,
                 random_state=42, verbosity=0
             )
         else:
             reg = GradientBoostingRegressor(
                 loss='quantile', alpha=alpha,
-                n_estimators=100, max_depth=4, learning_rate=0.1,
+                n_estimators=n_estimators, max_depth=max_depth,
+                learning_rate=learning_rate,
                 random_state=42
             )
         reg.fit(X_train, z_train)
@@ -485,7 +488,7 @@ def quantile_gbm_density(X_train, z_train, X_test, n_grid=200,
 
 
 def quantile_linear_density(X_train, z_train, X_test, n_grid=200,
-                             z_min=None, z_max=None):
+                             z_min=None, z_max=None, regularization=0.0):
     """Linear quantile regression baseline.
 
     Fits multiple quantile levels with linear models, then interpolates
@@ -499,7 +502,7 @@ def quantile_linear_density(X_train, z_train, X_test, n_grid=200,
 
     Q_test = np.zeros((n_test, n_q))
     for j, alpha in enumerate(alphas_q):
-        reg = QuantileRegressor(quantile=alpha, alpha=0.0, solver='highs')
+        reg = QuantileRegressor(quantile=alpha, alpha=regularization, solver='highs')
         reg.fit(X_train, z_train)
         Q_test[:, j] = reg.predict(X_test)
 
@@ -730,12 +733,14 @@ def _fit_xbart(X_train, y_train, num_trees=30, num_sweeps=60, burnin=20):
 
 
 def bart_homo_density(X_train, z_train, X_test, n_grid=200,
-                      z_min=None, z_max=None):
+                      z_min=None, z_max=None, num_trees=30,
+                      num_sweeps=60, burnin=20):
     """BART with constant residual variance: f(z|x) = N(BART(x), sigma^2).
 
     Uses XBART's built-in sigma draws (posterior mean) for the residual sd.
     """
-    model, sigma = _fit_xbart(X_train, z_train)
+    model, sigma = _fit_xbart(X_train, z_train, num_trees=num_trees,
+                              num_sweeps=num_sweeps, burnin=burnin)
     mu_test = model.predict(X_test)
     sigma = max(sigma, 1e-8)
 
@@ -749,7 +754,8 @@ def bart_homo_density(X_train, z_train, X_test, n_grid=200,
 
 
 def bart_hetero_density(X_train, z_train, X_test, n_grid=200,
-                        z_min=None, z_max=None):
+                        z_min=None, z_max=None, num_trees=30,
+                        num_sweeps=60, burnin=20):
     """Heteroscedastic BART: two-stage density estimation.
 
     Stage 1: fit BART for E[Z|X].
@@ -757,14 +763,16 @@ def bart_hetero_density(X_train, z_train, X_test, n_grid=200,
     Result: f(z|x) = N(BART_mean(x), exp(BART_var(x))).
     """
     # Stage 1: mean model
-    model_mean, _ = _fit_xbart(X_train, z_train)
+    model_mean, _ = _fit_xbart(X_train, z_train, num_trees=num_trees,
+                               num_sweeps=num_sweeps, burnin=burnin)
     mu_train = model_mean.predict(X_train)
     mu_test = model_mean.predict(X_test)
 
     # Stage 2: variance model on log-squared residuals
     residuals = z_train - mu_train
     log_sq_res = np.log(np.maximum(residuals ** 2, 1e-12))
-    model_var, _ = _fit_xbart(X_train, log_sq_res)
+    model_var, _ = _fit_xbart(X_train, log_sq_res, num_trees=num_trees,
+                              num_sweeps=num_sweeps, burnin=burnin)
     log_var_test = model_var.predict(X_test)
     sigma_test = np.sqrt(np.exp(log_var_test))
     sigma_test = np.maximum(sigma_test, 1e-8)

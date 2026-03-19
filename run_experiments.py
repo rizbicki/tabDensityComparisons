@@ -53,10 +53,11 @@ from models import (
     FlexCodeEstimator, RFFlexRegressor,
     tabpfn_native_density, tabicl_quantile_density,
     linear_gaussian_homo_density, linear_gaussian_hetero_density,
-    mdn_density, normalizing_flow_density, quantile_gbm_density,
-    quantile_linear_density, gamma_glm_density,
+    gamma_glm_density,
     student_t_density, lognormal_homo_density, lognormal_hetero_density,
-    bart_homo_density, bart_hetero_density,
+    mdn_density_tuned, normalizing_flow_density_tuned,
+    quantile_gbm_density_tuned, quantile_linear_density_tuned,
+    bart_homo_density_tuned, bart_hetero_density_tuned,
 )
 from datasets import load_all_datasets
 from evaluation import compute_all_metrics
@@ -330,36 +331,7 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
             print(f"CDE={m['CDE_loss']:.4f}, LL={m['log_lik']:.3f}, "
                   f"CRPS={m['CRPS']:.4f}, KS={m['PIT_KS']:.3f}")
 
-    # ── Quantile GBM/XGB baseline ────────────────────────────────────────
-    if _want('Quantile-Tree'):
-        name = 'Quantile-Tree'
-        hit = _cached(name)
-        if hit:
-            m_c, cdes_qgbm, zg_qgbm = hit
-            results[name] = m_c
-            cdes_dict[name] = cdes_qgbm
-            zgrids_dict[name] = zg_qgbm
-            print(f"  {name}... [cached] CDE={m_c['CDE_loss']:.4f}, "
-                  f"LL={m_c['log_lik']:.3f}")
-        else:
-            print(f"  {name}...", end=" ", flush=True)
-            t0 = time.time()
-            z_lo = z_train.min() - 0.05 * np.ptp(z_train)
-            z_hi = z_train.max() + 0.05 * np.ptp(z_train)
-            cdes_qgbm, zg_qgbm = quantile_gbm_density(
-                X_tr, z_train, X_te, n_grid=n_grid, z_min=z_lo, z_max=z_hi
-            )
-            fit_t = time.time() - t0
-            m = compute_all_metrics(cdes_qgbm, zg_qgbm, z_test)
-            m['fit_time'] = fit_t
-            m['pred_time'] = 0
-            m['n_basis'] = None
-            results[name] = m
-            cdes_dict[name] = cdes_qgbm
-            zgrids_dict[name] = zg_qgbm
-            _save(name, m, cdes_qgbm, zg_qgbm)
-            print(f"CDE={m['CDE_loss']:.4f}, LL={m['log_lik']:.3f}, "
-                  f"CRPS={m['CRPS']:.4f}, KS={m['PIT_KS']:.3f}")
+    # ── Quantile GBM/XGB baseline (handled in baselines section below) ───
 
     # ── Helper for simple density baselines ──────────────────────────────
     def _run_density_baseline(name, density_fn, **kwargs):
@@ -404,11 +376,17 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
     if _want('LogNormal-Hetero'):
         _run_density_baseline('LogNormal-Hetero', lognormal_hetero_density)
     if _want('MDN-2mix'):
-        _run_density_baseline('MDN-2mix', mdn_density, n_components=2, n_hidden=16)
+        _run_density_baseline('MDN-2mix', mdn_density_tuned,
+                              random_state=random_state)
     if _want('Flow-Spline'):
-        _run_density_baseline('Flow-Spline', normalizing_flow_density, device=device)
+        _run_density_baseline('Flow-Spline', normalizing_flow_density_tuned,
+                              device=device, random_state=random_state)
+    if _want('Quantile-Tree'):
+        _run_density_baseline('Quantile-Tree', quantile_gbm_density_tuned,
+                              random_state=random_state)
     if n_train <= 10000 and _want('Quantile-Linear'):
-        _run_density_baseline('Quantile-Linear', quantile_linear_density)
+        _run_density_baseline('Quantile-Linear', quantile_linear_density_tuned,
+                              random_state=random_state)
     if _want('Gamma-GLM'):
         _run_density_baseline('Gamma-GLM', gamma_glm_density)
 
@@ -428,9 +406,11 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
 
     # ── BART methods ──────────────────────────────────────────────────────
     if HAS_XBART and _want('BART-Homo'):
-        _run_density_baseline('BART-Homo', bart_homo_density)
+        _run_density_baseline('BART-Homo', bart_homo_density_tuned,
+                              random_state=random_state)
     if HAS_XBART and _want('BART-Hetero'):
-        _run_density_baseline('BART-Hetero', bart_hetero_density)
+        _run_density_baseline('BART-Hetero', bart_hetero_density_tuned,
+                              random_state=random_state)
 
     # ── True conditional density (synthetic only) ────────────────────────
     true_cde = None

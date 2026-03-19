@@ -14,3 +14,11 @@ from .baselines import (
     bart_homo_density,
     bart_hetero_density,
 )
+from .tuning import (
+    mdn_density_tuned,
+    normalizing_flow_density_tuned,
+    quantile_gbm_density_tuned,
+    quantile_linear_density_tuned,
+    bart_homo_density_tuned,
+    bart_hetero_density_tuned,
+)

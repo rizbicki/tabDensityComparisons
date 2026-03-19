@@ -410,6 +410,10 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
         _run_density_baseline('BART-Hetero', bart_hetero_density_tuned,
                               random_state=random_state)
 
+    if _want('CatMLP'):
+        _run_density_baseline('CatMLP', categorical_mlp_density_tuned,
+                              random_state=random_state)
+
     # ── True conditional density (synthetic only) ────────────────────────
     true_cde = None
     true_zgrid = None

@@ -148,6 +148,7 @@ with the penalty chosen by leave-one-out cross-validation (`RidgeCV`).
 |--------|-------------|
 | Quantile-Tree | Quantile regression via XGBoost/GBM |
 | Flow-Spline | Conditional neural spline flow with Gaussian base |
+| CatMLP | MLP with discretized response (softmax over bins, CV-tuned) |
 
 ## Datasets
 

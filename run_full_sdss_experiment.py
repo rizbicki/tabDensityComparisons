@@ -48,6 +48,7 @@ DEFAULT_METHOD_ORDER = [
     "BART-Homo",
     "BART-Hetero",
     "FlexCode-RF",
+    "CatMLP",
 ]
 
 

@@ -36,6 +36,7 @@ METHOD_STYLES = {
     'Gamma-GLM-Ridge':        {'color': '#e78ac3', 'ls': '-.',  'lw': 1.5, 'zorder': 2},
     'BART-Homo':              {'color': '#1b9e77', 'ls': '-',   'lw': 1.8, 'zorder': 3},
     'BART-Hetero':            {'color': '#d62728', 'ls': '--',  'lw': 1.8, 'zorder': 3},
+    'CatMLP':                 {'color': '#b07aa1', 'ls': '-',   'lw': 1.7, 'zorder': 3},
 }
 _FALLBACK_COLORS = ['#8dd3c7', '#bebada', '#fb8072', '#80b1d3', '#fdb462']
 
@@ -53,6 +54,7 @@ NONPARAMETRIC_MODELS = {
     'MDN-2mix',
     'Flow-Spline',
     'Quantile-Tree',
+    'CatMLP',
 }
 
 METHOD_GROUP_ORDER = ('parametric', 'nonparametric', 'foundational')
@@ -126,6 +128,7 @@ METHOD_ORDER_HINTS = [
     'MDN-2mix',
     'Flow-Spline',
     'Quantile-Tree',
+    'CatMLP',
     'TabPFN-Native',
     'TabPFN-2.5',
     'RealTabPFN-2.5',

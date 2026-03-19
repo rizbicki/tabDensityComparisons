@@ -53,12 +53,12 @@ DEFAULT_METHOD_ORDER = [
     "RealTabPFN-2.5",
     "TabICL-Quantiles",
     "Quantile-Tree",
-    "Quantile-Linear",
     "MDN-2mix",
     "Flow-Spline",
     "BART-Homo",
     "BART-Hetero",
     "FlexCode-RF",
+    "CatMLP",
 ]
 
 DEFAULT_SAMPLE_SIZE_SPEC = "10000,50000,100000,250000,500000,full"

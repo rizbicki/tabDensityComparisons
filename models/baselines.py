@@ -6,7 +6,9 @@ Quantile methods, GLMs, and BART.
 import math
 import numpy as np
 from scipy import stats
-from sklearn.linear_model import LinearRegression, RidgeCV
+from scipy.optimize import minimize_scalar
+from sklearn.linear_model import LinearRegression, RidgeCV, GammaRegressor
+from sklearn.model_selection import KFold
 
 
 def _make_reg(regularized=False):
@@ -18,10 +20,51 @@ def _make_reg(regularized=False):
 
 def _normalize_density_rows(cdes, z_grid):
     """Normalize each row so it integrates to one on z_grid."""
-    dz = z_grid[1] - z_grid[0]
-    row_sums = cdes.sum(axis=1) * dz
-    row_sums[row_sums <= 0] = 1.0
-    return cdes / row_sums[:, None]
+    integrals = np.trapezoid(cdes, z_grid, axis=1)
+    integrals[integrals <= 0] = 1.0
+    return cdes / integrals[:, None]
+
+
+def _oof_regression_predictions(X, y, fit_and_predict, n_splits=5, random_state=42):
+    """Return out-of-fold predictions for a regression target."""
+    n_samples = len(y)
+    if n_samples == 0:
+        return np.array([], dtype=float)
+    if n_samples == 1:
+        return np.array([float(y[0])], dtype=float)
+
+    n_splits = min(n_splits, n_samples)
+    if n_splits < 2:
+        return np.full(n_samples, float(np.mean(y)))
+
+    preds = np.empty(n_samples, dtype=float)
+    kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+    for tr_idx, val_idx in kf.split(X):
+        preds[val_idx] = fit_and_predict(X[tr_idx], y[tr_idx], X[val_idx])
+    return preds
+
+
+def _estimate_gamma_shape(y_pos, mu):
+    """Estimate the Gamma shape parameter with fixed conditional means."""
+    y_pos = np.maximum(np.asarray(y_pos, dtype=float), 1e-10)
+    mu = np.maximum(np.asarray(mu, dtype=float), 1e-10)
+
+    rel_sq = np.square((y_pos - mu) / mu)
+    init_shape = max(1e-3, 1.0 / max(np.mean(rel_sq), 1e-8))
+
+    def neg_ll(log_shape):
+        shape = np.exp(log_shape)
+        scale = np.maximum(mu / shape, 1e-12)
+        return -np.sum(stats.gamma.logpdf(y_pos, a=shape, scale=scale))
+
+    result = minimize_scalar(
+        neg_ll,
+        bounds=(np.log(1e-3), np.log(1e4)),
+        method='bounded',
+    )
+    if not result.success or not np.isfinite(result.fun):
+        return init_shape
+    return max(float(np.exp(result.x)), 1e-3)
 
 
 def _flow_torch_device(requested):
@@ -146,8 +189,12 @@ def linear_gaussian_homo_density(X_train, z_train, X_test, n_grid=200,
     """Linear Gaussian with constant variance: f(z|x) = N(x'beta, sigma^2)."""
     reg = _make_reg(regularized).fit(X_train, z_train)
     mu_test = reg.predict(X_test)
-    residuals = z_train - reg.predict(X_train)
-    sigma = np.std(residuals, ddof=X_train.shape[1] + 1)
+    mu_train_oof = _oof_regression_predictions(
+        X_train, z_train,
+        lambda X_tr, y_tr, X_val: _make_reg(regularized).fit(X_tr, y_tr).predict(X_val),
+    )
+    residuals = z_train - mu_train_oof
+    sigma = np.std(residuals, ddof=1)
     sigma = max(sigma, 1e-8)
 
     if z_min is None:
@@ -156,7 +203,7 @@ def linear_gaussian_homo_density(X_train, z_train, X_test, n_grid=200,
         z_max = z_train.max() + 0.1 * np.ptp(z_train)
     z_grid = np.linspace(z_min, z_max, n_grid)
     cdes = stats.norm.pdf(z_grid[None, :], mu_test[:, None], sigma)
-    return cdes, z_grid
+    return _normalize_density_rows(cdes, z_grid), z_grid
 
 
 def linear_gaussian_hetero_density(X_train, z_train, X_test, n_grid=200,
@@ -167,10 +214,14 @@ def linear_gaussian_hetero_density(X_train, z_train, X_test, n_grid=200,
     Stage 2: fit log(residual^2) = X'gamma to model variance.
     """
     reg_mean = _make_reg(regularized).fit(X_train, z_train)
-    mu_train = reg_mean.predict(X_train)
     mu_test = reg_mean.predict(X_test)
 
-    residuals = z_train - mu_train
+    mu_train_oof = _oof_regression_predictions(
+        X_train,
+        z_train,
+        lambda X_tr, y_tr, X_val: _make_reg(regularized).fit(X_tr, y_tr).predict(X_val),
+    )
+    residuals = z_train - mu_train_oof
     log_sq_res = np.log(np.maximum(residuals ** 2, 1e-12))
     reg_var = _make_reg(regularized).fit(X_train, log_sq_res)
     log_var_test = reg_var.predict(X_test)
@@ -183,7 +234,7 @@ def linear_gaussian_hetero_density(X_train, z_train, X_test, n_grid=200,
         z_max = z_train.max() + 0.1 * np.ptp(z_train)
     z_grid = np.linspace(z_min, z_max, n_grid)
     cdes = stats.norm.pdf(z_grid[None, :], mu_test[:, None], sigma_test[:, None])
-    return cdes, z_grid
+    return _normalize_density_rows(cdes, z_grid), z_grid
 
 
 def mdn_density(X_train, z_train, X_test, n_grid=200,
@@ -204,8 +255,22 @@ def mdn_density(X_train, z_train, X_test, n_grid=200,
     z_std = max(z_std, 1e-8)
     z_tr_s = (z_train - z_mean) / z_std
 
-    X_tr_t = torch.tensor(X_train, dtype=torch.float32)
-    z_tr_t = torch.tensor(z_tr_s, dtype=torch.float32).unsqueeze(1)
+    # Train/val split for early stopping
+    n_total = len(X_train)
+    rng_split = np.random.RandomState(42)
+    perm = rng_split.permutation(n_total)
+    val_size = max(1, int(0.1 * n_total))
+    val_size = min(val_size, max(1, n_total // 5))
+    if n_total - val_size < 2:
+        val_size = 0
+
+    val_idx = perm[:val_size]
+    fit_idx = perm[val_size:] if val_size > 0 else perm
+
+    X_fit_t = torch.tensor(X_train[fit_idx], dtype=torch.float32)
+    z_fit_t = torch.tensor(z_tr_s[fit_idx], dtype=torch.float32).unsqueeze(1)
+    X_val_t = torch.tensor(X_train[val_idx], dtype=torch.float32) if val_size > 0 else None
+    z_val_t = torch.tensor(z_tr_s[val_idx], dtype=torch.float32).unsqueeze(1) if val_size > 0 else None
     X_te_t = torch.tensor(X_test, dtype=torch.float32)
 
     class MDN(nn.Module):
@@ -224,20 +289,47 @@ def mdn_density(X_train, z_train, X_test, n_grid=200,
             sigmas = torch.exp(log_sigmas.clamp(-5, 3))
             return pi, mus, sigmas
 
-    model = MDN()
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-
-    for epoch in range(n_epochs):
-        pi, mus, sigmas = model(X_tr_t)
-        z_exp = z_tr_t.expand_as(mus)
+    def _mdn_loss(pi, mus, sigmas, z_target):
+        z_exp = z_target.expand_as(mus)
         normal_lp = -0.5 * ((z_exp - mus) / sigmas) ** 2 \
                     - torch.log(sigmas) - 0.5 * np.log(2 * np.pi)
         log_mix = torch.log(pi + 1e-10) + normal_lp
-        loss = -torch.logsumexp(log_mix, dim=1).mean()
+        return -torch.logsumexp(log_mix, dim=1).mean()
+
+    model = MDN()
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    best_val_loss = float('inf')
+    best_state = None
+    patience = 30
+    stale = 0
+
+    for epoch in range(n_epochs):
+        model.train()
+        pi, mus, sigmas = model(X_fit_t)
+        loss = _mdn_loss(pi, mus, sigmas, z_fit_t)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
+        model.eval()
+        with torch.no_grad():
+            if X_val_t is not None:
+                pi_v, mus_v, sigmas_v = model(X_val_t)
+                val_loss = float(_mdn_loss(pi_v, mus_v, sigmas_v, z_val_t))
+            else:
+                val_loss = float(loss)
+
+        if val_loss < best_val_loss - 1e-4:
+            best_val_loss = val_loss
+            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+            stale = 0
+        else:
+            stale += 1
+            if stale >= patience:
+                break
+
+    if best_state is not None:
+        model.load_state_dict(best_state)
     model.eval()
     with torch.no_grad():
         pi, mus, sigmas = model(X_te_t)
@@ -257,7 +349,7 @@ def mdn_density(X_train, z_train, X_test, n_grid=200,
         cdes += pi[:, k:k+1] * stats.norm.pdf(
             z_grid[None, :], mus_np[:, k:k+1], sigmas_np[:, k:k+1]
         )
-    return cdes, z_grid
+    return _normalize_density_rows(cdes, z_grid), z_grid
 
 
 def normalizing_flow_density(X_train, z_train, X_test, n_grid=200,
@@ -470,9 +562,9 @@ def quantile_gbm_density(X_train, z_train, X_test, n_grid=200,
         Q_test[i, :] = np.sort(Q_test[i, :])
 
     if z_min is None:
-        z_min = Q_test.min() - 0.1 * np.ptp(Q_test)
+        z_min = z_train.min() - 0.1 * np.ptp(z_train)
     if z_max is None:
-        z_max = Q_test.max() + 0.1 * np.ptp(Q_test)
+        z_max = z_train.max() + 0.1 * np.ptp(z_train)
 
     z_grid = np.linspace(z_min, z_max, n_grid)
     cdes = np.zeros((n_test, n_grid))
@@ -514,9 +606,9 @@ def quantile_linear_density(X_train, z_train, X_test, n_grid=200,
         Q_test[i, :] = np.sort(Q_test[i, :])
 
     if z_min is None:
-        z_min = Q_test.min() - 0.1 * np.ptp(Q_test)
+        z_min = z_train.min() - 0.1 * np.ptp(z_train)
     if z_max is None:
-        z_max = Q_test.max() + 0.1 * np.ptp(Q_test)
+        z_max = z_train.max() + 0.1 * np.ptp(z_train)
 
     z_grid = np.linspace(z_min, z_max, n_grid)
     cdes = np.zeros((n_test, n_grid))
@@ -553,17 +645,24 @@ def gamma_glm_density(X_train, z_train, X_test, n_grid=200,
     z_train_pos = z_train + shift
     z_train_pos = np.maximum(z_train_pos, 1e-10)
 
-    # Fit log(E[Z|X]) = X'beta on log(z)
-    log_z = np.log(z_train_pos)
-    reg = _make_reg(regularized).fit(X_train, log_z)
-    log_mu_train = reg.predict(X_train)
-    log_mu_test = reg.predict(X_test)
-    mu_train = np.exp(log_mu_train)
-    mu_test = np.exp(log_mu_test)
+    # Fit a proper Gamma GLM with log link.
+    alpha = 1.0 if regularized else 0.0
+    reg = GammaRegressor(alpha=alpha, max_iter=1000, tol=1e-6)
+    reg.fit(X_train, z_train_pos)
+    mu_test = np.maximum(reg.predict(X_test), 1e-10)
 
-    # Estimate shape parameter
-    log_resid = log_z - log_mu_train
-    shape = 1.0 / np.maximum(np.var(log_resid, ddof=X_train.shape[1] + 1), 1e-8)
+    # Use out-of-fold predictions so the shape estimate is unbiased.
+    mu_train_oof = _oof_regression_predictions(
+        X_train, z_train_pos,
+        lambda X_tr, y_tr, X_val: np.maximum(
+            GammaRegressor(alpha=alpha, max_iter=1000, tol=1e-6)
+            .fit(X_tr, y_tr).predict(X_val),
+            1e-10,
+        ),
+    )
+
+    # Estimate the constant shape parameter conditional on OOF means.
+    shape = _estimate_gamma_shape(z_train_pos, mu_train_oof)
 
     # Gamma parameterization: shape=a, scale=mu/a
     if z_min is None:
@@ -596,14 +695,15 @@ def student_t_density(X_train, z_train, X_test, n_grid=200,
 
     Stage 1: fit E[Z|X] = X'beta.
     Stage 2: estimate scale and degrees of freedom by maximising the
-             Student-t log-likelihood of the residuals (profile MLE).
+             Student-t log-likelihood of the out-of-fold residuals (profile MLE).
     """
-    from scipy.optimize import minimize_scalar
-
     reg = _make_reg(regularized).fit(X_train, z_train)
-    mu_train = reg.predict(X_train)
     mu_test = reg.predict(X_test)
-    residuals = z_train - mu_train
+    mu_train_oof = _oof_regression_predictions(
+        X_train, z_train,
+        lambda X_tr, y_tr, X_val: _make_reg(regularized).fit(X_tr, y_tr).predict(X_val),
+    )
+    residuals = z_train - mu_train_oof
 
     def neg_ll(log_df):
         df = np.exp(log_df)
@@ -626,7 +726,7 @@ def student_t_density(X_train, z_train, X_test, n_grid=200,
     z_grid = np.linspace(z_min, z_max, n_grid)
 
     cdes = stats.t.pdf(z_grid[None, :], df=df, loc=mu_test[:, None], scale=scale)
-    return cdes, z_grid
+    return _normalize_density_rows(cdes, z_grid), z_grid
 
 
 def lognormal_homo_density(X_train, z_train, X_test, n_grid=200,
@@ -645,11 +745,14 @@ def lognormal_homo_density(X_train, z_train, X_test, n_grid=200,
 
     log_z = np.log(z_pos)
     reg = _make_reg(regularized).fit(X_train, log_z)
-    mu_train = reg.predict(X_train)
     mu_test = reg.predict(X_test)
 
-    residuals = log_z - mu_train
-    sigma = np.std(residuals, ddof=X_train.shape[1] + 1)
+    mu_train_oof = _oof_regression_predictions(
+        X_train, log_z,
+        lambda X_tr, y_tr, X_val: _make_reg(regularized).fit(X_tr, y_tr).predict(X_val),
+    )
+    residuals = log_z - mu_train_oof
+    sigma = np.std(residuals, ddof=1)
     sigma = max(sigma, 1e-8)
 
     if z_min is None:
@@ -690,10 +793,14 @@ def lognormal_hetero_density(X_train, z_train, X_test, n_grid=200,
     log_z = np.log(z_pos)
 
     reg_mean = _make_reg(regularized).fit(X_train, log_z)
-    mu_train = reg_mean.predict(X_train)
     mu_test = reg_mean.predict(X_test)
 
-    residuals = log_z - mu_train
+    mu_train_oof = _oof_regression_predictions(
+        X_train,
+        log_z,
+        lambda X_tr, y_tr, X_val: _make_reg(regularized).fit(X_tr, y_tr).predict(X_val),
+    )
+    residuals = log_z - mu_train_oof
     log_sq_res = np.log(np.maximum(residuals ** 2, 1e-12))
     reg_var = _make_reg(regularized).fit(X_train, log_sq_res)
     log_var_test = reg_var.predict(X_test)
@@ -728,10 +835,13 @@ def _fit_xbart(X_train, y_train, num_trees=30, num_sweeps=60, burnin=20):
     from xbart import XBART
     model = XBART(num_trees=num_trees, num_sweeps=num_sweeps, burnin=burnin)
     model.fit(X_train, y_train)
-    # sigma_draws shape: (num_sweeps, num_trees) – average over trees,
-    # then take the mean of post-burnin sweeps
+    # sigma_draws may be (num_sweeps,) or (num_sweeps, num_trees).
+    # Average over trees first (if 2-D), then over post-burnin sweeps.
     sigma_arr = np.array(model.sigma_draws)
-    sigma_post = sigma_arr[burnin:].mean()
+    if sigma_arr.ndim == 2:
+        sigma_post = sigma_arr[burnin:].mean(axis=1).mean()
+    else:
+        sigma_post = sigma_arr[burnin:].mean()
     return model, sigma_post
 
 
@@ -753,7 +863,7 @@ def bart_homo_density(X_train, z_train, X_test, n_grid=200,
         z_max = z_train.max() + 0.1 * np.ptp(z_train)
     z_grid = np.linspace(z_min, z_max, n_grid)
     cdes = stats.norm.pdf(z_grid[None, :], mu_test[:, None], sigma)
-    return cdes, z_grid
+    return _normalize_density_rows(cdes, z_grid), z_grid
 
 
 def bart_hetero_density(X_train, z_train, X_test, n_grid=200,
@@ -768,11 +878,24 @@ def bart_hetero_density(X_train, z_train, X_test, n_grid=200,
     # Stage 1: mean model
     model_mean, _ = _fit_xbart(X_train, z_train, num_trees=num_trees,
                                num_sweeps=num_sweeps, burnin=burnin)
-    mu_train = model_mean.predict(X_train)
     mu_test = model_mean.predict(X_test)
 
+    # Use out-of-fold residuals so the variance model is not trained on
+    # optimistic in-sample mean fits.
+    mu_train_oof = _oof_regression_predictions(
+        X_train,
+        z_train,
+        lambda X_tr, y_tr, X_val: _fit_xbart(
+            X_tr,
+            y_tr,
+            num_trees=num_trees,
+            num_sweeps=num_sweeps,
+            burnin=burnin,
+        )[0].predict(X_val),
+    )
+
     # Stage 2: variance model on log-squared residuals
-    residuals = z_train - mu_train
+    residuals = z_train - mu_train_oof
     log_sq_res = np.log(np.maximum(residuals ** 2, 1e-12))
     model_var, _ = _fit_xbart(X_train, log_sq_res, num_trees=num_trees,
                               num_sweeps=num_sweeps, burnin=burnin)
@@ -786,7 +909,7 @@ def bart_hetero_density(X_train, z_train, X_test, n_grid=200,
         z_max = z_train.max() + 0.1 * np.ptp(z_train)
     z_grid = np.linspace(z_min, z_max, n_grid)
     cdes = stats.norm.pdf(z_grid[None, :], mu_test[:, None], sigma_test[:, None])
-    return cdes, z_grid
+    return _normalize_density_rows(cdes, z_grid), z_grid
 
 
 # ── Categorical MLP density estimator ───────────────────────────────────────
@@ -819,8 +942,22 @@ def categorical_mlp_density(X_train, z_train, X_test, n_grid=200,
         np.digitize(z_train, bin_edges) - 1, 0, n_bins - 1
     ).astype(np.int64)
 
-    X_tr_t = torch.tensor(X_train, dtype=torch.float32)
-    y_tr_t = torch.tensor(bin_idx, dtype=torch.long)
+    # Train/val split for early stopping
+    n_total = len(X_train)
+    rng_split = np.random.RandomState(42)
+    perm = rng_split.permutation(n_total)
+    val_size = max(1, int(0.1 * n_total))
+    val_size = min(val_size, max(1, n_total // 5))
+    if n_total - val_size < 2:
+        val_size = 0
+
+    val_idx_split = perm[:val_size]
+    fit_idx_split = perm[val_size:] if val_size > 0 else perm
+
+    X_fit_t = torch.tensor(X_train[fit_idx_split], dtype=torch.float32)
+    y_fit_t = torch.tensor(bin_idx[fit_idx_split], dtype=torch.long)
+    X_val_t = torch.tensor(X_train[val_idx_split], dtype=torch.float32) if val_size > 0 else None
+    y_val_t = torch.tensor(bin_idx[val_idx_split], dtype=torch.long) if val_size > 0 else None
     X_te_t = torch.tensor(X_test, dtype=torch.float32)
 
     class CatMLP(nn.Module):
@@ -840,14 +977,37 @@ def categorical_mlp_density(X_train, z_train, X_test, n_grid=200,
     model = CatMLP()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     loss_fn = nn.CrossEntropyLoss()
+    best_val_loss = float('inf')
+    best_state = None
+    patience = 30
+    stale = 0
 
     for _ in range(n_epochs):
-        logits = model(X_tr_t)
-        loss = loss_fn(logits, y_tr_t)
+        model.train()
+        logits = model(X_fit_t)
+        loss = loss_fn(logits, y_fit_t)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
+        model.eval()
+        with torch.no_grad():
+            if X_val_t is not None:
+                val_loss = float(loss_fn(model(X_val_t), y_val_t))
+            else:
+                val_loss = float(loss)
+
+        if val_loss < best_val_loss - 1e-4:
+            best_val_loss = val_loss
+            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+            stale = 0
+        else:
+            stale += 1
+            if stale >= patience:
+                break
+
+    if best_state is not None:
+        model.load_state_dict(best_state)
     model.eval()
     with torch.no_grad():
         logits = model(X_te_t)

@@ -28,7 +28,7 @@ os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib")
 
 from datasets import load_sdss_dataset
 from run_experiments import run_experiment
-from utils import load_cache, save_cache, print_summary
+from utils import load_cache, save_cache, print_summary, aggregate_reps
 from visualization import (
     plot_performance_vs_n,
     plot_performance_vs_n_foundational,
@@ -65,16 +65,6 @@ DEFAULT_METHOD_ORDER = [
 
 DEFAULT_SAMPLE_SIZE_SPEC = "1000,10000,50000,100000,250000,500000,full"
 TABPFN_METHODS = {"TabPFN-Native", "TabPFN-2.5", "RealTabPFN-2.5"}
-MEAN_METRICS = [
-    "CDE_loss",
-    "log_lik",
-    "CRPS",
-    "PIT_KS",
-    "coverage_90",
-    "interval_width",
-    "fit_time",
-    "pred_time",
-]
 
 
 def _key(name):
@@ -94,6 +84,10 @@ def _method_aliases(name):
 
 def _canonicalize_methods(methods):
     return list(dict.fromkeys(_canonical_method_name(m) for m in methods))
+
+
+def _sdss_run_tag(random_state, subsample_seed):
+    return f"split{int(random_state)}_sub{int(subsample_seed)}"
 
 
 def _normalize_method_mapping(mapping):
@@ -138,41 +132,6 @@ def _load_cached_arrays(partial_dir, dataset_name, methods):
                 zgrids[method] = np.load(zgrid_file)
                 break
     return cdes, zgrids
-
-
-def _aggregate_reps(per_rep_results):
-    methods = sorted(set(m for rep in per_rep_results for m in rep))
-    agg = {}
-    for method in methods:
-        vals = {k: [] for k in MEAN_METRICS}
-        n_basis_vals = []
-        rep_count = 0
-
-        for rep in per_rep_results:
-            if method not in rep:
-                continue
-            rep_count += 1
-            for metric in MEAN_METRICS:
-                if rep[method].get(metric) is not None:
-                    vals[metric].append(rep[method][metric])
-            if rep[method].get("n_basis") is not None:
-                n_basis_vals.append(rep[method]["n_basis"])
-
-        agg_method = {"n_reps": rep_count}
-        for metric in MEAN_METRICS:
-            arr = np.array(vals[metric], dtype=float)
-            if len(arr) > 0:
-                agg_method[metric] = float(np.mean(arr))
-                agg_method[f"{metric}_se"] = (
-                    float(np.std(arr, ddof=1) / np.sqrt(len(arr)))
-                    if len(arr) > 1 else None
-                )
-            else:
-                agg_method[metric] = None
-                agg_method[f"{metric}_se"] = None
-        agg_method["n_basis"] = float(np.mean(n_basis_vals)) if n_basis_vals else None
-        agg[method] = agg_method
-    return agg
 
 
 def _resolve_runtime_device(requested):
@@ -276,21 +235,34 @@ def _select_methods(base_methods, n_total, runtime_device, use_policy=True):
     return selected, skipped
 
 
-def _load_existing_output(output_dir):
+def _load_existing_output(output_dir, run_tag=None):
     all_results = {}
 
     json_file = output_dir / "results.json"
+    policy_file = output_dir / "method_policy.json"
+    if run_tag is not None and policy_file.exists():
+        try:
+            with open(policy_file) as f:
+                policy_payload = json.load(f)
+            existing_run_tag = policy_payload.get("_run_tag")
+            if existing_run_tag != run_tag:
+                return {}, {}
+        except Exception:
+            return {}, {}
+
     if json_file.exists():
         with open(json_file) as f:
             all_results = _normalize_results_payload(json.load(f))
 
-    all_data = _load_cached_scaling_payloads(output_dir, all_results)
+    all_data = _load_cached_scaling_payloads(output_dir, all_results, run_tag=run_tag)
     return all_results, all_data
 
 
-def _load_cached_scaling_payloads(output_dir, all_results):
+def _load_cached_scaling_payloads(output_dir, all_results, run_tag=None):
     all_data = {}
     cache_dir = output_dir / "cache"
+    if run_tag is not None:
+        cache_dir = cache_dir / run_tag
     for dataset_name in all_results:
         cache_file = cache_dir / f"{dataset_name}.npz"
         if not cache_file.exists():
@@ -311,8 +283,10 @@ def _load_cached_scaling_payloads(output_dir, all_results):
     return all_data
 
 
-def _load_partial_scaling_output(output_dir):
+def _load_partial_scaling_output(output_dir, run_tag=None):
     partial_root = output_dir / "cache" / "partial"
+    if run_tag is not None:
+        partial_root = partial_root / run_tag
     if not partial_root.exists():
         return {}, {}
 
@@ -327,11 +301,11 @@ def _load_partial_scaling_output(output_dir):
 
     all_results = {}
     for dataset_name in sorted(dataset_reps):
-        agg_results = _aggregate_reps(dataset_reps[dataset_name])
+        agg_results = aggregate_reps(dataset_reps[dataset_name])
         if agg_results:
             all_results[dataset_name] = agg_results
 
-    all_data = _load_cached_scaling_payloads(output_dir, all_results)
+    all_data = _load_cached_scaling_payloads(output_dir, all_results, run_tag=run_tag)
     return all_results, all_data
 
 
@@ -352,13 +326,17 @@ def _render_sdss_scaling_outputs(all_results, all_data, output_dir, se_caption):
     return True
 
 
-def generate_sdss_scaling_partial_plots(output_dir="results_real/sdss_scaling"):
+def generate_sdss_scaling_partial_plots(output_dir="results_real/sdss_scaling",
+                                        run_tag=None):
     """Aggregate current partial SDSS-scaling results and regenerate plots/tables."""
     output_dir = Path(output_dir)
     results_file = output_dir / "results.json"
-    all_results, all_data = _load_partial_scaling_output(output_dir)
+    all_results, all_data = _load_partial_scaling_output(output_dir, run_tag=run_tag)
     if not all_results:
-        print(f"[skip] No partial SDSS scaling results found in {output_dir / 'cache' / 'partial'}")
+        partial_root = output_dir / "cache" / "partial"
+        if run_tag is not None:
+            partial_root = partial_root / run_tag
+        print(f"[skip] No partial SDSS scaling results found in {partial_root}")
         return False
 
     _write_json(results_file, all_results)
@@ -405,6 +383,7 @@ def main():
                         help="Regenerate the SDSS scaling table/plots after each "
                              "completed repetition")
     args = parser.parse_args()
+    run_tag = _sdss_run_tag(args.random_state, args.subsample_seed)
 
     if args.list_methods:
         print("\n".join(DEFAULT_METHOD_ORDER))
@@ -414,26 +393,34 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
     cache_dir = output_dir / "cache"
     cache_dir.mkdir(exist_ok=True)
-    partial_root = cache_dir / "partial"
+    cache_payload_dir = cache_dir / run_tag
+    cache_payload_dir.mkdir(parents=True, exist_ok=True)
+    partial_root = cache_dir / "partial" / run_tag
     partial_root.mkdir(parents=True, exist_ok=True)
     results_file = output_dir / "results.json"
     policy_file = output_dir / "method_policy.json"
 
     if args.plot_partial_results_only:
-        generate_sdss_scaling_partial_plots(output_dir=output_dir)
+        generate_sdss_scaling_partial_plots(output_dir=output_dir, run_tag=run_tag)
         return
 
     if args.force:
         all_results = {}
         all_data = {}
-        policy_manifest = {}
+        policy_manifest = {"_run_tag": run_tag}
     else:
-        all_results, all_data = _load_existing_output(output_dir)
+        all_results, all_data = _load_existing_output(output_dir, run_tag=run_tag)
         if policy_file.exists():
             with open(policy_file) as f:
                 policy_manifest = json.load(f)
+            existing_run_tag = policy_manifest.get("_run_tag")
+            if existing_run_tag != run_tag:
+                print(f"[cache] ignoring existing SDSS scaling metadata for run tag "
+                      f"{existing_run_tag}; current run tag is {run_tag}")
+                policy_manifest = {"_run_tag": run_tag}
         else:
-            policy_manifest = {}
+            policy_manifest = {"_run_tag": run_tag}
+    policy_manifest["_run_tag"] = run_tag
 
     X_full, z_full = load_sdss_dataset()
     full_n = len(z_full)
@@ -458,10 +445,11 @@ def main():
     print(f"Policy runtime device: {runtime_device}")
     print(f"Sample sizes: {', '.join(f'{n:,}' for n in sample_sizes)}")
     print(f"Repetitions per sample size: {args.n_reps}")
+    print(f"Run tag: {run_tag}")
 
     for n_total in sample_sizes:
         dataset_name = f"SDSS-{n_total}"
-        cache_file = cache_dir / f"{dataset_name}.npz"
+        cache_file = cache_payload_dir / f"{dataset_name}.npz"
 
         use_policy = (not args.methods) and (not args.all_methods_at_all_sizes)
         selected_methods, policy_skips = _select_methods(
@@ -499,9 +487,10 @@ def main():
             rep_partial = partial_root / f"rep{rep}"
             rep_partial.mkdir(parents=True, exist_ok=True)
             rep_seed = args.random_state + rep
-            subsample_seed = args.subsample_seed + rep
+            # Use constant subsample seed so all reps evaluate the same
+            # data subset; only the train/test split varies (via rep_seed).
             X_sub, z_sub = _subsample_from_full(
-                X_full, z_full, n_total, subsample_seed
+                X_full, z_full, n_total, args.subsample_seed
             )
             rep_key = f"rep{rep}"
             runtime_failures[rep_key] = {}
@@ -511,7 +500,7 @@ def main():
             true_zgrid = None
 
             print(f"\n  ── rep {rep + 1}/{args.n_reps} (seed={rep_seed}, "
-                  f"subsample_seed={subsample_seed}) ──")
+                  f"subsample_seed={args.subsample_seed}) ──")
             for method in selected_methods:
                 print(f"\nRunning {dataset_name}: {method}")
                 try:
@@ -540,7 +529,7 @@ def main():
             rep_metrics = _load_partial_metrics(rep_partial, dataset_name)
             per_rep_results.append(rep_metrics)
             if args.refresh_plots_after_each_rep:
-                generate_sdss_scaling_partial_plots(output_dir=output_dir)
+                generate_sdss_scaling_partial_plots(output_dir=output_dir, run_tag=run_tag)
 
             if (
                 not representative_cache_saved
@@ -562,7 +551,7 @@ def main():
                     )
                     representative_cache_saved = True
 
-        agg_results = _aggregate_reps(per_rep_results)
+        agg_results = aggregate_reps(per_rep_results)
         if agg_results:
             all_results[dataset_name] = agg_results
             if cache_file.exists():

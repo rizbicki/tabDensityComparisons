@@ -12,7 +12,6 @@ import argparse
 import json
 from pathlib import Path
 
-import numpy as np
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -23,7 +22,6 @@ from run_experiments import (
     report_sdss_schedule,
 )
 from datasets import load_real_only_datasets
-from evaluation import compute_all_metrics
 from visualization import (
     plot_rankings_by_n, plot_raw_metrics_by_n,
     plot_pit_histograms, plot_native_tab_subset,
@@ -31,42 +29,7 @@ from visualization import (
     save_html_table,
     save_latex_table,
 )
-from utils import save_cache, load_cache, print_summary
-
-
-MEAN_METRICS = ['CDE_loss', 'log_lik', 'CRPS', 'PIT_KS',
-                'coverage_90', 'interval_width', 'fit_time', 'pred_time']
-
-
-def _aggregate_reps(per_rep_results):
-    methods = sorted(set(m for rep in per_rep_results for m in rep))
-    agg = {}
-    for m in methods:
-        vals = {k: [] for k in MEAN_METRICS}
-        n_basis_vals = []
-        for rep in per_rep_results:
-            if m not in rep:
-                continue
-            for k in MEAN_METRICS:
-                if k in rep[m] and rep[m][k] is not None:
-                    vals[k].append(rep[m][k])
-            if rep[m].get('n_basis') is not None:
-                n_basis_vals.append(rep[m]['n_basis'])
-
-        agg_m = {}
-        for k in MEAN_METRICS:
-            arr = np.array(vals[k])
-            if len(arr) > 0:
-                agg_m[k] = float(np.mean(arr))
-                agg_m[f'{k}_se'] = float(
-                    np.std(arr, ddof=1) / np.sqrt(len(arr))
-                ) if len(arr) > 1 else None
-            else:
-                agg_m[k] = None
-                agg_m[f'{k}_se'] = None
-        agg_m['n_basis'] = float(np.mean(n_basis_vals)) if n_basis_vals else None
-        agg[m] = agg_m
-    return agg
+from utils import save_cache, load_cache, print_summary, aggregate_reps
 
 
 def main():
@@ -157,7 +120,7 @@ def main():
                     )
                 per_rep_results.append(res)
             n_total = len(z)
-            all_results[name] = _aggregate_reps(per_rep_results)
+            all_results[name] = aggregate_reps(per_rep_results)
             save_cache(cache_file, cdes, zgrids, X_te, z_te,
                        true_cde, true_zgrid, n_total)
 

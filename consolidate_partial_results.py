@@ -17,42 +17,7 @@ import json
 from pathlib import Path
 import numpy as np
 
-
-MEAN_METRICS = ['CDE_loss', 'log_lik', 'CRPS', 'PIT_KS',
-                'coverage_90', 'interval_width', 'fit_time', 'pred_time']
-
-
-def _aggregate_reps(per_rep_results):
-    """Aggregate metrics across repetitions and compute mean +/- SE."""
-    methods = sorted(set(m for rep in per_rep_results for m in rep))
-    agg = {}
-    for m in methods:
-        vals = {k: [] for k in MEAN_METRICS}
-        n_basis_vals = []
-        for rep in per_rep_results:
-            if m not in rep:
-                continue
-            for k in MEAN_METRICS:
-                if k in rep[m] and rep[m][k] is not None:
-                    vals[k].append(rep[m][k])
-            if rep[m].get('n_basis') is not None:
-                n_basis_vals.append(rep[m]['n_basis'])
-
-        agg_m = {}
-        for k in MEAN_METRICS:
-            arr = np.array(vals[k])
-            if len(arr) > 0:
-                agg_m[k] = float(np.mean(arr))
-                agg_m[f'{k}_se'] = (
-                    float(np.std(arr, ddof=1) / np.sqrt(len(arr)))
-                    if len(arr) > 1 else None
-                )
-            else:
-                agg_m[k] = None
-                agg_m[f'{k}_se'] = None
-        agg_m['n_basis'] = float(np.mean(n_basis_vals)) if n_basis_vals else None
-        agg[m] = agg_m
-    return agg
+from utils import aggregate_reps
 
 
 def _consolidate_source(source_dir, all_results, output_cache_dir):
@@ -84,7 +49,7 @@ def _consolidate_source(source_dir, all_results, output_cache_dir):
     last_rep = rep_dirs[-1]
     for ds_name in sorted(dataset_reps):
         reps = dataset_reps[ds_name]
-        all_results[ds_name] = _aggregate_reps(reps)
+        all_results[ds_name] = aggregate_reps(reps)
         print(f"    {ds_name}: {len(reps)} rep(s), "
               f"{len(all_results[ds_name])} method(s)")
 

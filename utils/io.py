@@ -38,6 +38,43 @@ def load_cache(cache_file):
     return cdes, zgrids, X_te, z_te, true_cde, true_zgrid, n_total
 
 
+MEAN_METRICS = ['CDE_loss', 'log_lik', 'CRPS', 'PIT_KS',
+                'coverage_90', 'interval_width', 'fit_time', 'pred_time']
+
+
+def aggregate_reps(per_rep_results):
+    """Aggregate metrics across repetitions: mean +/- SE."""
+    methods = sorted(set(m for rep in per_rep_results for m in rep))
+    agg = {}
+    for m in methods:
+        vals = {k: [] for k in MEAN_METRICS}
+        n_basis_vals = []
+        for rep in per_rep_results:
+            if m not in rep:
+                continue
+            for k in MEAN_METRICS:
+                if k in rep[m] and rep[m][k] is not None:
+                    vals[k].append(rep[m][k])
+            if rep[m].get('n_basis') is not None:
+                n_basis_vals.append(rep[m]['n_basis'])
+
+        agg_m = {}
+        for k in MEAN_METRICS:
+            arr = np.array(vals[k])
+            if len(arr) > 0:
+                agg_m[k] = float(np.mean(arr))
+                agg_m[f'{k}_se'] = float(
+                    np.std(arr, ddof=1) / np.sqrt(len(arr))
+                ) if len(arr) > 1 else None
+            else:
+                agg_m[k] = None
+                agg_m[f'{k}_se'] = None
+        agg_m['n_basis'] = (float(np.mean(n_basis_vals))
+                            if n_basis_vals else None)
+        agg[m] = agg_m
+    return agg
+
+
 def fmt_metric(val, se, fmt='.4f'):
     """Format metric value with standard error in parentheses."""
     if se is None:

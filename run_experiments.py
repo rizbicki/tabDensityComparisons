@@ -69,7 +69,7 @@ from visualization import (
     save_html_table,
     save_latex_table,
 )
-from utils import save_cache, load_cache, print_summary
+from utils import save_cache, load_cache, print_summary, aggregate_reps
 
 
 # ============================================================================
@@ -437,8 +437,8 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
     true_zgrid = None
     if true_density_fn is not None and zgrids_dict:
         first_zg = next(iter(zgrids_dict.values()))
-        z_lo = min(first_zg[0], z_test.min() - 0.05 * np.ptp(z_test))
-        z_hi = max(first_zg[-1], z_test.max() + 0.05 * np.ptp(z_test))
+        z_lo = min(first_zg[0], z_train.min() - 0.05 * np.ptp(z_train))
+        z_hi = max(first_zg[-1], z_train.max() + 0.05 * np.ptp(z_train))
         true_zgrid = np.linspace(z_lo, z_hi, n_grid)
         true_cde = true_density_fn(X_test, true_zgrid)  # unscaled X_test
         dz = true_zgrid[1] - true_zgrid[0]
@@ -518,42 +518,6 @@ def main():
     report_sdss_schedule(datasets)
     n_reps = args.n_reps
 
-    # ── Metrics that are averaged across repetitions ──────────────────────
-    MEAN_METRICS = ['CDE_loss', 'log_lik', 'CRPS', 'PIT_KS',
-                    'coverage_90', 'interval_width', 'fit_time', 'pred_time']
-
-    def _aggregate_reps(per_rep_results):
-        """Aggregate metrics across repetitions: mean ± SE."""
-        methods = sorted(set(m for rep in per_rep_results for m in rep))
-        agg = {}
-        for m in methods:
-            vals = {k: [] for k in MEAN_METRICS}
-            n_basis_vals = []
-            for rep in per_rep_results:
-                if m not in rep:
-                    continue
-                for k in MEAN_METRICS:
-                    if k in rep[m] and rep[m][k] is not None:
-                        vals[k].append(rep[m][k])
-                if rep[m].get('n_basis') is not None:
-                    n_basis_vals.append(rep[m]['n_basis'])
-
-            agg_m = {}
-            for k in MEAN_METRICS:
-                arr = np.array(vals[k])
-                if len(arr) > 0:
-                    agg_m[k] = float(np.mean(arr))
-                    agg_m[f'{k}_se'] = float(
-                        np.std(arr, ddof=1) / np.sqrt(len(arr))
-                    ) if len(arr) > 1 else None
-                else:
-                    agg_m[k] = None
-                    agg_m[f'{k}_se'] = None
-            agg_m['n_basis'] = (float(np.mean(n_basis_vals))
-                                if n_basis_vals else None)
-            agg[m] = agg_m
-        return agg
-
     all_results = {}
     all_data = {}
 
@@ -605,7 +569,7 @@ def main():
                 per_rep_results.append(res)
             # Aggregate across reps
             n_total = len(z)
-            all_results[name] = _aggregate_reps(per_rep_results)
+            all_results[name] = aggregate_reps(per_rep_results)
             # Save last rep's CDEs for visualization
             save_cache(cache_file, cdes, zgrids, X_te, z_te,
                        true_cde, true_zgrid, n_total)

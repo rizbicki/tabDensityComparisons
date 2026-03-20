@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 from pathlib import Path
 from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 from matplotlib.transforms import blended_transform_factory
 
 from evaluation.metrics import eval_pit, eval_pit_ks
@@ -132,6 +133,11 @@ PERF_TICK_FONTSIZE = 14
 PERF_LEGEND_FONTSIZE = 14
 PERF_FOUNDATIONAL_LEGEND_FONTSIZE = 17
 PERF_SUPTITLE_FONTSIZE = 22
+
+HEATMAP_CELL_WIDTH = 0.62
+HEATMAP_CELL_HEIGHT = 0.40
+HEATMAP_SUMMARY_WIDTH = 3.3
+HEATMAP_MIN_FIG_HEIGHT = 4.4
 
 EXCLUDED_METHODS = {'Quantile-Linear'}
 
@@ -348,6 +354,41 @@ def _decorate_grouped_method_axis(ax, methods, label_x, show_labels=True,
         tick.set_color(METHOD_GROUP_META[_method_group(method)]['accent'])
 
 
+def _heatmap_layout(n_methods, n_ds, include_summary=True):
+    heatmap_w = n_ds * HEATMAP_CELL_WIDTH
+    summary_w = HEATMAP_SUMMARY_WIDTH if include_summary else 0.0
+    fig_w = heatmap_w + summary_w + 1.0
+    fig_h = max(HEATMAP_MIN_FIG_HEIGHT, n_methods * HEATMAP_CELL_HEIGHT + 2.0)
+    return fig_w, fig_h, heatmap_w, summary_w
+
+
+def _heatmap_font_sizes(n_methods, n_ds):
+    max_dim = max(n_methods, n_ds)
+    return {
+        'method': max(9, min(13, 165 / max(1, n_methods))),
+        'dataset': max(8, min(11, 130 / max(1, n_ds))),
+        'cell': max(7, min(10, 135 / max(1, max_dim))),
+        'title': max(12, min(16, 210 / max(1, max_dim))),
+        'axis': max(10, min(13, 170 / max(1, max_dim))),
+        'tick': max(8, min(11, 145 / max(1, max_dim))),
+        'legend': max(10, min(12, 175 / max(1, max_dim))),
+    }
+
+
+def _add_method_group_legend(fig, fontsize):
+    handles = []
+    for group in METHOD_GROUP_ORDER:
+        meta = METHOD_GROUP_META[group]
+        handles.append(
+            Patch(facecolor=meta['accent'], alpha=0.25,
+                  edgecolor=meta['accent'], linewidth=1.5,
+                  label=meta['label'])
+        )
+    fig.legend(handles=handles, loc='upper center',
+               ncol=len(handles), frameon=False,
+               fontsize=fontsize, bbox_to_anchor=(0.5, 1.0))
+
+
 def _resolve_output_dirs(output_dir):
     """Normalize output_dir into {'sim': Path(...), 'real': Path(...)}."""
     if isinstance(output_dir, dict):
@@ -502,19 +543,15 @@ def _plot_rankings_grid(sub_results, methods, colors, n_size, kind_label,
     n_ds = len(datasets)
     ds_labels = _ds_labels(datasets, all_data)
     method_index = {m: i for i, m in enumerate(methods)}
-
-    # Adaptive sizing: fixed per-cell dimensions that scale gracefully
-    cell_w = 0.55                           # width per dataset column
-    cell_h = 0.34                           # height per method row
-    bar_w  = 2.8                            # fixed width for bar chart panel
-    fig_w = n_ds * cell_w + bar_w + 1.0
-    fig_h = max(3.5, n_methods * cell_h + 1.8)  # extra for title + x-labels
-
-    # Adaptive font sizes (clamped)
-    method_fs  = max(7, min(11, 140 / n_methods))
-    ds_fs      = max(6, min(9,  110 / n_ds))
-    cell_fs    = max(6, min(9,  120 / max(n_methods, n_ds)))
-    title_fs   = max(10, min(14, 180 / max(n_methods, n_ds)))
+    fig_w, fig_h, heatmap_w, bar_w = _heatmap_layout(n_methods, n_ds)
+    fonts = _heatmap_font_sizes(n_methods, n_ds)
+    method_fs = fonts['method']
+    ds_fs = fonts['dataset']
+    cell_fs = fonts['cell']
+    title_fs = fonts['title']
+    axis_fs = fonts['axis']
+    tick_fs = fonts['tick']
+    legend_fs = fonts['legend']
 
     for metric, label, direction in METRICS_INFO:
         matrix = np.full((n_methods, n_ds), np.nan)
@@ -542,8 +579,6 @@ def _plot_rankings_grid(sub_results, methods, colors, n_size, kind_label,
         row_order = [method_index[m] for m in ordered_methods]
         plot_matrix = matrix[row_order, :]
 
-        # Layout: heatmap | gap | bar chart, with explicit widths
-        heatmap_w = n_ds * cell_w
         width_ratios = [heatmap_w, bar_w]
         fig, (ax1, ax2) = plt.subplots(
             1, 2, figsize=(fig_w, fig_h),
@@ -570,8 +605,8 @@ def _plot_rankings_grid(sub_results, methods, colors, n_size, kind_label,
         # Colorbar: horizontal, below the heatmap, so it never overlaps the bar chart
         cbar = fig.colorbar(im, ax=ax1, orientation='horizontal',
                             fraction=0.04, pad=0.18, shrink=0.6)
-        cbar.ax.tick_params(labelsize=max(7, method_fs - 2))
-        cbar.set_label('Rank', fontsize=max(8, method_fs - 1))
+        cbar.ax.tick_params(labelsize=tick_fs)
+        cbar.set_label('Rank', fontsize=axis_fs)
         ax1.set_title(f'{label} — Rankings (n={n_size}, {kind_label})',
                       fontsize=title_fs, fontweight='bold')
 
@@ -581,29 +616,18 @@ def _plot_rankings_grid(sub_results, methods, colors, n_size, kind_label,
                  color=[colors[m] for m in sorted_methods], alpha=0.8)
         ax2.set_yticks(y_pos)
         ax2.set_yticklabels(sorted_methods, fontsize=method_fs)
-        ax2.set_xlabel('Avg Rank', fontsize=max(8, method_fs - 1))
+        ax2.set_xlabel('Avg Rank', fontsize=axis_fs)
         ax2.set_title(f'Overall (n={n_size})', fontsize=title_fs,
                       fontweight='bold')
         ax2.grid(axis='x', alpha=0.3)
-        ax2.tick_params(axis='x', labelsize=max(7, method_fs - 2))
+        ax2.tick_params(axis='x', labelsize=tick_fs)
         ax2.invert_yaxis()
         _decorate_grouped_method_axis(ax2, sorted_methods, label_x=0,
                                       show_labels=False, show_lines=False)
 
-        # Compact group legend above the title
-        from matplotlib.patches import Patch
-        legend_handles = []
-        for group in METHOD_GROUP_ORDER:
-            meta = METHOD_GROUP_META[group]
-            legend_handles.append(
-                Patch(facecolor=meta['accent'], alpha=0.25,
-                      edgecolor=meta['accent'], linewidth=1.5,
-                      label=meta['label']))
-        fig.legend(handles=legend_handles, loc='upper center',
-                   ncol=len(legend_handles), frameon=False,
-                   fontsize=max(8, method_fs), bbox_to_anchor=(0.5, 1.0))
+        _add_method_group_legend(fig, legend_fs)
 
-        fig.subplots_adjust(right=0.97, top=0.92, bottom=0.15)
+        fig.subplots_adjust(right=0.97, top=0.92, bottom=0.16)
         fname = f"{fname_prefix}_{metric.lower()}_n{n_size}.png"
         fig.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
         plt.close(fig)
@@ -628,21 +652,31 @@ def plot_rankings_by_n(all_results, output_dir, all_data=None):
                                 n_size, label, prefix, output_dirs[kind], all_data)
 
 
-def _plot_raw_grid(sub_results, methods, n_size, kind_label, fname_prefix,
-                   output_dir, all_data):
+def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
+                   fname_prefix, output_dir, all_data):
     """Shared raw-value heatmap for one (n, type) slice."""
     datasets = list(sub_results.keys())
     if not datasets:
         return
-    ordered_methods = _ordered_methods(methods)
-    n_methods = len(ordered_methods)
+    n_methods = len(methods)
     n_ds = len(datasets)
     ds_labels = _ds_labels(datasets, all_data)
+    method_index = {m: i for i, m in enumerate(methods)}
+    fig_w, fig_h, heatmap_w, bar_w = _heatmap_layout(n_methods, n_ds)
+    fonts = _heatmap_font_sizes(n_methods, n_ds)
+    method_fs = fonts['method']
+    ds_fs = fonts['dataset']
+    cell_fs = fonts['cell']
+    title_fs = fonts['title']
+    axis_fs = fonts['axis']
+    tick_fs = fonts['tick']
+    legend_fs = fonts['legend']
 
     for metric, label, direction in METRICS_INFO:
         matrix = np.full((n_methods, n_ds), np.nan)
         for di, ds in enumerate(datasets):
-            for mi, m in enumerate(ordered_methods):
+            for m in methods:
+                mi = method_index[m]
                 v = sub_results[ds].get(m, {}).get(metric)
                 if v is not None:
                     matrix[mi, di] = v
@@ -652,6 +686,8 @@ def _plot_raw_grid(sub_results, methods, n_size, kind_label, fname_prefix,
         norm_matrix = np.full_like(matrix, np.nan)
         for j in range(n_ds):
             col = matrix[:, j]
+            if np.all(np.isnan(col)):
+                continue
             cmin, cmax = np.nanmin(col), np.nanmax(col)
             rng = cmax - cmin
             if rng < 1e-10:
@@ -659,32 +695,73 @@ def _plot_raw_grid(sub_results, methods, n_size, kind_label, fname_prefix,
             else:
                 norm_matrix[:, j] = (col - cmin) / rng
 
-        fig, ax = plt.subplots(figsize=(max(10, n_ds * 0.9),
-                                        max(4, n_methods * 0.6)))
-        ax.imshow(norm_matrix, cmap=cmap, aspect='auto', vmin=0, vmax=1)
-        ax.set_yticks(range(n_methods))
-        ax.set_yticklabels(ordered_methods, fontsize=11)
-        ax.set_xticks(range(n_ds))
-        ax.set_xticklabels(ds_labels, fontsize=9, rotation=45, ha='right')
-        _decorate_grouped_method_axis(ax, ordered_methods, label_x=-0.34)
+        scaled_scores = {}
+        for mi, m in enumerate(methods):
+            vals = norm_matrix[mi][~np.isnan(norm_matrix[mi])]
+            if len(vals) == 0:
+                scaled_scores[m] = -1.0
+                continue
+            scaled = 1.0 - vals if direction == 'lower' else vals
+            scaled_scores[m] = float(np.mean(scaled))
+
+        ordered_methods = _ordered_methods(methods, score_map=scaled_scores)
+        row_order = [method_index[m] for m in ordered_methods]
+        plot_matrix = matrix[row_order, :]
+        plot_norm = norm_matrix[row_order, :]
+
+        width_ratios = [heatmap_w, bar_w]
+        fig, (ax1, ax2) = plt.subplots(
+            1, 2, figsize=(fig_w, fig_h),
+            gridspec_kw={'width_ratios': width_ratios, 'wspace': 0.35})
+
+        im = ax1.imshow(plot_norm, cmap=cmap, aspect='auto', vmin=0, vmax=1)
+        ax1.set_yticks(range(n_methods))
+        ax1.set_yticklabels(ordered_methods, fontsize=method_fs)
+        ax1.set_xticks(range(n_ds))
+        ax1.set_xticklabels(ds_labels, fontsize=ds_fs, rotation=50, ha='right')
+        _decorate_grouped_method_axis(ax1, ordered_methods, label_x=0,
+                                      show_labels=False, fontsize=method_fs)
 
         for i in range(n_methods):
             for j in range(n_ds):
-                if not np.isnan(matrix[i, j]):
-                    val = matrix[i, j]
+                if not np.isnan(plot_matrix[i, j]):
+                    val = plot_matrix[i, j]
                     txt = f'{val:.3f}' if abs(val) < 100 else f'{val:.1f}'
-                    nv = norm_matrix[i, j]
+                    nv = plot_norm[i, j]
                     dark = nv < 0.4 if direction == 'higher' else nv > 0.6
-                    ax.text(j, i, txt, ha='center', va='center',
-                            fontsize=8, fontweight='bold',
-                            color='white' if dark else 'black')
+                    ax1.text(j, i, txt, ha='center', va='center',
+                             fontsize=cell_fs, fontweight='bold',
+                             color='white' if dark else 'black')
 
-        ax.set_title(f'{label} (n={n_size}, {kind_label}, colors normalized per dataset)',
-                     fontsize=14, fontweight='bold')
-        plt.tight_layout(rect=[0.08, 0, 1, 1])
+        cbar = fig.colorbar(im, ax=ax1, orientation='horizontal',
+                            fraction=0.04, pad=0.18, shrink=0.6)
+        cbar.ax.tick_params(labelsize=tick_fs)
+        cbar.set_label('Scaled Within Dataset', fontsize=axis_fs)
+        ax1.set_title(f'{label} — Raw Values (n={n_size}, {kind_label})',
+                      fontsize=title_fs, fontweight='bold')
+
+        sorted_methods = sorted(scaled_scores, key=scaled_scores.get, reverse=True)
+        y_pos = range(len(sorted_methods))
+        ax2.barh(y_pos, [scaled_scores[m] for m in sorted_methods],
+                 color=[colors[m] for m in sorted_methods], alpha=0.8)
+        ax2.set_yticks(y_pos)
+        ax2.set_yticklabels(sorted_methods, fontsize=method_fs)
+        ax2.set_xlabel('Avg Scaled', fontsize=axis_fs)
+        ax2.set_title(f'Overall (n={n_size})', fontsize=title_fs,
+                      fontweight='bold')
+        ax2.grid(axis='x', alpha=0.3)
+        ax2.tick_params(axis='x', labelsize=tick_fs)
+        ax2.set_xlim(0, 1)
+        ax2.invert_yaxis()
+        _decorate_grouped_method_axis(ax2, sorted_methods, label_x=0,
+                                      show_labels=False, show_lines=False)
+
+        _add_method_group_legend(fig, legend_fs)
+
+        fig.subplots_adjust(right=0.97, top=0.92, bottom=0.16)
         fname = f"{fname_prefix}_{metric.lower()}_n{n_size}.png"
-        plt.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
-        plt.close()
+        fig.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
+        plt.close(fig)
         print(f"  saved {fname}")
 
 
@@ -697,11 +774,12 @@ def plot_raw_metrics_by_n(all_results, output_dir, all_data=None):
 
     methods = sorted(set(m for ds in all_results.values() for m in ds.keys())
                      - EXCLUDED_METHODS)
+    colors = _method_colors_map(methods)
 
     for n_size in sorted(groups):
         for kind, label, prefix in [('sim', 'Simulated', 'raw_sim'),
                                      ('real', 'Real', 'raw_real')]:
-            _plot_raw_grid(groups[n_size][kind], methods, n_size, label,
+            _plot_raw_grid(groups[n_size][kind], methods, colors, n_size, label,
                            prefix, output_dirs[kind], all_data)
 
 

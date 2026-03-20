@@ -78,6 +78,11 @@ _REAL_DATASETS = [
     (44027, "Year",       515345),
     (43144, "SGEMM_GPU",  241600),
     (41540, "BlackFriday",166821),
+    # High-dimensional datasets (d ≈ 250–525 raw numeric features)
+    (46300, "CTSlices",   53500),   # d=384, CT scan slice localization
+    (46293, "IndoorLoc",  21048),   # d=525, WiFi fingerprinting → latitude
+    (416,   "Yprop",      8885),    # d=251, drug property prediction
+    (422,   "Topo",       8885),    # d=266, topology prediction
 ]
 
 

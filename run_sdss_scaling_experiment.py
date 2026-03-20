@@ -11,8 +11,9 @@ package limits or are expected to be impractical for a single-run scaling study.
 USAGE:
   .venv/bin/python run_sdss_scaling_experiment.py
   .venv/bin/python run_sdss_scaling_experiment.py --device cuda
-  .venv/bin/python run_sdss_scaling_experiment.py --sample-sizes 10000,50000,full
+  .venv/bin/python run_sdss_scaling_experiment.py --sample-sizes 1000,10000,full
   .venv/bin/python run_sdss_scaling_experiment.py --methods LinearGauss-Homo,Flow-Spline
+  .venv/bin/python run_sdss_scaling_experiment.py --plot-partial-results-only
 """
 
 import argparse
@@ -61,7 +62,7 @@ DEFAULT_METHOD_ORDER = [
     "CatMLP",
 ]
 
-DEFAULT_SAMPLE_SIZE_SPEC = "10000,50000,100000,250000,500000,full"
+DEFAULT_SAMPLE_SIZE_SPEC = "1000,10000,50000,100000,250000,500000,full"
 TABPFN_METHODS = {"TabPFN-Native", "TabPFN-2.5", "RealTabPFN-2.5"}
 MEAN_METRICS = [
     "CDE_loss",
@@ -276,13 +277,18 @@ def _select_methods(base_methods, n_total, runtime_device, use_policy=True):
 
 def _load_existing_output(output_dir):
     all_results = {}
-    all_data = {}
 
     json_file = output_dir / "results.json"
     if json_file.exists():
         with open(json_file) as f:
             all_results = _normalize_results_payload(json.load(f))
 
+    all_data = _load_cached_scaling_payloads(output_dir, all_results)
+    return all_results, all_data
+
+
+def _load_cached_scaling_payloads(output_dir, all_results):
+    all_data = {}
     cache_dir = output_dir / "cache"
     for dataset_name in all_results:
         cache_file = cache_dir / f"{dataset_name}.npz"
@@ -301,13 +307,66 @@ def _load_existing_output(output_dir):
             }
         except Exception as exc:
             print(f"  [warn] could not load cache for {dataset_name}: {exc}")
+    return all_data
 
+
+def _load_partial_scaling_output(output_dir):
+    partial_root = output_dir / "cache" / "partial"
+    if not partial_root.exists():
+        return {}, {}
+
+    rep_dirs = sorted(rep_dir for rep_dir in partial_root.glob("rep*") if rep_dir.is_dir())
+    dataset_reps = {}
+    for rep_dir in rep_dirs:
+        for metrics_file in sorted(rep_dir.glob("SDSS-*_metrics.json")):
+            with open(metrics_file) as f:
+                rep_metrics = json.load(f)
+            dataset_name = metrics_file.stem.replace("_metrics", "")
+            dataset_reps.setdefault(dataset_name, []).append(rep_metrics)
+
+    all_results = {}
+    for dataset_name in sorted(dataset_reps):
+        agg_results = _aggregate_reps(dataset_reps[dataset_name])
+        if agg_results:
+            all_results[dataset_name] = agg_results
+
+    all_data = _load_cached_scaling_payloads(output_dir, all_results)
     return all_results, all_data
 
 
 def _write_json(path, payload):
     with open(path, "w") as f:
         json.dump(payload, f, indent=2)
+
+
+def _render_sdss_scaling_outputs(all_results, all_data, output_dir, se_caption):
+    if not all_results:
+        print("[skip] No SDSS scaling results available for plotting")
+        return False
+
+    save_html_table(all_results, output_dir, se_caption=se_caption)
+    plot_performance_vs_n(all_results, output_dir, all_data=all_data)
+    plot_performance_vs_n_foundational(all_results, output_dir, all_data=all_data)
+    return True
+
+
+def generate_sdss_scaling_partial_plots(output_dir="results_real/sdss_scaling"):
+    """Aggregate current partial SDSS-scaling results and regenerate plots/tables."""
+    output_dir = Path(output_dir)
+    results_file = output_dir / "results.json"
+    all_results, all_data = _load_partial_scaling_output(output_dir)
+    if not all_results:
+        print(f"[skip] No partial SDSS scaling results found in {output_dir / 'cache' / 'partial'}")
+        return False
+
+    _write_json(results_file, all_results)
+    print(f"saved {results_file}")
+    return _render_sdss_scaling_outputs(
+        all_results,
+        all_data,
+        output_dir,
+        se_caption="mean +/- SE across completed repetitions",
+    )
 
 
 def main():
@@ -337,6 +396,12 @@ def main():
                         help="Disable the conservative large-n pruning policy")
     parser.add_argument("--list-methods", action="store_true",
                         help="Print available method names and exit")
+    parser.add_argument("--plot-partial-results-only", action="store_true",
+                        help="Aggregate current partial SDSS scaling outputs, "
+                             "regenerate results.json and plots, then exit")
+    parser.add_argument("--refresh-plots-after-each-rep", action="store_true",
+                        help="Regenerate the SDSS scaling table/plots after each "
+                             "completed repetition")
     args = parser.parse_args()
 
     if args.list_methods:
@@ -351,6 +416,10 @@ def main():
     partial_root.mkdir(parents=True, exist_ok=True)
     results_file = output_dir / "results.json"
     policy_file = output_dir / "method_policy.json"
+
+    if args.plot_partial_results_only:
+        generate_sdss_scaling_partial_plots(output_dir=output_dir)
+        return
 
     if args.force:
         all_results = {}
@@ -464,6 +533,8 @@ def main():
 
             rep_metrics = _load_partial_metrics(rep_partial, dataset_name)
             per_rep_results.append(rep_metrics)
+            if args.refresh_plots_after_each_rep:
+                generate_sdss_scaling_partial_plots(output_dir=output_dir)
 
             if (
                 not representative_cache_saved
@@ -521,9 +592,7 @@ def main():
     print_summary(all_results, se_caption=se_caption)
 
     print("\nGenerating SDSS scaling plots...")
-    save_html_table(all_results, output_dir, se_caption=se_caption)
-    plot_performance_vs_n(all_results, output_dir, all_data=all_data)
-    plot_performance_vs_n_foundational(all_results, output_dir, all_data=all_data)
+    _render_sdss_scaling_outputs(all_results, all_data, output_dir, se_caption)
 
     print(f"\nSaved metrics to {results_file}")
     print(f"Saved method schedule to {policy_file}")

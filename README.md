@@ -238,9 +238,9 @@ To compare methods on SDSS across larger sample sizes:
 ```
 
 The default sample-size spec is
-`10000,50000,100000,250000,500000,full`. The parser deduplicates repeated
-sizes, so with the bundled 500k-row SDSS CSV this currently becomes the five
-unique sizes `10k, 50k, 100k, 250k, 500k`. Outputs are written to
+`1000,10000,50000,100000,250000,500000,full`. The parser deduplicates repeated
+sizes, so with the bundled 500k-row SDSS CSV this currently becomes the six
+unique sizes `1k, 10k, 50k, 100k, 250k, 500k`. Outputs are written to
 `results_real/sdss_scaling/`, metrics are averaged over `4` repetitions per
 sample size by default, and the script regenerates the SDSS-only HTML table and
 performance-vs-`n` plots there.
@@ -253,12 +253,44 @@ You can override the schedule with `--methods ...`, disable pruning with
 `results_real/sdss_scaling/method_policy.json`, or change the repetition count
 with `--n-reps`.
 
+To refresh the current SDSS scaling HTML table and performance-vs-`n` plots
+from whatever repetitions have already finished, without starting new fits:
+
+```bash
+.venv/bin/python run_sdss_scaling_experiment.py \
+  --plot-partial-results-only \
+  --output-dir results_real/sdss_scaling
+```
+
+That scans `results_real/sdss_scaling/cache/partial/rep*/`, aggregates the
+currently completed repetitions into `results.json`, and regenerates
+`results_table.html` plus the `perf_vs_n_*` figures for the finished sample
+sizes and methods so far. If you want those outputs refreshed automatically
+while the scaling experiment is running, add `--refresh-plots-after-each-rep`
+to the main scaling command.
+
 For a single held-out split on the full bundled SDSS dataset instead of the
 multi-`n` scaling study:
 
 ```bash
 .venv/bin/python run_full_sdss_experiment.py --device cuda
 ```
+
+To refresh the current full-SDSS HTML table and diagnostic plots from whatever
+methods have already finished, without starting new fits:
+
+```bash
+.venv/bin/python run_full_sdss_experiment.py \
+  --plot-partial-results-only \
+  --output-dir results_real/sdss_full
+```
+
+That reads the current partial outputs under
+`results_real/sdss_full/cache/partial/rep0/` and regenerates
+`results_table.html`, `density_examples.png`, and `pit_calibration.png` for the
+completed methods so far. If you want those plots refreshed automatically after
+each finished method during the full-SDSS run, add
+`--refresh-plots-after-each-method` to the main command.
 
 ## Evaluation Metrics
 
@@ -308,6 +340,9 @@ results_real/sdss_scaling/
 
 results_real/sdss_full/
   results.json                      one-shot full-SDSS metrics
+  results_table.html                HTML table for the completed full-SDSS methods
+  density_examples.png              example conditional densities for completed methods
+  pit_calibration.png               PIT histograms for completed methods
   cache/partial/rep0/               cached arrays for the full-SDSS run
 ```
 

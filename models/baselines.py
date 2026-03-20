@@ -439,19 +439,19 @@ def quantile_gbm_density(X_train, z_train, X_test, n_grid=200,
         has_xgb = False
 
     from sklearn.ensemble import GradientBoostingRegressor
+    from joblib import Parallel, delayed
 
     n_test = X_test.shape[0]
     n_q = 49
     alphas_q = np.linspace(0.02, 0.98, n_q)
 
-    Q_test = np.zeros((n_test, n_q))
-    for j, alpha in enumerate(alphas_q):
+    def _fit_one(alpha):
         if has_xgb:
             reg = xgb.XGBRegressor(
                 objective='reg:quantileerror', quantile_alpha=alpha,
                 n_estimators=n_estimators, max_depth=max_depth,
                 learning_rate=learning_rate,
-                random_state=42, verbosity=0
+                random_state=42, verbosity=0, nthread=1,
             )
         else:
             reg = GradientBoostingRegressor(
@@ -461,7 +461,10 @@ def quantile_gbm_density(X_train, z_train, X_test, n_grid=200,
                 random_state=42
             )
         reg.fit(X_train, z_train)
-        Q_test[:, j] = reg.predict(X_test)
+        return reg.predict(X_test)
+
+    preds = Parallel(n_jobs=-1)(delayed(_fit_one)(a) for a in alphas_q)
+    Q_test = np.column_stack(preds)
 
     for i in range(n_test):
         Q_test[i, :] = np.sort(Q_test[i, :])

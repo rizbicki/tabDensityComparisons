@@ -164,7 +164,7 @@ The main simulated and real-data benchmarks run `4` repetitions per dataset by
 default (`--n-reps` to change this); metrics report mean ± SE across
 repetitions.
 
-### Synthetic (d ∈ {5, 10, 50}, n ∈ {1000, 2000, 4000, 6000, 20000})
+### Synthetic (d ∈ {5, 10, 50, 100, 500}, n ∈ {1000, 2000, 4000, 6000, 20000})
 
 All synthetic datasets have known true conditional densities. Tags follow
 `{Base}-d{d}-{n}` (e.g. `Heteroscedastic-d10-2000`).

@@ -176,7 +176,7 @@ def load_real_only_datasets():
 
 
 def load_all_datasets(quick=False):
-    # Synthetic: d ∈ {5, 10, 50}, n ∈ {1000, 2000, 4000, 6000, 20000}
+    # Synthetic: d ∈ {5, 10, 50, 100, 500}, n ∈ {1000, 2000, 4000, 6000, 20000}
     synthetic_generators = [
         make_heteroscedastic,
         make_bimodal,
@@ -188,7 +188,7 @@ def load_all_datasets(quick=False):
     ]
     datasets = []
     for gen in synthetic_generators:
-        for d in [5, 10, 50]:
+        for d in [5, 10, 50, 100, 500]:
             for n in [1000, 2000, 4000, 6000, 20000]:
                 datasets.append(gen(n=n, d=d))
 

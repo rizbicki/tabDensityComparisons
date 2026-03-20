@@ -206,12 +206,6 @@ def _default_skip_reason(method, n_total, runtime_device):
                 f"for {runtime_device.upper()} scaling runs"
             )
 
-    if method in {"BART-Homo", "BART-Hetero"} and n_total > 100_000:
-        return "XBART baselines are conservatively capped at n=100,000 for this scaling study"
-
-    if method == "Quantile-Tree" and n_total > 100_000:
-        return "fits many quantile models and is conservatively capped at n=100,000"
-
     if method == "MDN-2mix":
         limit = 500_000
         if n_total > limit:

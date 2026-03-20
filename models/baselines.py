@@ -189,7 +189,7 @@ def linear_gaussian_hetero_density(X_train, z_train, X_test, n_grid=200,
 def mdn_density(X_train, z_train, X_test, n_grid=200,
                 z_min=None, z_max=None, n_components=2, n_hidden=16,
                 n_epochs=500, lr=0.01):
-    """Mixture Density Network with few parameters (2-Gaussian mixture).
+    """Mixture Density Network with few parameters (Gaussian mixture with K components).
 
     Architecture: X -> Linear(d, n_hidden) -> ReLU -> Linear(n_hidden, 3*K)
     where K = n_components.  Outputs: mixing weights (softmax), means, log-stds.

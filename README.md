@@ -12,6 +12,7 @@ chmod +x setup_and_run.sh
 ./setup_and_run.sh --real-only      # real/semi-synthetic datasets only
 ./setup_and_run.sh --cpu            # force CPU (slower)
 .venv/bin/python run_sdss_scaling_experiment.py --device cuda   # SDSS scaling study
+.venv/bin/python run_full_sdss_experiment.py --device cuda      # one-shot full-SDSS run
 ```
 
 Results now split by dataset type:
@@ -22,8 +23,8 @@ Results now split by dataset type:
 You can regenerate plots/tables from both after runs complete:
 
 ```bash
-python consolidate_partial_results.py
-python generate_plots.py                # regenerates all plots
+.venv/bin/python consolidate_partial_results.py
+.venv/bin/python generate_plots.py      # regenerates all plots
 ```
 
 If you only need the tables plus the metric-based figures on another machine,
@@ -31,7 +32,7 @@ you can transfer just `results_real/results.json` and/or
 `results_simulated/results.json` and regenerate from metrics only:
 
 ```bash
-python generate_plots.py --metrics-only
+.venv/bin/python generate_plots.py --metrics-only
 ```
 
 This reproduces the HTML table plus the ranking, raw-metric, and performance
@@ -45,10 +46,10 @@ experiments to finish:
 
 ```bash
 # consolidate whatever has been saved so far
-python consolidate_partial_results.py
+.venv/bin/python consolidate_partial_results.py
 
 # generate plots from the consolidated results
-python generate_plots.py
+.venv/bin/python generate_plots.py
 ```
 
 Re-run these two commands whenever you want updated plots. Only datasets
@@ -71,15 +72,17 @@ so pip doesn't overwrite your CUDA build with a CPU-only one.
 ## Project Structure
 
 ```
-run_experiments.py          Synthetic experiments entry point + CLI
+run_experiments.py          Main benchmark entry point (simulated + real datasets)
 run_real_experiments.py     Real/semi-synthetic experiments entry point
 run_sdss_scaling_experiment.py  SDSS-only scaling benchmark over multiple n
+run_full_sdss_experiment.py Full-SDSS benchmark on the bundled 500k-row CSV
 consolidate_partial_results.py  Build results.json from partial checkpoints
 generate_plots.py           Regenerate all plots from cached results
 models/
   flexcode.py               FlexCodeEstimator + RF regressor wrapper
   native.py                 TabPFN / RealTabPFN native density extraction
-  baselines.py              Parametric, GLM, quantile, flow, and MDN baselines
+  baselines.py              Parametric, GLM, quantile, flow, MDN, BART, CatMLP baselines
+  tuning.py                 Hyperparameter search helpers for learned baselines
 datasets/
   synthetic.py              Synthetic DGPs (with known true densities)
   real.py                   Semi-synthetic + real-world dataset loaders
@@ -87,7 +90,7 @@ datasets/
 evaluation/
   metrics.py                CDE loss, log-lik, CRPS, PIT, coverage
 visualization/
-  plots.py                  Rankings, raw metrics, density comparisons, PIT
+  plots.py                  HTML tables, rankings, raw metrics, density comparisons, PIT
 utils/
   io.py                     Caching, formatting, summary printing
 ```
@@ -109,7 +112,7 @@ utils/
 |--------|-------------|
 | FlexCode-RF | FlexCode with Random Forest regressor |
 
-### Parametric / GLM Baselines
+### Parametric Baselines
 
 | Method | Description |
 |--------|-------------|
@@ -119,12 +122,16 @@ utils/
 | LogNormal-Homo | Log-normal with linear log-mean, constant log-variance |
 | LogNormal-Hetero | Log-normal with linear log-mean, input-dependent log-variance |
 | Gamma-GLM | Gamma GLM with log-link for the mean |
-| MDN-2mix | Mixture Density Network (2 Gaussians, 1 hidden layer) |
 
 ### Penalized (Ridge) Variants
 
-Each parametric method above (except MDN) also has a Ridge-regularized variant
-with the penalty chosen by leave-one-out cross-validation (`RidgeCV`).
+`MDN` is still treated as parametric in this benchmark: it predicts a finite set
+of mixture weights, means, and scales from a finite-dimensional neural network,
+rather than using a nonparametric density estimator.
+
+The classical linear / GLM families above (except MDN) also have a
+Ridge-regularized variant with the penalty chosen by leave-one-out
+cross-validation (`RidgeCV`).
 
 | Method | Description |
 |--------|-------------|
@@ -149,11 +156,13 @@ with the penalty chosen by leave-one-out cross-validation (`RidgeCV`).
 | Quantile-Tree | Quantile regression via XGBoost/GBM |
 | Flow-Spline | Conditional neural spline flow with Gaussian base |
 | CatMLP | MLP with discretized response (softmax over bins, CV-tuned) |
+| MDN-2mix | Mixture Density Network (shown as `MDN` in plots and HTML tables); random-search CV tunes the number of Gaussian components over `{2, 3, 5}` plus hidden size and learning rate |
 
 ## Datasets
 
-Each experiment is run 20 times with different train/test splits; metrics
-report mean ± SE across repetitions.
+The main simulated and real-data benchmarks run `4` repetitions per dataset by
+default (`--n-reps` to change this); metrics report mean ± SE across
+repetitions.
 
 ### Synthetic (d ∈ {5, 10, 50}, n ∈ {1000, 2000, 4000, 6000, 20000})
 
@@ -228,13 +237,28 @@ To compare methods on SDSS across larger sample sizes:
 .venv/bin/python run_sdss_scaling_experiment.py --device cuda
 ```
 
-By default this runs `n = 10k, 50k, 100k, 250k, 500k, full`, writes outputs to
-`results_real/sdss_scaling/`, averages metrics over `4` repetitions per sample
-size by default, and generates performance-vs-`n` plots there. The script uses
-a conservative default schedule that drops methods once they hit explicit
-package limits or are likely to be impractical for a repeated scaling
-benchmark. You can override that with `--methods ...`,
-`--all-methods-at-all-sizes`, or change the repetition count with `--n-reps`.
+The default sample-size spec is
+`10000,50000,100000,250000,500000,full`. The parser deduplicates repeated
+sizes, so with the bundled 500k-row SDSS CSV this currently becomes the five
+unique sizes `10k, 50k, 100k, 250k, 500k`. Outputs are written to
+`results_real/sdss_scaling/`, metrics are averaged over `4` repetitions per
+sample size by default, and the script regenerates the SDSS-only HTML table and
+performance-vs-`n` plots there.
+
+The default schedule still prunes methods that hit explicit limits or are
+conservatively capped for runtime reasons, but it now keeps `Quantile-Tree`,
+`BART-Homo`, `BART-Hetero`, and `CatMLP` available at all bundled SDSS sizes.
+You can override the schedule with `--methods ...`, disable pruning with
+`--all-methods-at-all-sizes`, inspect the exact chosen methods with
+`results_real/sdss_scaling/method_policy.json`, or change the repetition count
+with `--n-reps`.
+
+For a single held-out split on the full bundled SDSS dataset instead of the
+multi-`n` scaling study:
+
+```bash
+.venv/bin/python run_full_sdss_experiment.py --device cuda
+```
 
 ## Evaluation Metrics
 
@@ -242,15 +266,16 @@ benchmark. You can override that with `--methods ...`,
 - **Log-likelihood**: mean log f(z_test)
 - **CRPS**: Continuous Ranked Probability Score
 - **PIT KS**: Kolmogorov-Smirnov statistic for calibration
-- **90% coverage**: proportion of test samples in 90% credible interval
-- **Interval width**: mean width of 90% credible interval
+- **90% coverage**: proportion of test samples inside the central 90% predictive interval (ideal is close to `0.90`; rankings and table highlighting treat closer to `0.90` as better)
+- **Interval width**: mean width of that 90% predictive interval
 - **Fit time**: total wall-clock time (fit + predict) in seconds
 
 ## Output
 
 Simulated results go to `results_simulated/` by default. Real-dataset results
 go to `results_real/` by default. `generate_plots.py` reads both directories
-and writes each artifact back to the matching destination.
+and writes each artifact back to the matching destination. The SDSS-specific
+benchmark scripts write to their own subdirectories under `results_real/`.
 
 ```
 results_simulated/
@@ -258,7 +283,7 @@ results_simulated/
   results_table.html                formatted HTML table (±SE across repetitions)
   rankings_sim_{metric}_n{n}.png    ranking heatmap — simulated, per n
   raw_sim_{metric}_n{n}.png         raw value heatmap — simulated, per n
-  perf_vs_n_{metric}_sim_d{d}.png   performance vs n — simulated, per d
+  perf_vs_n_{metric}_sim_d{d}.png   performance vs n — simulated, per d; metric in {cde_loss, log_lik, crps, pit_ks, coverage_90, interval_width, fit_time}
   pit_calibration.png               PIT histograms for calibration assessment
   native_tab_{ds}.png               density comparison plots (synthetic)
   cache/{dataset}.npz               cached arrays (skip re-runs)
@@ -268,17 +293,29 @@ results_real/
   results_table.html                formatted HTML table (±SE across repetitions)
   rankings_real_{metric}_n{n}.png   ranking heatmap — real, per n
   raw_real_{metric}_n{n}.png        raw value heatmap — real, per n
-  perf_vs_n_{metric}_real.png       performance vs n — real datasets
-  perf_vs_n_foundational_*.png      same, highlighting foundation models only
+  perf_vs_n_{metric}_real.png       performance vs n — real datasets; metric in {cde_loss, log_lik, crps, pit_ks, coverage_90, interval_width, fit_time}
+  perf_vs_n_foundational_*.png      same metrics, highlighting foundation models only
   pit_calibration.png               PIT histograms for calibration assessment
   cache/{dataset}.npz               cached arrays (skip re-runs)
+
+results_real/sdss_scaling/
+  results.json                      aggregated SDSS-by-n metrics
+  method_policy.json                methods selected/skipped at each sample size
+  results_table.html                SDSS scaling HTML table
+  perf_vs_n_{metric}_real.png       SDSS performance vs n; metric in {cde_loss, log_lik, crps, pit_ks, coverage_90, interval_width, fit_time}
+  perf_vs_n_foundational_*.png      same metrics, SDSS performance vs n with foundational focus
+  cache/partial/rep*/               per-repetition partial checkpoints
+
+results_real/sdss_full/
+  results.json                      one-shot full-SDSS metrics
+  cache/partial/rep0/               cached arrays for the full-SDSS run
 ```
 
 For a lightweight cross-machine bundle, you can track or archive only
 `results_*/results.json` and run:
 
 ```bash
-python generate_plots.py --metrics-only
+.venv/bin/python generate_plots.py --metrics-only
 ```
 
 That reproduces `results_table.html`, `rankings_*`, `raw_*`,

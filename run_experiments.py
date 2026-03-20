@@ -320,10 +320,14 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
         else:
             print(f"  {name}...", end=" ", flush=True)
             t0 = time.time()
-            icl_reg = TabICLRegressor(
+            n_train = len(z_train)
+            icl_kw = dict(
                 n_estimators=4,
-                device=device if device != 'auto' else 'cpu'
+                device=device if device != 'auto' else 'cpu',
             )
+            if n_train > 50_000:
+                icl_kw.update(batch_size=2, offload_mode="cpu")
+            icl_reg = TabICLRegressor(**icl_kw)
             icl_reg.fit(X_tr, z_train)
             fit_t = time.time() - t0
             t0 = time.time()

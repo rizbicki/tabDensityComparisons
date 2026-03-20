@@ -7,12 +7,18 @@ classical methods for conditional density estimation (CDE) on tabular data.
 
 ```bash
 chmod +x setup_and_run.sh
+./setup_and_run.sh --setup-only     # create .venv and install dependencies only
 ./setup_and_run.sh --quick          # sanity check (synthetic datasets only)
 ./setup_and_run.sh                  # full run (synthetic + real datasets)
 ./setup_and_run.sh --real-only      # real/semi-synthetic datasets only
 ./setup_and_run.sh --cpu            # force CPU (slower)
+```
+
+For the SDSS-only run, first create the local virtualenv via `./setup_and_run.sh --setup-only`
+or the manual setup steps below, then launch:
+
+```bash
 .venv/bin/python run_sdss_scaling_experiment.py --device cuda   # SDSS scaling study
-.venv/bin/python run_full_sdss_experiment.py --device cuda      # one-shot full-SDSS run
 ```
 
 Results now split by dataset type:
@@ -39,27 +45,25 @@ This reproduces the HTML table plus the ranking, raw-metric, and performance
 plots. It intentionally skips PIT histograms and density example plots, which
 require the cached arrays under `results_*/cache/*.npz`.
 
-### Plots from partial results (while experiments are running)
+### Plots from partial results
 
-You can generate preliminary plots at any point without waiting for all
-experiments to finish:
+You can regenerate preliminary plots at any point by re-running:
 
 ```bash
-# consolidate whatever has been saved so far
 .venv/bin/python consolidate_partial_results.py
-
-# generate plots from the consolidated results
 .venv/bin/python generate_plots.py
 ```
 
-Re-run these two commands whenever you want updated plots. Only datasets
-with at least one completed method will appear.
+Only datasets with at least one completed method will appear.
 
 ## Manual Setup
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+pip install --upgrade pip
+pip install numpy setuptools
+pip install --no-build-isolation xbart
 pip install -r requirements.txt
 python run_experiments.py --quick --device cuda
 ```
@@ -75,7 +79,6 @@ so pip doesn't overwrite your CUDA build with a CPU-only one.
 run_experiments.py          Main benchmark entry point (simulated + real datasets)
 run_real_experiments.py     Real/semi-synthetic experiments entry point
 run_sdss_scaling_experiment.py  SDSS-only scaling benchmark over multiple n
-run_full_sdss_experiment.py Full-SDSS benchmark on the bundled 500k-row CSV
 consolidate_partial_results.py  Build results.json from partial checkpoints
 generate_plots.py           Regenerate all plots from cached results
 models/
@@ -164,7 +167,7 @@ The main simulated and real-data benchmarks run `4` repetitions per dataset by
 default (`--n-reps` to change this); metrics report mean ± SE across
 repetitions.
 
-### Synthetic (d ∈ {5, 10, 50, 100, 500}, n ∈ {1000, 2000, 4000, 6000, 20000})
+### Synthetic (d ∈ {5, 10, 50}, n ∈ {1000, 2000, 4000, 6000, 20000})
 
 All synthetic datasets have known true conditional densities. Tags follow
 `{Base}-d{d}-{n}` (e.g. `Heteroscedastic-d10-2000`).
@@ -246,10 +249,11 @@ sample size by default, and the script regenerates the SDSS-only HTML table and
 performance-vs-`n` plots there.
 
 The default schedule still prunes methods that hit explicit limits or are
-conservatively capped for runtime reasons, but it now keeps `Quantile-Tree`,
-`BART-Homo`, `BART-Hetero`, and `CatMLP` available at all bundled SDSS sizes.
-You can override the schedule with `--methods ...`, disable pruning with
-`--all-methods-at-all-sizes`, inspect the exact chosen methods with
+conservatively capped for runtime reasons. `Quantile-Tree`, `BART-Homo`,
+`BART-Hetero`, and `CatMLP` remain available at all bundled SDSS sizes, while
+`TabICL-Quantiles` is capped below `n=50,000`. You can override the schedule
+with `--methods ...`, disable pruning with `--all-methods-at-all-sizes`,
+inspect the exact chosen methods with
 `results_real/sdss_scaling/method_policy.json`, or change the repetition count
 with `--n-reps`.
 
@@ -268,29 +272,6 @@ currently completed repetitions into `results.json`, and regenerates
 sizes and methods so far. If you want those outputs refreshed automatically
 while the scaling experiment is running, add `--refresh-plots-after-each-rep`
 to the main scaling command.
-
-For a single held-out split on the full bundled SDSS dataset instead of the
-multi-`n` scaling study:
-
-```bash
-.venv/bin/python run_full_sdss_experiment.py --device cuda
-```
-
-To refresh the current full-SDSS HTML table and diagnostic plots from whatever
-methods have already finished, without starting new fits:
-
-```bash
-.venv/bin/python run_full_sdss_experiment.py \
-  --plot-partial-results-only \
-  --output-dir results_real/sdss_full
-```
-
-That reads the current partial outputs under
-`results_real/sdss_full/cache/partial/rep0/` and regenerates
-`results_table.html`, `density_examples.png`, and `pit_calibration.png` for the
-completed methods so far. If you want those plots refreshed automatically after
-each finished method during the full-SDSS run, add
-`--refresh-plots-after-each-method` to the main command.
 
 ## Evaluation Metrics
 
@@ -337,21 +318,4 @@ results_real/sdss_scaling/
   perf_vs_n_{metric}_real.png       SDSS performance vs n; metric in {cde_loss, log_lik, crps, pit_ks, coverage_90, interval_width, fit_time}
   perf_vs_n_foundational_*.png      same metrics, SDSS performance vs n with foundational focus
   cache/partial/rep*/               per-repetition partial checkpoints
-
-results_real/sdss_full/
-  results.json                      one-shot full-SDSS metrics
-  results_table.html                HTML table for the completed full-SDSS methods
-  density_examples.png              example conditional densities for completed methods
-  pit_calibration.png               PIT histograms for completed methods
-  cache/partial/rep0/               cached arrays for the full-SDSS run
 ```
-
-For a lightweight cross-machine bundle, you can track or archive only
-`results_*/results.json` and run:
-
-```bash
-.venv/bin/python generate_plots.py --metrics-only
-```
-
-That reproduces `results_table.html`, `rankings_*`, `raw_*`,
-`perf_vs_n_*`, and `perf_vs_n_foundational_*` without copying `cache/`.

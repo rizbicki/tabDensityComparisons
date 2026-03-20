@@ -234,7 +234,7 @@ def _default_skip_reason(method, n_total, runtime_device):
             return "the installed TabPFN v2.5 configuration supports up to n=50,000"
 
     if method == "TabICL-Quantiles":
-        limit = 10_000 if runtime_device == "cpu" else 50_000
+        limit = 10_000 if runtime_device == "cpu" else 49_999
         if n_total > limit:
             return (
                 f"native TabICL quantile inference is conservatively capped at n={limit:,} "

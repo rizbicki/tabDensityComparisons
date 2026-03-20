@@ -5,6 +5,7 @@ set -euo pipefail
 # =================================================================
 # Usage:
 #   chmod +x setup_and_run.sh
+#   ./setup_and_run.sh --setup-only     # create .venv and install dependencies only
 #   ./setup_and_run.sh                  # full run (synthetic + real)
 #   ./setup_and_run.sh --quick          # quick sanity check (4 datasets)
 #   ./setup_and_run.sh --real-only      # real/semi-synthetic datasets only
@@ -27,11 +28,13 @@ PIP="${VENV_DIR}/bin/pip"
 EXTRA_ARGS=()
 DEVICE="auto"
 REAL_ONLY=0
+SETUP_ONLY=0
 for arg in "$@"; do
     case "$arg" in
         --cpu) DEVICE="cpu"; EXTRA_ARGS+=("--device" "cpu") ;;
         --quick) EXTRA_ARGS+=("--quick") ;;
         --real-only) REAL_ONLY=1 ;;
+        --setup-only) SETUP_ONLY=1 ;;
         *) EXTRA_ARGS+=("$arg") ;;
     esac
 done
@@ -82,6 +85,14 @@ try:
 except ImportError:
     print('  ✗ PyTorch not found')
 "
+
+if [ "$SETUP_ONLY" -eq 1 ]; then
+    echo ""
+    echo "============================================================"
+    echo "  Setup complete. Virtual environment is ready at ${VENV_DIR}/"
+    echo "============================================================"
+    exit 0
+fi
 
 # ── 4. Run experiments ──────────────────────────────────────────
 echo ""

@@ -99,6 +99,13 @@ PERF_FOUNDATIONAL_STYLES = {
     },
 }
 
+# Sample-size threshold beyond which a foundation model is plotted dashed
+# (i.e. the model is running outside its original pre-training / validation
+# regime).  Methods absent from this dict are never dashed.
+FOUNDATION_NATIVE_LIMITS = {
+    'TabICL-Quantiles': 50_000,
+}
+
 PERF_BACKGROUND_GROUP_STYLES = {
     'parametric': {'color': METHOD_GROUP_META['parametric']['accent'],
                    'lw': 2.0, 'alpha': 0.5, 'zorder': 1},
@@ -1261,7 +1268,8 @@ def _foundational_perf_legend_handles():
 
 
 def _group_perf_legend_handles():
-    """Three-entry legend: Parametric, Nonparametric, Foundational."""
+    """Three-entry legend: Parametric, Nonparametric, Foundational,
+    plus a dashed-line note for beyond-native-limit regime."""
     handles = []
     for group in METHOD_GROUP_ORDER:
         meta = METHOD_GROUP_META[group]
@@ -1272,7 +1280,54 @@ def _group_perf_legend_handles():
             linewidth=3.5,
             label=meta['label'],
         ))
+    handles.append(Line2D(
+        [0], [0],
+        color='grey',
+        linestyle='--',
+        linewidth=2.5,
+        alpha=0.7,
+        label='Beyond native limit',
+    ))
     return handles
+
+
+def _plot_split_at_native_limit(ax, ns, vals, method, **plot_kwargs):
+    """Plot a line, switching to dashed beyond the method's native limit.
+
+    If *method* has no entry in FOUNDATION_NATIVE_LIMITS, draws a single
+    ordinary line.  Otherwise the segment up to the limit is drawn with
+    the caller's style and the segment beyond the limit is drawn dashed
+    (with a connecting overlap point so the two segments look continuous).
+    """
+    native_limit = FOUNDATION_NATIVE_LIMITS.get(method)
+    if native_limit is None or all(n <= native_limit for n in ns):
+        ax.plot(ns, vals, **plot_kwargs)
+        return
+
+    ns_in, vals_in = [], []
+    ns_out, vals_out = [], []
+    for n, v in zip(ns, vals):
+        if n <= native_limit:
+            ns_in.append(n)
+            vals_in.append(v)
+        else:
+            ns_out.append(n)
+            vals_out.append(v)
+
+    # Draw in-range segment (solid / caller style)
+    if ns_in:
+        ax.plot(ns_in, vals_in, **plot_kwargs)
+
+    # Draw extrapolated segment as dashed, starting from last in-range point
+    if ns_out:
+        extra_kw = dict(plot_kwargs)
+        extra_kw.pop('label', None)       # avoid duplicate legend entries
+        extra_kw['linestyle'] = '--'
+        extra_kw['alpha'] = max(0.55, extra_kw.get('alpha', 1.0) * 0.7)
+        if ns_in:
+            ns_out = [ns_in[-1]] + ns_out
+            vals_out = [vals_in[-1]] + vals_out
+        ax.plot(ns_out, vals_out, **extra_kw)
 
 
 def _plot_perf_grid(base_groups, all_results, methods, method_colors,
@@ -1322,14 +1377,15 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
                         continue
                     perf_sty = _perf_style(m, method_colors, foundational_only=True)
                     if is_found:
-                        ax.plot(valid_ns, vals,
-                                color=perf_sty['color'],
-                                linestyle='-',
-                                linewidth=max(4.2, perf_sty.get('lw', 2.0)),
-                                alpha=0.98,
-                                solid_capstyle='round',
-                                zorder=max(10, perf_sty.get('zorder', 4)),
-                                label=m)
+                        _plot_split_at_native_limit(
+                            ax, valid_ns, vals, m,
+                            color=perf_sty['color'],
+                            linestyle='-',
+                            linewidth=max(4.2, perf_sty.get('lw', 2.0)),
+                            alpha=0.98,
+                            solid_capstyle='round',
+                            zorder=max(10, perf_sty.get('zorder', 4)),
+                            label=m)
                         highlighted_vals.extend(vals)
                         if not is_sdss:
                             perf_label_series.append({
@@ -1371,13 +1427,14 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
                 if valid_ns:
                     sty = _perf_style(m, method_colors)
                     is_foundational = m in FOUNDATIONAL_MODELS
-                    ax.plot(valid_ns, vals,
-                            color=sty['color'],
-                            linestyle='-',
-                            linewidth=3.0 if is_foundational else 2.1,
-                            alpha=sty.get('alpha', 0.9),
-                            zorder=sty.get('zorder', 3),
-                            label=m)
+                    _plot_split_at_native_limit(
+                        ax, valid_ns, vals, m,
+                        color=sty['color'],
+                        linestyle='-',
+                        linewidth=3.0 if is_foundational else 2.1,
+                        alpha=sty.get('alpha', 0.9),
+                        zorder=sty.get('zorder', 3),
+                        label=m)
                     highlighted_vals.extend(vals)
 
             full_ylim = _focus_ylim(highlighted_vals, pad_ratio=0.12)
@@ -1425,14 +1482,14 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
     if foundational_only:
         handles = _foundational_perf_legend_handles()
         fig.legend(handles, [h.get_label() for h in handles],
-                   loc='upper center', ncol=3,
+                   loc='upper center', ncol=4,
                    fontsize=PERF_FOUNDATIONAL_LEGEND_FONTSIZE,
                    handlelength=2.8, columnspacing=1.7, labelspacing=0.9,
                    borderpad=0.7, framealpha=0.94, bbox_to_anchor=(0.5, 0.99))
     else:
         handles = _group_perf_legend_handles()
         fig.legend(handles, [h.get_label() for h in handles],
-                   loc='upper center', ncol=3,
+                   loc='upper center', ncol=4,
                    fontsize=PERF_LEGEND_FONTSIZE + 2,
                    handlelength=2.5, columnspacing=2.0,
                    framealpha=0.92, bbox_to_anchor=(0.5, 0.99))

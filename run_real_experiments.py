@@ -113,13 +113,25 @@ def main():
 
     for X, z, name, true_density_fn in datasets:
         cache_file = cache_dir / f"{name}.npz"
+
+        # Count how many reps are already fully cached
+        cached_reps = 0
+        if not args.force:
+            for r in range(n_reps):
+                mf = partial_dir / f"rep{r}" / f"{name}_metrics.json"
+                if mf.exists():
+                    cached_reps += 1
+                else:
+                    break
+
         use_cache = (not args.force
                      and name in existing_results
-                     and cache_file.exists())
+                     and cache_file.exists()
+                     and cached_reps >= n_reps)
 
         if use_cache:
-            print(f"\n[cache] Skipping '{name}' -- already in results.json. "
-                  f"Use --force to re-run.")
+            print(f"\n[cache] Skipping '{name}' -- {cached_reps}/{n_reps} "
+                  f"reps cached. Use --force to re-run.")
             cdes, zgrids, X_te, z_te, true_cde, true_zgrid, n_total = \
                 load_cache(cache_file)
             all_results[name] = {
@@ -127,6 +139,9 @@ def main():
                 for m in existing_results[name]
             }
         else:
+            if cached_reps > 0 and cached_reps < n_reps:
+                print(f"\n  [{name}] {cached_reps} rep(s) cached, "
+                      f"running {n_reps - cached_reps} more...")
             per_rep_results = []
             for rep in range(n_reps):
                 rep_partial = partial_dir / f"rep{rep}"

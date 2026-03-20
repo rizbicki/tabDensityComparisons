@@ -156,7 +156,7 @@ cross-validation (`RidgeCV`).
 | Quantile-Tree | Quantile regression via XGBoost/GBM |
 | Flow-Spline | Conditional neural spline flow with Gaussian base |
 | CatMLP | MLP with discretized response (softmax over bins, CV-tuned) |
-| MDN-2mix | Mixture Density Network (shown as `MDN` in plots and HTML tables); random-search CV tunes the number of Gaussian components over `{2, 3, 5}` plus hidden size and learning rate |
+| MDN | Mixture Density Network (legacy method key `MDN-2mix` is still accepted); random-search CV tunes the number of Gaussian components over `{2, 3, 5}` plus hidden size and learning rate |
 
 ## Datasets
 

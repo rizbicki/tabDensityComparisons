@@ -43,7 +43,7 @@ DEFAULT_METHOD_ORDER = [
     "RealTabPFN-2.5",
     "TabICL-Quantiles",
     "Quantile-Tree",
-    "MDN-2mix",
+    "MDN",
     "Flow-Spline",
     "BART-Homo",
     "BART-Hetero",
@@ -56,6 +56,31 @@ def _key(name):
     return re.sub(r"[^a-zA-Z0-9_-]", "_", name)
 
 
+def _canonical_method_name(name):
+    return "MDN" if name == "MDN-2mix" else name
+
+
+def _method_aliases(name):
+    canonical = _canonical_method_name(name)
+    if canonical == "MDN":
+        return ("MDN", "MDN-2mix")
+    return (canonical,)
+
+
+def _canonicalize_methods(methods):
+    return list(dict.fromkeys(_canonical_method_name(m) for m in methods))
+
+
+def _normalize_method_mapping(mapping):
+    normalized = {}
+    for name, value in mapping.items():
+        canonical = _canonical_method_name(name)
+        if canonical in normalized and name != canonical:
+            continue
+        normalized[canonical] = value
+    return normalized
+
+
 def _parse_methods_arg(raw):
     return [m.strip() for m in raw.split(",") if m.strip()]
 
@@ -65,19 +90,21 @@ def _load_partial_metrics(partial_dir, dataset_name):
     if not metrics_file.exists():
         return {}
     with open(metrics_file) as f:
-        return json.load(f)
+        return _normalize_method_mapping(json.load(f))
 
 
 def _load_cached_arrays(partial_dir, dataset_name, methods):
     cdes = {}
     zgrids = {}
     for method in methods:
-        method_key = _key(method)
-        cde_file = partial_dir / f"{dataset_name}_{method_key}_cdes.npy"
-        zgrid_file = partial_dir / f"{dataset_name}_{method_key}_zgrid.npy"
-        if cde_file.exists() and zgrid_file.exists():
-            cdes[method] = np.load(cde_file)
-            zgrids[method] = np.load(zgrid_file)
+        for alias in _method_aliases(method):
+            method_key = _key(alias)
+            cde_file = partial_dir / f"{dataset_name}_{method_key}_cdes.npy"
+            zgrid_file = partial_dir / f"{dataset_name}_{method_key}_zgrid.npy"
+            if cde_file.exists() and zgrid_file.exists():
+                cdes[method] = np.load(cde_file)
+                zgrids[method] = np.load(zgrid_file)
+                break
     return cdes, zgrids
 
 
@@ -123,11 +150,11 @@ def main():
     json_file = output_dir / "results.json"
 
     if args.methods:
-        selected_methods = _parse_methods_arg(args.methods)
+        selected_methods = _canonicalize_methods(_parse_methods_arg(args.methods))
     else:
         selected_methods = list(DEFAULT_METHOD_ORDER)
     if args.exclude:
-        excluded = set(_parse_methods_arg(args.exclude))
+        excluded = set(_canonicalize_methods(_parse_methods_arg(args.exclude)))
         selected_methods = [m for m in selected_methods if m not in excluded]
     unknown = [m for m in selected_methods if m not in DEFAULT_METHOD_ORDER]
     if unknown:

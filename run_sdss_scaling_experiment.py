@@ -53,7 +53,7 @@ DEFAULT_METHOD_ORDER = [
     "RealTabPFN-2.5",
     "TabICL-Quantiles",
     "Quantile-Tree",
-    "MDN-2mix",
+    "MDN",
     "Flow-Spline",
     "BART-Homo",
     "BART-Hetero",
@@ -79,6 +79,38 @@ def _key(name):
     return re.sub(r"[^a-zA-Z0-9_-]", "_", name)
 
 
+def _canonical_method_name(name):
+    return "MDN" if name == "MDN-2mix" else name
+
+
+def _method_aliases(name):
+    canonical = _canonical_method_name(name)
+    if canonical == "MDN":
+        return ("MDN", "MDN-2mix")
+    return (canonical,)
+
+
+def _canonicalize_methods(methods):
+    return list(dict.fromkeys(_canonical_method_name(m) for m in methods))
+
+
+def _normalize_method_mapping(mapping):
+    normalized = {}
+    for name, value in mapping.items():
+        canonical = _canonical_method_name(name)
+        if canonical in normalized and name != canonical:
+            continue
+        normalized[canonical] = value
+    return normalized
+
+
+def _normalize_results_payload(payload):
+    return {
+        dataset_name: _normalize_method_mapping(metrics)
+        for dataset_name, metrics in payload.items()
+    }
+
+
 def _parse_methods_arg(raw):
     return [m.strip() for m in raw.split(",") if m.strip()]
 
@@ -88,19 +120,21 @@ def _load_partial_metrics(partial_dir, dataset_name):
     if not metrics_file.exists():
         return {}
     with open(metrics_file) as f:
-        return json.load(f)
+        return _normalize_method_mapping(json.load(f))
 
 
 def _load_cached_arrays(partial_dir, dataset_name, methods):
     cdes = {}
     zgrids = {}
     for method in methods:
-        method_key = _key(method)
-        cde_file = partial_dir / f"{dataset_name}_{method_key}_cdes.npy"
-        zgrid_file = partial_dir / f"{dataset_name}_{method_key}_zgrid.npy"
-        if cde_file.exists() and zgrid_file.exists():
-            cdes[method] = np.load(cde_file)
-            zgrids[method] = np.load(zgrid_file)
+        for alias in _method_aliases(method):
+            method_key = _key(alias)
+            cde_file = partial_dir / f"{dataset_name}_{method_key}_cdes.npy"
+            zgrid_file = partial_dir / f"{dataset_name}_{method_key}_zgrid.npy"
+            if cde_file.exists() and zgrid_file.exists():
+                cdes[method] = np.load(cde_file)
+                zgrids[method] = np.load(zgrid_file)
+                break
     return cdes, zgrids
 
 
@@ -206,7 +240,7 @@ def _default_skip_reason(method, n_total, runtime_device):
                 f"for {runtime_device.upper()} scaling runs"
             )
 
-    if method == "MDN-2mix":
+    if method == "MDN":
         limit = 500_000
         if n_total > limit:
             return (
@@ -247,7 +281,7 @@ def _load_existing_output(output_dir):
     json_file = output_dir / "results.json"
     if json_file.exists():
         with open(json_file) as f:
-            all_results = json.load(f)
+            all_results = _normalize_results_payload(json.load(f))
 
     cache_dir = output_dir / "cache"
     for dataset_name in all_results:
@@ -257,8 +291,8 @@ def _load_existing_output(output_dir):
         try:
             cdes, zgrids, X_te, z_te, true_cde, true_zgrid, n_total = load_cache(cache_file)
             all_data[dataset_name] = {
-                "cdes": cdes,
-                "zgrids": zgrids,
+                "cdes": _normalize_method_mapping(cdes),
+                "zgrids": _normalize_method_mapping(zgrids),
                 "X_test": X_te,
                 "z_test": z_te,
                 "true_cde": true_cde,
@@ -336,11 +370,11 @@ def main():
     sample_sizes = _parse_sample_sizes(args.sample_sizes, full_n)
 
     if args.methods:
-        base_methods = _parse_methods_arg(args.methods)
+        base_methods = _canonicalize_methods(_parse_methods_arg(args.methods))
     else:
         base_methods = list(DEFAULT_METHOD_ORDER)
     if args.exclude:
-        excluded = set(_parse_methods_arg(args.exclude))
+        excluded = set(_canonicalize_methods(_parse_methods_arg(args.exclude)))
         base_methods = [m for m in base_methods if m not in excluded]
 
     unknown = [m for m in base_methods if m not in DEFAULT_METHOD_ORDER]

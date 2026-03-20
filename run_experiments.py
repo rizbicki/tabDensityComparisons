@@ -142,10 +142,21 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
     results = {}
     cdes_dict = {}
     zgrids_dict = {}
-    methods = set(methods) if methods is not None else None
+
+    def _canonical_method_name(name):
+        return 'MDN' if name == 'MDN-2mix' else name
+
+    def _method_aliases(name):
+        canonical = _canonical_method_name(name)
+        if canonical == 'MDN':
+            return ('MDN', 'MDN-2mix')
+        return (canonical,)
+
+    methods = ({_canonical_method_name(m) for m in methods}
+               if methods is not None else None)
 
     def _want(name):
-        return methods is None or name in methods
+        return methods is None or _canonical_method_name(name) in methods
 
     def _run_tabpfn_method(name, model_factory):
         hit = _cached(name)
@@ -200,10 +211,11 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
     def _load_arrays(name):
         if partial_dir is None:
             return None, None
-        cde_f = partial_dir / f"{dataset_name}_{_key(name)}_cdes.npy"
-        zg_f  = partial_dir / f"{dataset_name}_{_key(name)}_zgrid.npy"
-        if cde_f.exists() and zg_f.exists():
-            return np.load(cde_f), np.load(zg_f)
+        for alias in _method_aliases(name):
+            cde_f = partial_dir / f"{dataset_name}_{_key(alias)}_cdes.npy"
+            zg_f = partial_dir / f"{dataset_name}_{_key(alias)}_zgrid.npy"
+            if cde_f.exists() and zg_f.exists():
+                return np.load(cde_f), np.load(zg_f)
         return None, None
 
     def _save(name, m, cdes, zg):
@@ -219,10 +231,11 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
 
     def _cached(name):
         """Return (metrics, cdes, zgrid) if cached, else None."""
-        if name in partial_metrics:
-            cdes, zg = _load_arrays(name)
-            if cdes is not None:
-                return partial_metrics[name], cdes, zg
+        for alias in _method_aliases(name):
+            if alias in partial_metrics:
+                cdes, zg = _load_arrays(name)
+                if cdes is not None:
+                    return partial_metrics[alias], cdes, zg
         return None
 
     n_train = len(z_train)
@@ -376,8 +389,8 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
         _run_density_baseline('LogNormal-Homo', lognormal_homo_density)
     if _want('LogNormal-Hetero'):
         _run_density_baseline('LogNormal-Hetero', lognormal_hetero_density)
-    if _want('MDN-2mix'):
-        _run_density_baseline('MDN-2mix', mdn_density_tuned,
+    if _want('MDN'):
+        _run_density_baseline('MDN', mdn_density_tuned,
                               random_state=random_state)
     if _want('Flow-Spline'):
         _run_density_baseline('Flow-Spline', normalizing_flow_density_tuned,

@@ -27,7 +27,7 @@ METHOD_STYLES = {
     'Student-t':           {'color': '#4daf4a', 'ls': ':',   'lw': 1.5, 'zorder': 2},
     'LogNormal-Homo':      {'color': '#d95f02', 'ls': ':',   'lw': 1.5, 'zorder': 2},
     'LogNormal-Hetero':    {'color': '#7570b3', 'ls': ':',   'lw': 1.5, 'zorder': 2},
-    'MDN-2mix':            {'color': '#8da0cb', 'ls': '--',  'lw': 1.5, 'zorder': 2},
+    'MDN':                 {'color': '#8da0cb', 'ls': '--',  'lw': 1.5, 'zorder': 2},
     'Flow-Spline':         {'color': '#a65628', 'ls': '-.',  'lw': 1.7, 'zorder': 3},
     'Gamma-GLM':           {'color': '#e78ac3', 'ls': ':',   'lw': 1.5, 'zorder': 2},
     'LinGauss-Homo-Ridge':    {'color': '#66c2a5', 'ls': '-.',  'lw': 1.5, 'zorder': 2},
@@ -129,7 +129,7 @@ METHOD_ORDER_HINTS = [
     'LogNormal-Homo',
     'LogNormal-Hetero',
     'Gamma-GLM',
-    'MDN-2mix',
+    'MDN',
     'LinGauss-Homo-Ridge',
     'LinGauss-Hetero-Ridge',
     'Student-t-Ridge',
@@ -149,8 +149,11 @@ METHOD_ORDER_HINTS = [
 ]
 METHOD_ORDER_INDEX = {m: i for i, m in enumerate(METHOD_ORDER_HINTS)}
 
-METHOD_LABEL_ALIASES = {
+METHOD_CANONICAL_ALIASES = {
     'MDN-2mix': 'MDN',
+}
+
+METHOD_LABEL_ALIASES = {
     'TabPFN-Native': 'Native',
     'TabPFN-2.5': 'TabPFN-2.5',
     'RealTabPFN-2.5': 'RealTabPFN',
@@ -158,11 +161,34 @@ METHOD_LABEL_ALIASES = {
 }
 
 
+def _canonical_method_name(method):
+    return METHOD_CANONICAL_ALIASES.get(method, method)
+
+
+def _method_aliases(method):
+    canonical = _canonical_method_name(method)
+    aliases = [canonical]
+    aliases.extend(
+        alias for alias, canonical_name in METHOD_CANONICAL_ALIASES.items()
+        if canonical_name == canonical
+    )
+    return aliases
+
+
+def _lookup_method(mapping, method):
+    for alias in _method_aliases(method):
+        if alias in mapping:
+            return mapping[alias]
+    return None
+
+
 def _display_method_name(method):
-    return METHOD_LABEL_ALIASES.get(method, method)
+    canonical = _canonical_method_name(method)
+    return METHOD_LABEL_ALIASES.get(canonical, canonical)
 
 
 def _method_style(method, fallback_idx=0):
+    method = _canonical_method_name(method)
     if method in METHOD_STYLES:
         return METHOD_STYLES[method]
     return {'color': _FALLBACK_COLORS[fallback_idx % len(_FALLBACK_COLORS)],
@@ -170,7 +196,15 @@ def _method_style(method, fallback_idx=0):
 
 
 def _visible_methods(methods):
-    return [m for m in methods if m not in EXCLUDED_METHODS]
+    visible = []
+    seen = set()
+    for method in methods:
+        canonical = _canonical_method_name(method)
+        if canonical in EXCLUDED_METHODS or canonical in seen:
+            continue
+        visible.append(canonical)
+        seen.add(canonical)
+    return visible
 
 
 def _perf_label(method):
@@ -340,6 +374,7 @@ def _top_non_tab_label_series(series, direction, top_k=2):
 
 
 def _method_group(method):
+    method = _canonical_method_name(method)
     if method in FOUNDATIONAL_MODELS:
         return 'foundational'
     if method in NONPARAMETRIC_MODELS:
@@ -498,8 +533,10 @@ def _plot_density_comparison_single(all_data, output_dir):
 
             for k, method in enumerate(sample_methods):
                 sty = _method_style(method, k)
-                cde = d['cdes'][method]
-                zg = d['zgrids'][method]
+                cde = _lookup_method(d['cdes'], method)
+                zg = _lookup_method(d['zgrids'], method)
+                if cde is None or zg is None:
+                    continue
                 ax.plot(zg, cde[idx],
                         label=_display_method_name(method) if (i == 0 and j == 0) else None,
                         color=sty['color'], linestyle=sty['ls'],
@@ -604,7 +641,8 @@ def _plot_rankings_grid(sub_results, methods, colors, n_size, kind_label,
         for di, ds in enumerate(datasets):
             vals, avail = [], []
             for m in methods:
-                v = sub_results[ds].get(m, {}).get(metric)
+                method_result = _lookup_method(sub_results[ds], m)
+                v = method_result.get(metric) if method_result is not None else None
                 if v is not None:
                     vals.append(v)
                     avail.append(m)
@@ -688,8 +726,9 @@ def plot_rankings_by_n(all_results, output_dir, all_data=None):
     if not groups:
         return
 
-    methods = sorted(set(m for ds in all_results.values() for m in ds.keys())
-                     - EXCLUDED_METHODS)
+    methods = sorted(_visible_methods(
+        m for ds in all_results.values() for m in ds.keys()
+    ))
     colors = _method_colors_map(methods)
 
     for n_size in sorted(groups):
@@ -724,7 +763,8 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
         for di, ds in enumerate(datasets):
             for m in methods:
                 mi = method_index[m]
-                v = sub_results[ds].get(m, {}).get(metric)
+                method_result = _lookup_method(sub_results[ds], m)
+                v = method_result.get(metric) if method_result is not None else None
                 if v is not None:
                     matrix[mi, di] = v
 
@@ -826,8 +866,9 @@ def plot_raw_metrics_by_n(all_results, output_dir, all_data=None):
     if not groups:
         return
 
-    methods = sorted(set(m for ds in all_results.values() for m in ds.keys())
-                     - EXCLUDED_METHODS)
+    methods = sorted(_visible_methods(
+        m for ds in all_results.values() for m in ds.keys()
+    ))
     colors = _method_colors_map(methods)
 
     for n_size in sorted(groups):
@@ -864,8 +905,10 @@ def _plot_pit_histograms_single(all_data, output_dir):
         d = all_data[ds]
         for j, m in enumerate(sample_methods):
             ax = axes[i, j]
-            if m in d['cdes']:
-                pit = eval_pit(d['cdes'][m], d['zgrids'][m], d['z_test'])
+            cde = _lookup_method(d['cdes'], m)
+            zg = _lookup_method(d['zgrids'], m)
+            if cde is not None and zg is not None:
+                pit = eval_pit(cde, zg, d['z_test'])
                 ks = eval_pit_ks(pit)
                 ax.hist(pit, bins=20, density=True, alpha=0.7,
                         color='steelblue', edgecolor='white')
@@ -914,8 +957,9 @@ def _save_html_table_single(all_results, output_dir,
         ('interval_width', 'Width',       'lower'),
     ]
 
-    methods = sorted(set(m for ds in all_results.values() for m in ds.keys())
-                     - EXCLUDED_METHODS)
+    methods = sorted(_visible_methods(
+        m for ds in all_results.values() for m in ds.keys()
+    ))
 
     css = """
     <style>
@@ -942,7 +986,11 @@ def _save_html_table_single(all_results, output_dir,
         best = {}
         second = {}
         for key, label, direction in METRICS:
-            vals = {m: res[m][key] for m in methods if m in res}
+            vals = {}
+            for m in methods:
+                method_result = _lookup_method(res, m)
+                if method_result is not None and method_result.get(key) is not None:
+                    vals[m] = method_result[key]
             if vals:
                 sorted_methods = sorted(
                     vals,
@@ -958,9 +1006,9 @@ def _save_html_table_single(all_results, output_dir,
 
         tbody_rows = []
         for m in methods:
-            if m not in res:
+            r = _lookup_method(res, m)
+            if r is None:
                 continue
-            r = res[m]
             basis = str(r['n_basis']) if r.get('n_basis') else '\u2014'
             cells = [f'<td class="method">{_display_method_name(m)}</td>']
             for key, _, direction in METRICS:
@@ -1032,7 +1080,11 @@ def plot_true_vs_estimated(all_data, output_dir, n_examples=4):
 
             for k, m in enumerate(methods):
                 sty = _method_style(m, k)
-                ax.plot(d['zgrids'][m], d['cdes'][m][idx],
+                zg = _lookup_method(d['zgrids'], m)
+                cde = _lookup_method(d['cdes'], m)
+                if zg is None or cde is None:
+                    continue
+                ax.plot(zg, cde[idx],
                         color=sty['color'], linestyle=sty['ls'],
                         linewidth=sty['lw'], alpha=0.85,
                         zorder=sty['zorder'], label=_display_method_name(m))
@@ -1066,7 +1118,7 @@ _NATIVE_SUBSET = [
     'RealTabPFN-2.5',
     'TabICL-Quantiles',
     'FlexCode-RF',
-    'MDN-2mix',
+    'MDN',
 ]
 
 
@@ -1104,10 +1156,12 @@ def plot_native_tab_subset(all_data, output_dir, n_examples=4):
                     label='True', zorder=10)
 
             for k, m in enumerate(_NATIVE_SUBSET):
-                if m not in d['cdes']:
+                zg = _lookup_method(d['zgrids'], m)
+                cde = _lookup_method(d['cdes'], m)
+                if zg is None or cde is None:
                     continue
                 sty = _method_style(m, k)
-                ax.plot(d['zgrids'][m], d['cdes'][m][idx],
+                ax.plot(zg, cde[idx],
                         color=sty['color'], linestyle=sty['ls'],
                         linewidth=sty['lw'], alpha=0.85,
                         zorder=sty['zorder'], label=_display_method_name(m))
@@ -1180,6 +1234,7 @@ def _split_real_sim(base_groups):
 
 
 def _method_colors_map(methods):
+    methods = _visible_methods(methods)
     cmap = plt.cm.tab20
     method_colors = {m: cmap(i / max(len(methods) - 1, 1)) for i, m in enumerate(methods)}
     for m in methods:
@@ -1259,8 +1314,9 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
                         continue
                     vals, valid_ns = [], []
                     for n, ds in pairs:
-                        if m in all_results[ds] and metric in all_results[ds][m]:
-                            vals.append(all_results[ds][m][metric])
+                        method_result = _lookup_method(all_results[ds], m)
+                        if method_result is not None and metric in method_result:
+                            vals.append(method_result[metric])
                             valid_ns.append(n)
                     if not valid_ns:
                         continue
@@ -1308,8 +1364,9 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
             for m in plot_methods:
                 vals, valid_ns = [], []
                 for n, ds in pairs:
-                    if m in all_results[ds] and metric in all_results[ds][m]:
-                        vals.append(all_results[ds][m][metric])
+                    method_result = _lookup_method(all_results[ds], m)
+                    if method_result is not None and metric in method_result:
+                        vals.append(method_result[metric])
                         valid_ns.append(n)
                 if valid_ns:
                     sty = _perf_style(m, method_colors)
@@ -1398,8 +1455,9 @@ def plot_performance_vs_n(all_results, output_dir, all_data=None):
     if not base_groups:
         return
 
-    methods = sorted(set(m for ds in all_results.values() for m in ds.keys())
-                     - EXCLUDED_METHODS)
+    methods = sorted(_visible_methods(
+        m for ds in all_results.values() for m in ds.keys()
+    ))
     mc = _method_colors_map(methods)
     real, sim_by_d = _split_real_sim(base_groups)
 
@@ -1425,8 +1483,9 @@ def plot_performance_vs_n_foundational(all_results, output_dir, all_data=None):
     if not base_groups:
         return
 
-    methods = sorted(set(m for ds in all_results.values() for m in ds.keys())
-                     - EXCLUDED_METHODS)
+    methods = sorted(_visible_methods(
+        m for ds in all_results.values() for m in ds.keys()
+    ))
     mc = _method_colors_map(methods)
     real, sim_by_d = _split_real_sim(base_groups)
 

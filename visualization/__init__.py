@@ -8,6 +8,7 @@ from .plots import (
     plot_performance_vs_n,
     plot_performance_vs_n_foundational,
     save_html_table,
+    save_latex_table,
     METHOD_STYLES,
     FOUNDATIONAL_MODELS,
 )

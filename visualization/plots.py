@@ -1064,6 +1064,140 @@ def _save_html_table_single(all_results, output_dir,
     print("  saved results_table.html")
 
 
+def save_latex_table(all_results, output_dir,
+                     se_caption='$\\pm$SE across repetitions'):
+    """Save LaTeX results tables (booktabs) suitable for a TMLR appendix.
+
+    Produces separate ``.tex`` files for real and simulated data.  Each file
+    contains one table per dataset with methods as rows, metrics as columns,
+    and mean $\\pm$ standard error.  The best value per column is set in
+    **bold** and the second best is \\underline{underlined}.
+    """
+    output_dirs = _resolve_output_dirs(output_dir)
+    split_results = _split_by_type(all_results)
+
+    for kind, results_subset in split_results.items():
+        if not results_subset:
+            continue
+        _save_latex_table_single(results_subset, output_dirs[kind],
+                                 se_caption=se_caption)
+
+
+def _tex_escape(s):
+    """Escape characters that are special in LaTeX."""
+    return (s.replace('_', '\\_')
+             .replace('&', '\\&')
+             .replace('%', '\\%')
+             .replace('#', '\\#'))
+
+
+def _save_latex_table_single(all_results, output_dir,
+                              se_caption='$\\pm$SE across repetitions'):
+    METRICS = [
+        ('CDE_loss',       'CDE loss',       'lower'),
+        ('log_lik',        'Log-lik',        'higher'),
+        ('CRPS',           'CRPS',           'lower'),
+        ('PIT_KS',         'PIT KS',         'lower'),
+        ('coverage_90',    '90\\% Cov',      'target_0.90'),
+        ('interval_width', 'Width',          'lower'),
+        ('fit_time',       'Time (s)',       'lower'),
+    ]
+
+    methods = sorted(_visible_methods(
+        m for ds in all_results.values() for m in ds.keys()
+    ))
+
+    n_metric_cols = len(METRICS)
+    col_spec = 'l' + 'r' * n_metric_cols
+
+    tables = []
+    for ds in all_results:
+        res = all_results[ds]
+
+        # --- determine best / second-best per metric -----------------------
+        best = {}
+        second = {}
+        for key, _, direction in METRICS:
+            vals = {}
+            for m in methods:
+                method_result = _lookup_method(res, m)
+                if method_result is not None and method_result.get(key) is not None:
+                    vals[m] = method_result[key]
+            if vals:
+                ranked = sorted(
+                    vals,
+                    key=lambda method: (_metric_sort_score(vals[method], direction),
+                                        method),
+                )
+                best[key] = ranked[0]
+                if len(ranked) > 1:
+                    second[key] = ranked[1]
+
+        # --- header ---------------------------------------------------------
+        header_cells = ' & '.join(f'\\textbf{{{lbl}}}' for _, lbl, _ in METRICS)
+        header = f'\\textbf{{Method}} & {header_cells}'
+
+        # --- body rows ------------------------------------------------------
+        body_rows = []
+        for m in methods:
+            r = _lookup_method(res, m)
+            if r is None:
+                continue
+            cells = [_tex_escape(_display_method_name(m))]
+            for key, _, direction in METRICS:
+                val = r.get(key)
+                se_val = r.get(f'{key}_se')
+                if val is None:
+                    cells.append('---')
+                    continue
+                if key == 'fit_time':
+                    txt = f'{val:.1f}'
+                    if se_val is not None:
+                        txt += f' {{\\scriptsize $\\pm${se_val:.1f}}}'
+                else:
+                    txt = f'{val:.4f}'
+                    if se_val is not None:
+                        txt += f' {{\\scriptsize $\\pm${se_val:.4f}}}'
+                if best.get(key) == m:
+                    txt = f'\\textbf{{{txt}}}'
+                elif second.get(key) == m:
+                    txt = f'\\underline{{{txt}}}'
+                cells.append(txt)
+            body_rows.append(' & '.join(cells))
+
+        # --- assemble table -------------------------------------------------
+        table_lines = [
+            f'% ---- {ds} ----',
+            f'\\begin{{table}}[ht]',
+            f'\\centering',
+            f'\\caption{{Results for {_tex_escape(ds)} ({se_caption}).}}',
+            f'\\label{{tab:{ds.lower().replace(" ", "_")}}}',
+            f'\\small',
+            f'\\begin{{tabular}}{{{col_spec}}}',
+            f'\\toprule',
+            header + ' \\\\',
+            f'\\midrule',
+        ]
+        for row in body_rows:
+            table_lines.append(row + ' \\\\')
+        table_lines += [
+            f'\\bottomrule',
+            f'\\end{{tabular}}',
+            f'\\end{{table}}',
+            '',
+        ]
+        tables.append('\n'.join(table_lines))
+
+    preamble = (
+        '% Auto-generated LaTeX tables — include in your .tex with \\input{...}\n'
+        '% Requires: \\usepackage{booktabs}\n'
+        '\n'
+    )
+    out = output_dir / 'results_table.tex'
+    out.write_text(preamble + '\n'.join(tables), encoding='utf-8')
+    print(f"  saved {out.name}")
+
+
 def plot_true_vs_estimated(all_data, output_dir, n_examples=4):
     """
     For each synthetic dataset, plot estimated densities from all methods

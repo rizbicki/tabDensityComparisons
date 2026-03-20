@@ -17,6 +17,7 @@ from visualization import (
     plot_pit_histograms, plot_native_tab_subset,
     plot_performance_vs_n, plot_performance_vs_n_foundational,
     save_html_table,
+    save_latex_table,
 )
 
 
@@ -97,6 +98,8 @@ def main():
     print("\nGenerating plots and tables...")
     save_html_table(all_results, output_dirs)
     print("  ✓ HTML table")
+    save_latex_table(all_results, output_dirs)
+    print("  ✓ LaTeX table")
 
     if args.metrics_only:
         print("  - Native TabPFN subset plots skipped (--metrics-only)")

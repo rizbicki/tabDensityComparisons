@@ -33,6 +33,7 @@ from visualization import (
     plot_performance_vs_n,
     plot_performance_vs_n_foundational,
     save_html_table,
+    save_latex_table,
 )
 
 
@@ -345,6 +346,7 @@ def _render_sdss_scaling_outputs(all_results, all_data, output_dir, se_caption):
         return False
 
     save_html_table(all_results, output_dir, se_caption=se_caption)
+    save_latex_table(all_results, output_dir, se_caption=se_caption)
     plot_performance_vs_n(all_results, output_dir, all_data=all_data)
     plot_performance_vs_n_foundational(all_results, output_dir, all_data=all_data)
     return True
@@ -460,7 +462,6 @@ def main():
     for n_total in sample_sizes:
         dataset_name = f"SDSS-{n_total}"
         cache_file = cache_dir / f"{dataset_name}.npz"
-        X_sub, z_sub = _subsample_from_full(X_full, z_full, n_total, args.subsample_seed)
 
         use_policy = (not args.methods) and (not args.all_methods_at_all_sizes)
         selected_methods, policy_skips = _select_methods(
@@ -468,7 +469,7 @@ def main():
         )
 
         print("\n" + "=" * 72)
-        print(f"{dataset_name}  (n={len(z_sub):,}, d={X_sub.shape[1]})")
+        print(f"{dataset_name}  (n={min(n_total, full_n):,}, d={X_full.shape[1]})")
         print("=" * 72)
         print("Selected methods:")
         for method in selected_methods:
@@ -498,6 +499,10 @@ def main():
             rep_partial = partial_root / f"rep{rep}"
             rep_partial.mkdir(parents=True, exist_ok=True)
             rep_seed = args.random_state + rep
+            subsample_seed = args.subsample_seed + rep
+            X_sub, z_sub = _subsample_from_full(
+                X_full, z_full, n_total, subsample_seed
+            )
             rep_key = f"rep{rep}"
             runtime_failures[rep_key] = {}
             last_X_te = None
@@ -505,7 +510,8 @@ def main():
             true_cde = None
             true_zgrid = None
 
-            print(f"\n  ── rep {rep + 1}/{args.n_reps} (seed={rep_seed}) ──")
+            print(f"\n  ── rep {rep + 1}/{args.n_reps} (seed={rep_seed}, "
+                  f"subsample_seed={subsample_seed}) ──")
             for method in selected_methods:
                 print(f"\nRunning {dataset_name}: {method}")
                 try:

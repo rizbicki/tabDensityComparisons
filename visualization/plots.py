@@ -63,7 +63,7 @@ METHOD_GROUP_ORDER = ('parametric', 'nonparametric', 'foundational')
 METHOD_GROUP_META = {
     'parametric': {'label': 'Parametric', 'accent': '#1b9e77'},
     'nonparametric': {'label': 'Nonparametric', 'accent': '#377eb8'},
-    'foundational': {'label': 'Foundational', 'accent': '#e67e22'},
+    'foundational': {'label': 'Foundation', 'accent': '#e67e22'},
 }
 
 _FOUNDATIONAL_ACCENT = METHOD_GROUP_META['foundational']['accent']
@@ -1268,7 +1268,7 @@ def _foundational_perf_legend_handles():
 
 
 def _group_perf_legend_handles():
-    """Three-entry legend: Parametric, Nonparametric, Foundational,
+    """Three-entry legend: Parametric, Nonparametric, Foundation,
     plus a dashed-line note for beyond-native-limit regime."""
     handles = []
     for group in METHOD_GROUP_ORDER:
@@ -1551,12 +1551,12 @@ def plot_performance_vs_n_foundational(all_results, output_dir, all_data=None):
         if real:
             _plot_perf_grid(real, all_results, methods, mc,
                             metric, label, direction,
-                            ' — Real (Foundational)',
+                            ' — Real (Foundation)',
                             f'perf_vs_n_foundational_{ml}_real.png',
                             output_dirs['real'], foundational_only=True)
         for d in sorted(sim_by_d):
             _plot_perf_grid(sim_by_d[d], all_results, methods, mc,
                             metric, label, direction,
-                            f' — Simulated d={d} (Foundational)',
+                            f' — Simulated d={d} (Foundation)',
                             f'perf_vs_n_foundational_{ml}_sim_d{d}.png',
                             output_dirs['sim'], foundational_only=True)

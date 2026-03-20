@@ -1,6 +1,7 @@
 from .plots import (
     plot_density_comparison,
     plot_rankings_by_n,
+    plot_critical_difference,
     plot_raw_metrics_by_n,
     plot_pit_histograms,
     plot_true_vs_estimated,

@@ -114,13 +114,13 @@ PERF_BACKGROUND_GROUP_STYLES = {
 }
 
 
-PERF_ANNOTATION_FONTSIZE = 13.0
-PERF_SUBPLOT_TITLE_FONTSIZE = 18
-PERF_AXIS_LABEL_FONTSIZE = 16
-PERF_TICK_FONTSIZE = 14
-PERF_LEGEND_FONTSIZE = 14
-PERF_FOUNDATIONAL_LEGEND_FONTSIZE = 17
-PERF_SUPTITLE_FONTSIZE = 22
+PERF_ANNOTATION_FONTSIZE = 14.0
+PERF_SUBPLOT_TITLE_FONTSIZE = 20
+PERF_AXIS_LABEL_FONTSIZE = 18
+PERF_TICK_FONTSIZE = 16
+PERF_LEGEND_FONTSIZE = 16
+PERF_FOUNDATIONAL_LEGEND_FONTSIZE = 18
+PERF_SUPTITLE_FONTSIZE = 24
 
 HEATMAP_CELL_WIDTH = 0.62
 HEATMAP_CELL_HEIGHT = 0.40
@@ -161,10 +161,10 @@ METHOD_CANONICAL_ALIASES = {
 }
 
 METHOD_LABEL_ALIASES = {
-    'TabPFN-Native': 'Native',
-    'TabPFN-2.5': 'TabPFN-2.5',
-    'RealTabPFN-2.5': 'RealTabPFN',
-    'TabICL-Quantiles': 'TabICL',
+    'TabPFN-Native': 'TabPFN Native',
+    'TabPFN-2.5': 'TabPFN 2.5',
+    'RealTabPFN-2.5': 'RealTabPFN 2.5',
+    'TabICL-Quantiles': 'TabICL Quantiles',
 }
 
 
@@ -1485,7 +1485,7 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
         return
 
     n_bases = len(base_groups)
-    ncols = min(4, n_bases)
+    ncols = min(6, n_bases)
     nrows = (n_bases + ncols - 1) // ncols
     plot_methods = _ordered_methods(methods)
     fig_w = max(8.0, 6.4 * ncols) if n_bases == 1 else 6.4 * ncols
@@ -1593,7 +1593,7 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
         ax.set_ylabel(label, fontsize=PERF_AXIS_LABEL_FONTSIZE)
         ax.tick_params(labelsize=PERF_TICK_FONTSIZE)
 
-        use_log = max(ns) / max(min(ns), 1) >= 8
+        use_log = len(ns) > 1
         if use_log:
             ax.set_xscale('log')
             ax.set_xticks(ns)

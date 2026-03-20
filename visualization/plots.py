@@ -1153,11 +1153,11 @@ def _save_latex_table_single(all_results, output_dir,
                 if key == 'fit_time':
                     txt = f'{val:.1f}'
                     if se_val is not None:
-                        txt += f' {{\\scriptsize $\\pm${se_val:.1f}}}'
+                        txt += f' $\\pm$ {se_val:.1f}'
                 else:
                     txt = f'{val:.4f}'
                     if se_val is not None:
-                        txt += f' {{\\scriptsize $\\pm${se_val:.4f}}}'
+                        txt += f' $\\pm$ {se_val:.4f}'
                 if best.get(key) == m:
                     txt = f'\\textbf{{{txt}}}'
                 elif second.get(key) == m:

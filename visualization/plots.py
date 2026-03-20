@@ -579,10 +579,23 @@ METRICS_INFO = [
 def _ds_labels(datasets, all_data, max_chars=20):
     labels = []
     for ds in datasets:
-        short = ds if len(ds) <= max_chars else ds[:max_chars - 1] + '…'
-        n_total = all_data[ds].get('n_total', '') if all_data and ds in all_data else ''
-        n_str = f"\n(n={n_total})" if n_total else ''
-        labels.append(f"{short}{n_str}")
+        base, _ = _parse_base_and_n(ds)
+        base = base if base is not None else ds
+
+        d_val = None
+        if all_data and ds in all_data:
+            X_test = all_data[ds].get('X_test')
+            if X_test is not None and getattr(X_test, 'ndim', None) == 2:
+                d_val = int(X_test.shape[1])
+        if d_val is None:
+            d_val = _parse_d(base)
+
+        if d_val is not None:
+            base = _re.sub(r'-d\d+$', '', base)
+
+        short = base if len(base) <= max_chars else base[:max_chars - 1] + '…'
+        d_str = f"\n(d={d_val})" if d_val is not None else ''
+        labels.append(f"{short}{d_str}")
     return labels
 
 

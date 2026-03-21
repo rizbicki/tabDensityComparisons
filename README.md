@@ -128,11 +128,8 @@ utils/
 
 ### Penalized (Ridge) Variants
 
-`MDN` is still treated as parametric in this benchmark: it predicts a finite set
-of mixture weights, means, and scales from a finite-dimensional neural network,
-rather than using a nonparametric density estimator.
-
-The classical linear / GLM families above (except MDN) also have a
+The classical linear / GLM families above
+also have a
 Ridge-regularized variant with the penalty chosen by leave-one-out
 cross-validation (`RidgeCV`).
 

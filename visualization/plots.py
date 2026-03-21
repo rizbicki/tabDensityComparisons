@@ -50,6 +50,7 @@ FOUNDATIONAL_MODELS = {
 }
 
 NONPARAMETRIC_MODELS = {
+    'MDN',
     'FlexCode-RF',
     'BART-Homo',
     'BART-Hetero',
@@ -136,7 +137,6 @@ METHOD_ORDER_HINTS = [
     'LogNormal-Homo',
     'LogNormal-Hetero',
     'Gamma-GLM',
-    'MDN',
     'LinGauss-Homo-Ridge',
     'LinGauss-Hetero-Ridge',
     'Student-t-Ridge',
@@ -144,6 +144,7 @@ METHOD_ORDER_HINTS = [
     'LogNormal-Hetero-Ridge',
     'Gamma-GLM-Ridge',
     'FlexCode-RF',
+    'MDN',
     'BART-Homo',
     'BART-Hetero',
     'Flow-Spline',

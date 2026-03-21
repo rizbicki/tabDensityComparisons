@@ -8,7 +8,7 @@ classical methods for conditional density estimation (CDE) on tabular data.
 ```bash
 chmod +x setup_and_run.sh
 ./setup_and_run.sh --setup-only     # create .venv and install dependencies only
-./setup_and_run.sh --quick          # sanity check (synthetic datasets only)
+./setup_and_run.sh --sim-only       # simulated datasets only
 ./setup_and_run.sh                  # full run (synthetic + real datasets)
 ./setup_and_run.sh --real-only      # real/semi-synthetic datasets only
 ./setup_and_run.sh --cpu            # force CPU (slower)
@@ -65,7 +65,7 @@ pip install --upgrade pip
 pip install numpy setuptools
 pip install --no-build-isolation xbart
 pip install -r requirements.txt
-python run_experiments.py --quick --device cuda
+python run_experiments.py --sim-only --device cuda
 ```
 
 ### If you already have a CUDA PyTorch
@@ -162,10 +162,10 @@ The main simulated and real-data benchmarks run `4` repetitions per dataset by
 default (`--n-reps` to change this); metrics report mean ± SE across
 repetitions.
 
-### Synthetic (d ∈ {5, 10, 50}, n ∈ {1000, 2000, 4000, 6000, 20000})
+### Synthetic (d ∈ {5, 10, 50}, n ∈ {50, 500, 1000, 5000, 10000, 20000})
 
 All synthetic datasets have known true conditional densities. Tags follow
-`{Base}-d{d}-{n}` (e.g. `Heteroscedastic-d10-2000`).
+`{Base}-d{d}-{n}` (e.g. `Heteroscedastic-d10-5000`).
 
 | Dataset | Description |
 |---------|-------------|

@@ -6,8 +6,8 @@ set -euo pipefail
 # Usage:
 #   chmod +x setup_and_run.sh
 #   ./setup_and_run.sh --setup-only     # create .venv and install dependencies only
+#   ./setup_and_run.sh --sim-only       # simulated datasets only
 #   ./setup_and_run.sh                  # full run (synthetic + real)
-#   ./setup_and_run.sh --quick          # quick sanity check (4 datasets)
 #   ./setup_and_run.sh --real-only      # real/semi-synthetic datasets only
 #   ./setup_and_run.sh --cpu            # force CPU
 #
@@ -28,16 +28,22 @@ PIP="${VENV_DIR}/bin/pip"
 EXTRA_ARGS=()
 DEVICE="auto"
 REAL_ONLY=0
+SIM_ONLY=0
 SETUP_ONLY=0
 for arg in "$@"; do
     case "$arg" in
         --cpu) DEVICE="cpu"; EXTRA_ARGS+=("--device" "cpu") ;;
-        --quick) EXTRA_ARGS+=("--quick") ;;
+        --sim-only) SIM_ONLY=1; EXTRA_ARGS+=("--sim-only") ;;
         --real-only) REAL_ONLY=1 ;;
         --setup-only) SETUP_ONLY=1 ;;
         *) EXTRA_ARGS+=("$arg") ;;
     esac
 done
+
+if [ "$REAL_ONLY" -eq 1 ] && [ "$SIM_ONLY" -eq 1 ]; then
+    echo "Cannot combine --real-only and --sim-only."
+    exit 1
+fi
 
 # ── 1. Create venv ──────────────────────────────────────────────
 if [ ! -d "$VENV_DIR" ]; then
@@ -112,6 +118,8 @@ else
     echo ""
     echo "============================================================"
     echo "  Done! Simulated results are in results_simulated/"
-    echo "  Done! Real results are in results_real/"
+    if [ "$SIM_ONLY" -eq 0 ]; then
+        echo "  Done! Real results are in results_real/"
+    fi
     echo "============================================================"
 fi

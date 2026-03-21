@@ -180,8 +180,8 @@ def load_real_only_datasets():
     return datasets
 
 
-def load_all_datasets(quick=False):
-    # Synthetic: d ∈ {5, 10, 50}, n ∈ {1000, 2000, 4000, 6000, 20000}
+def load_all_datasets(include_real=True):
+    # Synthetic: d ∈ {5, 10, 50}, n matches the real-data schedule.
     synthetic_generators = [
         make_heteroscedastic,
         make_bimodal,
@@ -194,14 +194,14 @@ def load_all_datasets(quick=False):
     datasets = []
     for gen in synthetic_generators:
         for d in [5, 10, 50]:
-            for n in [1000, 2000, 4000, 6000, 20000]:
+            for n in _REAL_TARGET_NS:
                 datasets.append(gen(n=n, d=d))
 
     # Friedman2 has fixed d=4
-    for n in [1000, 2000, 4000, 6000, 20000]:
+    for n in _REAL_TARGET_NS:
         datasets.append(make_friedman2(n=n))
 
-    if not quick:
+    if include_real:
         # Real datasets at n=50, 500, 1000, 5000, 10000, 20000
         for target_n in _REAL_TARGET_NS:
             _load_real_at_n(datasets, target_n)

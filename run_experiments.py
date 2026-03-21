@@ -4,7 +4,7 @@ FlexCode x Tabular Foundation Models: CDE Experiments
 
 USAGE:
   pip install tabpfn tabicl scikit-learn matplotlib numpy scipy
-  python run_experiments.py [--device cpu|cuda] [--quick] [--force]
+  python run_experiments.py [--device cpu|cuda] [--sim-only] [--force]
 """
 
 import argparse
@@ -458,8 +458,8 @@ def main():
         description='FlexCode x TFM CDE Experiments')
     parser.add_argument('--device', default='auto',
                         choices=['auto', 'cpu', 'cuda'])
-    parser.add_argument('--quick', action='store_true',
-                        help='Run fewer datasets')
+    parser.add_argument('--sim-only', action='store_true',
+                        help='Run the full synthetic benchmark only')
     parser.add_argument('--output-dir', default='results_simulated',
                         help='Output directory for simulated results '
                              '(default: results_simulated)')
@@ -514,7 +514,9 @@ def main():
         print("  Install with: pip install tabpfn tabicl")
         print("  Running with sklearn baselines only.\n")
 
-    datasets = prioritize_dataset_schedule(load_all_datasets(quick=args.quick))
+    datasets = prioritize_dataset_schedule(
+        load_all_datasets(include_real=not args.sim_only)
+    )
     report_sdss_schedule(datasets)
     n_reps = args.n_reps
 

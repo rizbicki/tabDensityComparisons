@@ -10,6 +10,7 @@ USAGE:
 
 import argparse
 import json
+import re
 from pathlib import Path
 
 import warnings
@@ -30,6 +31,18 @@ from visualization import (
     save_latex_table,
 )
 from utils import save_cache, load_cache, print_summary, aggregate_reps
+
+
+def _dataset_target_n(name):
+    match = re.search(r'-(\d+)$', name)
+    return int(match.group(1)) if match else None
+
+
+def _effective_n_reps(dataset_name, requested_n_reps):
+    target_n = _dataset_target_n(dataset_name)
+    if target_n == 50:
+        return requested_n_reps * 10
+    return requested_n_reps
 
 
 def main():
@@ -70,13 +83,18 @@ def main():
 
     datasets = prioritize_dataset_schedule(load_real_only_datasets())
     report_sdss_schedule(datasets)
-    n_reps = args.n_reps
+    requested_n_reps = args.n_reps
 
     all_results = {}
     all_data = {}
 
     for X, z, name, true_density_fn in datasets:
+        n_reps = _effective_n_reps(name, requested_n_reps)
         cache_file = cache_dir / f"{name}.npz"
+
+        if n_reps != requested_n_reps:
+            print(f"\n  [{name}] using {n_reps} repetitions "
+                  f"(10x requested {requested_n_reps} for n=50)")
 
         # Count how many reps are already fully cached
         cached_reps = 0

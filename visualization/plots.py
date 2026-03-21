@@ -459,6 +459,11 @@ def _heatmap_font_sizes(n_methods, n_ds):
     }
 
 
+def _scaled_heatmap_font_sizes(n_methods, n_ds, scale=1.0):
+    fonts = _heatmap_font_sizes(n_methods, n_ds)
+    return {key: value * scale for key, value in fonts.items()}
+
+
 def _add_method_group_legend(fig, fontsize):
     handles = []
     for group in METHOD_GROUP_ORDER:
@@ -708,14 +713,13 @@ def _plot_rankings_grid(sub_results, methods, colors, n_size, kind_label,
     method_index = {m: i for i, m in enumerate(methods)}
     # +1 row for avg rank summary
     fig_w, fig_h = _heatmap_layout(n_methods, n_ds + 1)
-    fonts = _heatmap_font_sizes(n_methods, n_ds)
-    ranking_font_scale = 1.25
-    method_fs = fonts['method'] * ranking_font_scale
-    ds_fs = fonts['dataset'] * ranking_font_scale
-    title_fs = fonts['title'] * ranking_font_scale
-    axis_fs = fonts['axis'] * ranking_font_scale
-    tick_fs = fonts['tick'] * ranking_font_scale
-    cell_fs = fonts['cell'] * ranking_font_scale
+    fonts = _scaled_heatmap_font_sizes(n_methods, n_ds, scale=1.25)
+    method_fs = fonts['method']
+    ds_fs = fonts['dataset']
+    title_fs = fonts['title']
+    axis_fs = fonts['axis']
+    tick_fs = fonts['tick']
+    cell_fs = fonts['cell']
 
     for metric, label, direction in METRICS_INFO:
         matrix = np.full((n_methods, n_ds), np.nan)
@@ -1055,7 +1059,7 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
     method_index = {m: i for i, m in enumerate(methods)}
     # +1 row for avg score summary
     fig_w, fig_h = _heatmap_layout(n_methods, n_ds + 1)
-    fonts = _heatmap_font_sizes(n_methods, n_ds)
+    fonts = _scaled_heatmap_font_sizes(n_methods, n_ds, scale=1.25)
     method_fs = fonts['method']
     ds_fs = fonts['dataset']
     title_fs = fonts['title']

@@ -8,10 +8,11 @@ results/*.png
 results/*.html
 results/results.json
 results_real/cache/
-results_real/*.png
-results_real/*.html
-results_real/results.json
 results_real/*/
+!results_real/*.png
+!results_real/*.pdf
+!results_real/*.html
+!results_real/*.tex
 !results_real/results.json
 results_simulated/cache/
 results_simulated/*.png

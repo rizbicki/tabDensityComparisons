@@ -10,6 +10,7 @@ from .plots import (
     plot_native_tab_subset,
     plot_performance_vs_n,
     plot_performance_vs_n_foundational,
+    plot_sdss_fit_time_vs_cde_loss,
     save_html_table,
     save_latex_table,
     METHOD_STYLES,

@@ -34,6 +34,7 @@ from visualization import (
     plot_performance_vs_n_foundational,
     plot_sdss_rankings_by_n,
     plot_sdss_raw_metrics_by_n,
+    plot_sdss_fit_time_vs_cde_loss,
     save_html_table,
     save_latex_table,
 )
@@ -348,6 +349,7 @@ def _render_sdss_scaling_outputs(all_results, all_data, output_dir, se_caption):
     plot_performance_vs_n_foundational(all_results, output_dir, all_data=all_data)
     plot_sdss_rankings_by_n(all_results, output_dir, all_data=all_data)
     plot_sdss_raw_metrics_by_n(all_results, output_dir, all_data=all_data)
+    plot_sdss_fit_time_vs_cde_loss(all_results, output_dir, all_data=all_data)
     return True
 
 

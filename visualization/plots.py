@@ -2274,3 +2274,109 @@ def plot_performance_vs_n_foundational(all_results, output_dir, all_data=None):
                             f'perf_vs_n_foundational_{ml}_sim_d{d}.png',
                             output_dirs['sim'], foundational_only=True,
                             all_data=all_data)
+
+
+def plot_sdss_fit_time_vs_cde_loss(all_results, output_dir, all_data=None):
+    """Scatter plot: fit_time (x) vs CDE_loss (y) across SDSS sample sizes.
+
+    Each point represents one (method, sample-size) combination.  Points for
+    the same method are connected with a thin line ordered by sample size,
+    letting the reader trace how the time/quality trade-off evolves as n grows.
+    """
+    del all_data  # unused; accepted for call-site consistency with other plot functions
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Collect SDSS slices: {n: method_results_dict}
+    sdss_datasets = {}
+    for ds, results in all_results.items():
+        base, n = _parse_base_and_n(ds)
+        if base is not None and _is_sdss_base(base):
+            sdss_datasets[n] = results
+
+    if not sdss_datasets:
+        return
+
+    n_sizes = sorted(sdss_datasets.keys())
+    all_methods = sorted(_visible_methods(
+        m for res in sdss_datasets.values() for m in res.keys()
+    ))
+    plot_methods = _ordered_methods(all_methods)
+
+    group_color = {g: METHOD_GROUP_META[g]['accent'] for g in METHOD_GROUP_META}
+
+    # Map n → marker area (points²) on a log scale
+    log_ns = [np.log10(n) for n in n_sizes]
+    log_min, log_max = min(log_ns), max(log_ns)
+    log_span = max(log_max - log_min, 1e-6)
+
+    def _marker_area(n):
+        t = (np.log10(n) - log_min) / log_span
+        return 40 + t * 200  # range [40, 240] points²
+
+    fig, ax = plt.subplots(figsize=(11, 7))
+
+    for m in plot_methods:
+        color = group_color[_method_group(m)]
+        points = []
+        for n in n_sizes:
+            mr = _lookup_method(sdss_datasets[n], m)
+            if mr is None:
+                continue
+            ft = mr.get('fit_time')
+            cl = mr.get('CDE_loss')
+            if ft is None or cl is None:
+                continue
+            points.append((n, ft, cl))
+
+        if not points:
+            continue
+
+        xs = [p[1] for p in points]
+        ys = [p[2] for p in points]
+
+        # Connecting line
+        ax.plot(xs, ys, color=color, lw=1.0, alpha=0.45, zorder=2)
+
+        # Scatter points sized by n (vectorized)
+        sizes = [_marker_area(p[0]) for p in points]
+        ax.scatter(xs, ys, s=sizes, color=color, zorder=3,
+                   edgecolors='white', linewidths=0.6)
+
+    ax.set_xscale('log')
+    ax.invert_yaxis()
+    ax.set_xlabel('Fit Time (s)', fontsize=14)
+    ax.set_ylabel('CDE Loss', fontsize=14)
+    ax.set_title('SDSS Scaling: Fit Time vs CDE Loss\n'
+                 'lower CDE Loss values are better (y-axis inverted: top = better)',
+                 fontsize=13)
+    ax.grid(True, alpha=0.25, which='both')
+
+    # Group legend
+    group_handles = [
+        Patch(color=METHOD_GROUP_META[g]['accent'],
+              label=METHOD_GROUP_META[g]['label'])
+        for g in METHOD_GROUP_ORDER
+        if any(_method_group(m) == g for m in plot_methods)
+    ]
+    leg1 = ax.legend(handles=group_handles, loc='upper left', fontsize=9,
+                     framealpha=0.85)
+    ax.add_artist(leg1)
+
+    # Sample-size legend (marker size guide)
+    size_handles = [
+        Line2D([0], [0], marker='o', color='#555555',
+               label=_fmt_n(n),
+               markersize=2 * np.sqrt(_marker_area(n) / np.pi),
+               linestyle='None')
+        for n in n_sizes
+    ]
+    ax.legend(handles=size_handles, loc='lower right', fontsize=8,
+              title='Sample size (n)', title_fontsize=9, framealpha=0.85)
+
+    plt.tight_layout()
+    for ext in ('pdf', 'png'):
+        fig.savefig(output_dir / f'fit_time_vs_cde_loss_sdss.{ext}',
+                    dpi=150, bbox_inches='tight')
+    plt.close(fig)
+    print(f"  saved fit_time_vs_cde_loss_sdss.{{pdf,png}}")

@@ -1176,10 +1176,11 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
     datasets = _ordered_dataset_names(sub_results.keys(), all_data)
     if not datasets:
         return
-    n_methods = len(methods)
+    ordered_methods = _ordered_methods(methods)
+    n_methods = len(ordered_methods)
     n_ds = len(datasets)
     ds_labels = _ds_labels(datasets, all_data)
-    method_index = {m: i for i, m in enumerate(methods)}
+    method_index = {m: i for i, m in enumerate(ordered_methods)}
     # +1 row for avg score summary
     fig_w, fig_h = _heatmap_layout(n_methods, n_ds + 1)
     fonts = _scaled_heatmap_font_sizes(n_methods, n_ds, scale=1.25)
@@ -1193,7 +1194,7 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
     for metric, label, direction in METRICS_INFO:
         matrix = np.full((n_methods, n_ds), np.nan)
         for di, ds in enumerate(datasets):
-            for m in methods:
+            for m in ordered_methods:
                 mi = method_index[m]
                 method_result = _lookup_method(sub_results[ds], m)
                 v = method_result.get(metric) if method_result is not None else None
@@ -1217,7 +1218,7 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
                 norm_matrix[:, j] = (score_col - cmin) / rng
 
         scaled_scores = {}
-        for mi, m in enumerate(methods):
+        for mi, m in enumerate(ordered_methods):
             vals = norm_matrix[mi][~np.isnan(norm_matrix[mi])]
             if len(vals) == 0:
                 scaled_scores[m] = -1.0
@@ -1229,10 +1230,8 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
             )
             scaled_scores[m] = float(np.mean(scaled))
 
-        ordered_methods = _ordered_methods(methods, score_map=scaled_scores)
-        col_order = [method_index[m] for m in ordered_methods]
         # Transposed: rows=datasets, columns=methods
-        data_norm = norm_matrix[col_order, :].T  # (n_ds, n_methods)
+        data_norm = norm_matrix.T  # (n_ds, n_methods)
         # Append avg scaled score row (map to [0,1] for colormap)
         avg_row = np.array([[scaled_scores[m] for m in ordered_methods]])
         plot_norm = np.vstack([data_norm, avg_row])
@@ -1287,7 +1286,7 @@ def _plot_sdss_raw_combined(groups, methods, output_dir):
 
     n_sizes = len(slices)
     n_labels = [_fmt_n(n_size) for n_size, _, _ in slices]
-    base_methods = list(methods)
+    base_methods = _ordered_methods(methods)
 
     for metric, label, direction in METRICS_INFO:
         raw_matrix = np.full((n_sizes, len(base_methods)), np.nan)
@@ -1309,12 +1308,13 @@ def _plot_sdss_raw_combined(groups, methods, output_dir):
         norm_matrix = np.full_like(raw_matrix, np.nan)
         finite_scores = score_matrix[np.isfinite(score_matrix)]
         if finite_scores.size:
-            cmin, cmax = np.nanmin(finite_scores), np.nanmax(finite_scores)
+            cmin = np.nanmin(finite_scores)
+            cmax = np.nanpercentile(finite_scores, 95)
             rng = cmax - cmin
             if rng < 1e-10:
                 norm_matrix[np.isfinite(score_matrix)] = 0.5
             else:
-                norm_matrix = (score_matrix - cmin) / rng
+                norm_matrix = np.clip((score_matrix - cmin) / rng, 0, 1)
 
         scaled_scores = {}
         for mi, m in enumerate(base_methods):
@@ -1330,15 +1330,13 @@ def _plot_sdss_raw_combined(groups, methods, output_dir):
             )
             scaled_scores[m] = float(np.mean(scaled))
 
-        ordered_methods = _ordered_methods(base_methods, score_map=scaled_scores)
-        col_order = [method_index[m] for m in ordered_methods]
-        plot_norm = norm_matrix[:, col_order]
-        plot_raw = raw_matrix[:, col_order]
-        plot_se = se_matrix[:, col_order]
+        plot_norm = norm_matrix
+        plot_raw = raw_matrix
+        plot_se = se_matrix
 
-        n_methods = len(ordered_methods)
+        n_methods = len(base_methods)
         fig_w, fig_h = _heatmap_layout(n_methods, n_sizes)
-        fig_w *= 1.12
+        fig_w *= 1.35
         fonts = _scaled_heatmap_font_sizes(n_methods, n_sizes, scale=1.15)
         method_fs = fonts['method']
         n_fs = fonts['dataset']
@@ -1349,24 +1347,33 @@ def _plot_sdss_raw_combined(groups, methods, output_dir):
         se_fs = max(4.5, fonts['cell'] * 0.72)
 
         fig, ax = plt.subplots(figsize=(fig_w, fig_h))
-        im = ax.imshow(plot_norm, cmap=_metric_cmap(direction), aspect='auto',
+        cmap_obj = plt.get_cmap(_metric_cmap(direction)).copy()
+        cmap_obj.set_bad(color='#e8e8e8')
+        im = ax.imshow(plot_norm, cmap=cmap_obj, aspect='auto',
                        vmin=0, vmax=1)
 
         for i in range(n_sizes):
             for j in range(n_methods):
                 val = plot_raw[i, j]
                 if np.isfinite(val):
+                    norm_val = plot_norm[i, j]
+                    rgba = cmap_obj(norm_val if np.isfinite(norm_val) else 0.5)
+                    lum = 0.299 * rgba[0] + 0.587 * rgba[1] + 0.114 * rgba[2]
+                    text_color = 'white' if lum < 0.45 else 'black'
                     se_val = plot_se[i, j]
-                    ax.text(j, i - 0.12, _format_table_number(val),
+                    ax.text(j, i - 0.12, _format_sdss_heatmap_number(metric, val),
                             ha='center', va='center',
                             fontsize=value_fs, fontweight='bold',
-                            color='black', zorder=5)
+                            color=text_color, zorder=5)
                     if np.isfinite(se_val):
-                        ax.text(j, i + 0.17, f'({_format_table_number(se_val)})',
+                        ax.text(j, i + 0.17, f'({_format_sdss_heatmap_number(metric, se_val)})',
                                 ha='center', va='center',
-                                fontsize=se_fs, color='black', zorder=5)
+                                fontsize=se_fs, color=text_color, zorder=5)
+                else:
+                    ax.text(j, i, '—', ha='center', va='center',
+                            fontsize=value_fs, color='#aaaaaa', zorder=5)
 
-        method_labels = [_display_method_name(m) for m in ordered_methods]
+        method_labels = [_display_method_name(m) for m in base_methods]
         ax.set_xticks(range(n_methods))
         ax.set_xticklabels(method_labels, fontsize=method_fs,
                            rotation=50, ha='right')
@@ -1374,17 +1381,12 @@ def _plot_sdss_raw_combined(groups, methods, output_dir):
         ax.set_yticklabels(n_labels, fontsize=n_fs)
         ax.set_ylabel('n', fontsize=axis_fs, fontweight='bold')
 
-        for tick, method in zip(ax.get_xticklabels(), ordered_methods):
+        for tick, method in zip(ax.get_xticklabels(), base_methods):
             tick.set_color(METHOD_GROUP_META[_method_group(method)]['accent'])
 
-        _add_group_labels_top(ax, ordered_methods, axis_fs)
+        _add_group_labels_top(ax, base_methods, axis_fs)
         ax.set_title(f'{label} — SDSS Raw Values', fontsize=title_fs,
                      fontweight='bold', pad=20)
-
-        cbar = fig.colorbar(im, ax=ax, orientation='vertical',
-                            fraction=0.02, pad=0.02, shrink=0.4)
-        cbar.ax.tick_params(labelsize=tick_fs)
-        cbar.set_label('Scaled Across All n', fontsize=axis_fs)
 
         fig.subplots_adjust(top=0.90, bottom=0.14)
         for ext in ('pdf', 'png'):
@@ -1629,6 +1631,24 @@ def _format_table_number(val):
         mantissa, exp = f'{val:.1e}'.split('e')
         return f'{mantissa}e{int(exp)}'
     return f'{val:.1f}'
+
+
+def _format_sdss_heatmap_number(metric, val):
+    """Formatting for SDSS raw heatmap cells."""
+    if metric == 'fit_time':
+        val = float(val)
+        if 0 < abs(val) < 0.01:
+            return '<0.01'
+        if abs(val) < 1:
+            return f'{val:.2f}s'
+        if abs(val) < 60:
+            return f'{val:.1f}s'
+        if abs(val) < 3600:
+            return f'{val / 60:.1f}m'
+        return f'{val / 3600:.1f}h'
+    if metric == 'CRPS':
+        return f'{float(val):.3f}'
+    return _format_table_number(val)
 
 
 def _save_latex_table_single(all_results, output_dir,

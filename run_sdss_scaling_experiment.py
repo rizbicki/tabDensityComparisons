@@ -65,7 +65,7 @@ DEFAULT_METHOD_ORDER = [
     "CatMLP",
 ]
 
-DEFAULT_SAMPLE_SIZE_SPEC = "1000,10000,50000,100000,250000,500000,full"
+DEFAULT_SAMPLE_SIZE_SPEC = "500,1000,10000,50000,100000,250000,500000,full"
 TABPFN_METHODS = {"TabPFN-Native", "TabPFN-2.5", "RealTabPFN-2.5"}
 
 
@@ -185,8 +185,11 @@ def _default_skip_reason(method, n_total, runtime_device):
     if method == "Quantile-Linear" and n_total > 10_000:
         return "disabled above n=10,000 by the linear-quantile baseline itself"
 
-    if method == "BART-Hetero" and n_total >= 100_000:
-        return "heteroskedastic BART is conservatively capped below n=100,000 for SDSS scaling runs"
+    if method == "Quantile-Tree" and n_total > 100_000:
+        return "quantile-tree tuning/inference is conservatively capped above n=100,000 for SDSS scaling runs"
+
+    if method == "BART-Hetero" and n_total > 100_000:
+        return "heteroskedastic BART is conservatively capped above n=100,000 for SDSS scaling runs"
 
     if method == "FlexCode-RF" and n_total > 500_000:
         return "5-fold CV over many random-forest basis regressions is conservatively capped at n=500,000"

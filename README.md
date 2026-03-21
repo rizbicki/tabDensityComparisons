@@ -244,11 +244,11 @@ sample size by default, and the script regenerates the SDSS-only HTML table and
 performance-vs-`n` plots there.
 
 The default schedule still prunes methods that hit explicit limits or are
-conservatively capped for runtime reasons. `Quantile-Tree`, `BART-Homo`,
-`BART-Hetero`, and `CatMLP` remain available at all bundled SDSS sizes, while
-`TabICL-Quantiles` is capped below `n=50,000`. You can override the schedule
-with `--methods ...`, disable pruning with `--all-methods-at-all-sizes`,
-inspect the exact chosen methods with
+conservatively capped for runtime reasons. `Quantile-Tree`, `BART-Homo`, and
+`CatMLP` remain available at all bundled SDSS sizes, `BART-Hetero` is capped
+below `n=100,000`, and `TabICL-Quantiles` is capped below `n=50,000`. You can
+override the schedule with `--methods ...`, disable pruning with
+`--all-methods-at-all-sizes`, inspect the exact chosen methods with
 `results_real/sdss_scaling/method_policy.json`, or change the repetition count
 with `--n-reps`.
 

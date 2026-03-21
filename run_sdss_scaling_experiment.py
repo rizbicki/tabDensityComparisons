@@ -32,6 +32,8 @@ from utils import load_cache, save_cache, print_summary, aggregate_reps
 from visualization import (
     plot_performance_vs_n,
     plot_performance_vs_n_foundational,
+    plot_sdss_rankings_by_n,
+    plot_sdss_raw_metrics_by_n,
     save_html_table,
     save_latex_table,
 )
@@ -183,6 +185,9 @@ def _default_skip_reason(method, n_total, runtime_device):
     if method == "Quantile-Linear" and n_total > 10_000:
         return "disabled above n=10,000 by the linear-quantile baseline itself"
 
+    if method == "BART-Hetero" and n_total >= 100_000:
+        return "heteroskedastic BART is conservatively capped below n=100,000 for SDSS scaling runs"
+
     if method == "FlexCode-RF" and n_total > 500_000:
         return "5-fold CV over many random-forest basis regressions is conservatively capped at n=500,000"
 
@@ -319,10 +324,27 @@ def _render_sdss_scaling_outputs(all_results, all_data, output_dir, se_caption):
         print("[skip] No SDSS scaling results available for plotting")
         return False
 
+    output_dir = Path(output_dir)
+    stale_patterns = [
+        "rankings_real_*_n*.pdf",
+        "rankings_real_*_n*.png",
+        "raw_real_*_n*.pdf",
+        "raw_real_*_n*.png",
+        "rankings_real_sdss_combined.pdf",
+        "rankings_real_sdss_combined.png",
+        "raw_real_sdss_combined.pdf",
+        "raw_real_sdss_combined.png",
+    ]
+    for pattern in stale_patterns:
+        for path in output_dir.glob(pattern):
+            path.unlink(missing_ok=True)
+
     save_html_table(all_results, output_dir, se_caption=se_caption)
     save_latex_table(all_results, output_dir, se_caption=se_caption)
     plot_performance_vs_n(all_results, output_dir, all_data=all_data)
     plot_performance_vs_n_foundational(all_results, output_dir, all_data=all_data)
+    plot_sdss_rankings_by_n(all_results, output_dir, all_data=all_data)
+    plot_sdss_raw_metrics_by_n(all_results, output_dir, all_data=all_data)
     return True
 
 

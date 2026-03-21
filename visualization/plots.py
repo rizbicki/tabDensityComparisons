@@ -690,6 +690,23 @@ def _group_by_n_and_type(all_results):
     return dict(groups)
 
 
+def _sdss_scaling_slices(groups, kind='real'):
+    """Return ordered SDSS slices [(n_size, dataset_name, results), ...] or None."""
+    slices = []
+    for n_size in sorted(groups):
+        sub_results = groups[n_size][kind]
+        if not sub_results:
+            continue
+        if len(sub_results) != 1:
+            return None
+        ds = next(iter(sub_results))
+        base_name, _ = _parse_base_and_n(ds)
+        if not _is_sdss_base(base_name):
+            return None
+        slices.append((n_size, ds, sub_results))
+    return slices or None
+
+
 def _add_group_labels_top(ax, methods, fontsize):
     """Add Parametric / Nonparametric / Foundation labels spanning columns above heatmap."""
     spans = _method_group_spans(methods)
@@ -797,6 +814,106 @@ def _plot_rankings_grid(sub_results, methods, colors, n_size, kind_label,
         print(f"  saved {fname_prefix}_{metric.lower()}_n{n_size}.{{pdf,png}}")
 
 
+def _plot_sdss_rankings_combined(groups, methods, output_dir):
+    """One SDSS ranking heatmap per metric with rows=n and columns=methods."""
+    slices = _sdss_scaling_slices(groups, kind='real')
+    if not slices:
+        return
+
+    n_sizes = len(slices)
+    n_labels = [_fmt_n(n_size) for n_size, _, _ in slices]
+    base_methods = list(methods)
+
+    for metric, label, direction in METRICS_INFO:
+        rank_matrix = np.full((n_sizes, len(base_methods)), np.nan)
+        method_index = {m: i for i, m in enumerate(base_methods)}
+
+        for ri, (_, ds, sub_results) in enumerate(slices):
+            vals, avail = [], []
+            for m in base_methods:
+                method_result = _lookup_method(sub_results[ds], m)
+                v = method_result.get(metric) if method_result is not None else None
+                if v is not None:
+                    vals.append(v)
+                    avail.append(m)
+            if not vals:
+                continue
+            ranks = _metric_rank_values(np.array(vals), direction)
+            for m, rank in zip(avail, ranks):
+                rank_matrix[ri, method_index[m]] = rank
+
+        avg_ranks = {}
+        for mi, m in enumerate(base_methods):
+            vals = rank_matrix[:, mi]
+            vals = vals[np.isfinite(vals)]
+            avg_ranks[m] = np.mean(vals) if len(vals) else 99.0
+
+        ordered_methods = _ordered_methods(base_methods, score_map=avg_ranks)
+        col_order = [method_index[m] for m in ordered_methods]
+        plot_matrix = rank_matrix[:, col_order]
+
+        n_methods = len(ordered_methods)
+        fig_w, fig_h = _heatmap_layout(n_methods, n_sizes)
+        fonts = _scaled_heatmap_font_sizes(n_methods, n_sizes, scale=1.15)
+        method_fs = fonts['method']
+        n_fs = fonts['dataset']
+        title_fs = fonts['title']
+        axis_fs = fonts['axis']
+        tick_fs = fonts['tick']
+        cell_fs = fonts['cell']
+
+        fig, ax = plt.subplots(figsize=(fig_w, fig_h))
+        im = ax.imshow(plot_matrix, cmap='RdYlGn_r', aspect='auto',
+                       vmin=1, vmax=max(1, n_methods))
+
+        for i in range(n_sizes):
+            for j in range(n_methods):
+                rank = plot_matrix[i, j]
+                if np.isfinite(rank):
+                    ax.text(j, i, f'{rank:.1f}', ha='center', va='center',
+                            fontsize=cell_fs, color='black', zorder=5)
+
+        method_labels = [_display_method_name(m) for m in ordered_methods]
+        ax.set_xticks(range(n_methods))
+        ax.set_xticklabels(method_labels, fontsize=method_fs,
+                           rotation=50, ha='right')
+        ax.set_yticks(range(n_sizes))
+        ax.set_yticklabels(n_labels, fontsize=n_fs)
+        ax.set_ylabel('n', fontsize=axis_fs, fontweight='bold')
+
+        for tick, method in zip(ax.get_xticklabels(), ordered_methods):
+            tick.set_color(METHOD_GROUP_META[_method_group(method)]['accent'])
+
+        _add_group_labels_top(ax, ordered_methods, axis_fs)
+        ax.set_title(f'{label} — SDSS Rankings', fontsize=title_fs,
+                     fontweight='bold', pad=20)
+
+        cbar = fig.colorbar(im, ax=ax, orientation='vertical',
+                            fraction=0.02, pad=0.02, shrink=0.4)
+        cbar.ax.tick_params(labelsize=tick_fs)
+        cbar.set_label('Rank', fontsize=axis_fs)
+
+        fig.subplots_adjust(top=0.90, bottom=0.14)
+        for ext in ('pdf', 'png'):
+            fname = f"rankings_real_{metric.lower()}_sdss.{ext}"
+            fig.savefig(output_dir / fname, dpi=300, bbox_inches='tight')
+        plt.close(fig)
+        print(f"  saved rankings_real_{metric.lower()}_sdss.{{pdf,png}}")
+
+
+def plot_sdss_rankings_by_n(all_results, output_dir, all_data=None):
+    """SDSS-only ranking heatmaps: one file per metric, rows=n, cols=methods."""
+    output_dirs = _resolve_output_dirs(output_dir)
+    groups = _group_by_n_and_type(all_results)
+    if not groups:
+        return
+
+    methods = sorted(_visible_methods(
+        m for ds in all_results.values() for m in ds.keys()
+    ))
+    _plot_sdss_rankings_combined(groups, methods, output_dirs['real'])
+
+
 def plot_rankings_by_n(all_results, output_dir, all_data=None):
     """Ranking heatmaps for each sample size, split into real and simulated."""
     output_dirs = _resolve_output_dirs(output_dir)
@@ -814,6 +931,8 @@ def plot_rankings_by_n(all_results, output_dir, all_data=None):
                                      ('real', 'Real', 'rankings_real')]:
             _plot_rankings_grid(groups[n_size][kind], methods, colors,
                                 n_size, label, prefix, output_dirs[kind], all_data)
+
+    _plot_sdss_rankings_combined(groups, methods, output_dirs['real'])
 
 
 def plot_critical_difference(all_results, output_dir, all_data=None):
@@ -1159,6 +1278,119 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
         print(f"  saved {fname_prefix}_{metric.lower()}_n{n_size}.{{pdf,png}}")
 
 
+def _plot_sdss_raw_combined(groups, methods, output_dir):
+    """One SDSS raw-value heatmap per metric with rows=n and columns=methods."""
+    slices = _sdss_scaling_slices(groups, kind='real')
+    if not slices:
+        return
+
+    n_sizes = len(slices)
+    n_labels = [_fmt_n(n_size) for n_size, _, _ in slices]
+    base_methods = list(methods)
+
+    for metric, label, direction in METRICS_INFO:
+        raw_matrix = np.full((n_sizes, len(base_methods)), np.nan)
+        method_index = {m: i for i, m in enumerate(base_methods)}
+
+        for ri, (_, ds, sub_results) in enumerate(slices):
+            for m in base_methods:
+                mi = method_index[m]
+                method_result = _lookup_method(sub_results[ds], m)
+                v = method_result.get(metric) if method_result is not None else None
+                if v is not None:
+                    raw_matrix[ri, mi] = v
+
+        norm_matrix = np.full_like(raw_matrix, np.nan)
+        for ri in range(n_sizes):
+            row = raw_matrix[ri]
+            if np.all(np.isnan(row)):
+                continue
+            score_row = _metric_color_values(row, direction)
+            cmin, cmax = np.nanmin(score_row), np.nanmax(score_row)
+            rng = cmax - cmin
+            norm_matrix[ri] = 0.5 if rng < 1e-10 else (score_row - cmin) / rng
+
+        scaled_scores = {}
+        for mi, m in enumerate(base_methods):
+            vals = norm_matrix[:, mi]
+            vals = vals[np.isfinite(vals)]
+            if len(vals) == 0:
+                scaled_scores[m] = -1.0
+                continue
+            scaled = (
+                1.0 - vals
+                if direction == 'lower' or _metric_target(direction) is not None
+                else vals
+            )
+            scaled_scores[m] = float(np.mean(scaled))
+
+        ordered_methods = _ordered_methods(base_methods, score_map=scaled_scores)
+        col_order = [method_index[m] for m in ordered_methods]
+        plot_norm = norm_matrix[:, col_order]
+        plot_raw = raw_matrix[:, col_order]
+
+        n_methods = len(ordered_methods)
+        fig_w, fig_h = _heatmap_layout(n_methods, n_sizes)
+        fonts = _scaled_heatmap_font_sizes(n_methods, n_sizes, scale=1.15)
+        method_fs = fonts['method']
+        n_fs = fonts['dataset']
+        title_fs = fonts['title']
+        axis_fs = fonts['axis']
+        tick_fs = fonts['tick']
+        cell_fs = fonts['cell']
+
+        fig, ax = plt.subplots(figsize=(fig_w, fig_h))
+        im = ax.imshow(plot_norm, cmap=_metric_cmap(direction), aspect='auto',
+                       vmin=0, vmax=1)
+
+        for i in range(n_sizes):
+            for j in range(n_methods):
+                val = plot_raw[i, j]
+                if np.isfinite(val):
+                    ax.text(j, i, _format_table_number(val), ha='center', va='center',
+                            fontsize=cell_fs, color='black', zorder=5)
+
+        method_labels = [_display_method_name(m) for m in ordered_methods]
+        ax.set_xticks(range(n_methods))
+        ax.set_xticklabels(method_labels, fontsize=method_fs,
+                           rotation=50, ha='right')
+        ax.set_yticks(range(n_sizes))
+        ax.set_yticklabels(n_labels, fontsize=n_fs)
+        ax.set_ylabel('n', fontsize=axis_fs, fontweight='bold')
+
+        for tick, method in zip(ax.get_xticklabels(), ordered_methods):
+            tick.set_color(METHOD_GROUP_META[_method_group(method)]['accent'])
+
+        _add_group_labels_top(ax, ordered_methods, axis_fs)
+        ax.set_title(f'{label} — SDSS Raw Values', fontsize=title_fs,
+                     fontweight='bold', pad=20)
+
+        cbar = fig.colorbar(im, ax=ax, orientation='vertical',
+                            fraction=0.02, pad=0.02, shrink=0.4)
+        cbar.ax.tick_params(labelsize=tick_fs)
+        cbar.set_label('Scaled Within n', fontsize=axis_fs)
+
+        fig.subplots_adjust(top=0.90, bottom=0.14)
+        for ext in ('pdf', 'png'):
+            fname = f"raw_real_{metric.lower()}_sdss.{ext}"
+            fig.savefig(output_dir / fname, dpi=300, bbox_inches='tight')
+        plt.close(fig)
+        print(f"  saved raw_real_{metric.lower()}_sdss.{{pdf,png}}")
+
+
+def plot_sdss_raw_metrics_by_n(all_results, output_dir, all_data=None):
+    """SDSS-only raw heatmaps: one file per metric, rows=n, cols=methods."""
+    output_dirs = _resolve_output_dirs(output_dir)
+    groups = _group_by_n_and_type(all_results)
+    if not groups:
+        return
+
+    methods = sorted(_visible_methods(
+        m for ds in all_results.values() for m in ds.keys()
+    ))
+    _plot_sdss_raw_combined(groups, methods, output_dirs['real'])
+
+
 def plot_raw_metrics_by_n(all_results, output_dir, all_data=None):
     """Raw-value heatmaps per sample size, split into real and simulated."""
     output_dirs = _resolve_output_dirs(output_dir)
@@ -1176,6 +1408,8 @@ def plot_raw_metrics_by_n(all_results, output_dir, all_data=None):
                                      ('real', 'Real', 'raw_real')]:
             _plot_raw_grid(groups[n_size][kind], methods, colors, n_size, label,
                            prefix, output_dirs[kind], all_data)
+
+    _plot_sdss_raw_combined(groups, methods, output_dirs['real'])
 
 
 def plot_pit_histograms(all_data, output_dir):
@@ -1316,7 +1550,7 @@ def _save_html_table_single(all_results, output_dir,
                 se_val = r.get(f'{key}_se')
                 is_best = best.get(key) == m
                 is_second = second.get(key) == m
-                se_str = (f'<br><span class="se">\u00b1{se_val:.4f}</span>'
+                se_str = (f'<br><span class="se">\u00b1{_format_table_number(se_val)}</span>'
                           if se_val is not None else '')
                 if is_best:
                     cls = ' class="best"'
@@ -1324,9 +1558,9 @@ def _save_html_table_single(all_results, output_dir,
                     cls = ' class="second"'
                 else:
                     cls = ''
-                cells.append(f'<td{cls}>{val:.4f}{se_str}</td>')
+                cells.append(f'<td{cls}>{_format_table_number(val)}{se_str}</td>')
             cells.append(f'<td>{basis}</td>')
-            cells.append(f'<td>{r["fit_time"]:.1f}s</td>')
+            cells.append(f'<td>{_format_table_number(r["fit_time"])}s</td>')
             tbody_rows.append('<tr>' + ''.join(cells) + '</tr>')
 
         table = (f'<h2>{ds}</h2>'
@@ -1369,6 +1603,16 @@ def _tex_escape(s):
              .replace('&', '\\&')
              .replace('%', '\\%')
              .replace('#', '\\#'))
+
+
+def _format_table_number(val):
+    """Compact table formatting: one decimal in fixed-point, scientific if needed."""
+    val = float(val)
+    abs_val = abs(val)
+    if abs_val != 0 and (abs_val < 0.1 or abs_val >= 1000):
+        mantissa, exp = f'{val:.1e}'.split('e')
+        return f'{mantissa}e{int(exp)}'
+    return f'{val:.1f}'
 
 
 def _save_latex_table_single(all_results, output_dir,
@@ -1430,14 +1674,9 @@ def _save_latex_table_single(all_results, output_dir,
                 if val is None:
                     cells.append('---')
                     continue
-                if key == 'fit_time':
-                    txt = f'{val:.1f}'
-                    if se_val is not None:
-                        txt += f' $\\pm$ {se_val:.1f}'
-                else:
-                    txt = f'{val:.4f}'
-                    if se_val is not None:
-                        txt += f' $\\pm$ {se_val:.4f}'
+                txt = _format_table_number(val)
+                if se_val is not None:
+                    txt += f' $\\pm$ {_format_table_number(se_val)}'
                 if best.get(key) == m:
                     txt = f'\\textbf{{{txt}}}'
                 elif second.get(key) == m:
@@ -1452,7 +1691,7 @@ def _save_latex_table_single(all_results, output_dir,
             f'\\centering',
             f'\\caption{{Results for {_tex_escape(ds)} ({se_caption}).}}',
             f'\\label{{tab:{ds.lower().replace(" ", "_")}}}',
-            f'\\small',
+            f'\\begin{{adjustbox}}{{max width=\\linewidth}}',
             f'\\begin{{tabular}}{{{col_spec}}}',
             f'\\toprule',
             header + ' \\\\',
@@ -1463,6 +1702,7 @@ def _save_latex_table_single(all_results, output_dir,
         table_lines += [
             f'\\bottomrule',
             f'\\end{{tabular}}',
+            f'\\end{{adjustbox}}',
             f'\\end{{table}}',
             '',
         ]
@@ -1470,7 +1710,7 @@ def _save_latex_table_single(all_results, output_dir,
 
     preamble = (
         '% Auto-generated LaTeX tables — include in your .tex with \\input{...}\n'
-        '% Requires: \\usepackage{booktabs}\n'
+        '% Requires: \\usepackage{booktabs} and \\usepackage{adjustbox}\n'
         '\n'
     )
     out = output_dir / 'results_table.tex'
@@ -1706,8 +1946,7 @@ def _foundational_perf_legend_handles():
 
 
 def _group_perf_legend_handles():
-    """Three-entry legend: Parametric, Nonparametric, Foundation,
-    plus a dashed-line note for beyond-native-limit regime."""
+    """Three-entry legend: Parametric, Nonparametric, Foundation."""
     handles = []
     for group in METHOD_GROUP_ORDER:
         meta = METHOD_GROUP_META[group]
@@ -1718,14 +1957,6 @@ def _group_perf_legend_handles():
             linewidth=3.5,
             label=meta['label'],
         ))
-    handles.append(Line2D(
-        [0], [0],
-        color='grey',
-        linestyle='--',
-        linewidth=2.5,
-        alpha=0.7,
-        label='Beyond native limit',
-    ))
     return handles
 
 
@@ -1883,7 +2114,8 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
             if full_ylim:
                 ax.set_ylim(*full_ylim)
 
-        ax.set_title(base, fontsize=PERF_SUBPLOT_TITLE_FONTSIZE, fontweight='bold')
+        panel_title = '' if is_sdss else base
+        ax.set_title(panel_title, fontsize=PERF_SUBPLOT_TITLE_FONTSIZE, fontweight='bold')
         ax.set_xlabel('n', fontsize=PERF_AXIS_LABEL_FONTSIZE)
         ax.set_ylabel(label, fontsize=PERF_AXIS_LABEL_FONTSIZE)
         ax.tick_params(labelsize=PERF_TICK_FONTSIZE)
@@ -1924,19 +2156,21 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
     if foundational_only:
         handles = _foundational_perf_legend_handles()
         fig.legend(handles, [h.get_label() for h in handles],
-                   loc='upper center', ncol=4,
+                   loc='upper center', ncol=len(handles),
                    fontsize=PERF_FOUNDATIONAL_LEGEND_FONTSIZE,
                    handlelength=2.8, columnspacing=1.7, labelspacing=0.9,
                    borderpad=0.7, framealpha=0.94, bbox_to_anchor=(0.5, 0.99))
     else:
         handles = _group_perf_legend_handles()
         fig.legend(handles, [h.get_label() for h in handles],
-                   loc='upper center', ncol=4,
+                   loc='upper center', ncol=len(handles),
                    fontsize=PERF_LEGEND_FONTSIZE + 2,
                    handlelength=2.5, columnspacing=2.0,
                    framealpha=0.92, bbox_to_anchor=(0.5, 0.99))
 
-    title = f'{label} vs Sample Size{title_suffix}'
+    base_names = [base for base, _ in ordered_bases]
+    sdss_only = len(base_names) == 1 and _is_sdss_base(base_names[0])
+    title = f'{label} vs Sample Size{" - SDSS" if sdss_only else title_suffix}'
     if better:
         title = f'{title} {better}'
     plt.suptitle(title,

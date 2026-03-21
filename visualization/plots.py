@@ -854,6 +854,7 @@ def _plot_sdss_rankings_combined(groups, methods, output_dir):
 
         n_methods = len(ordered_methods)
         fig_w, fig_h = _heatmap_layout(n_methods, n_sizes)
+        fig_w *= 1.12
         fonts = _scaled_heatmap_font_sizes(n_methods, n_sizes, scale=1.15)
         method_fs = fonts['method']
         n_fs = fonts['dataset']
@@ -1290,6 +1291,7 @@ def _plot_sdss_raw_combined(groups, methods, output_dir):
 
     for metric, label, direction in METRICS_INFO:
         raw_matrix = np.full((n_sizes, len(base_methods)), np.nan)
+        se_matrix = np.full((n_sizes, len(base_methods)), np.nan)
         method_index = {m: i for i, m in enumerate(base_methods)}
 
         for ri, (_, ds, sub_results) in enumerate(slices):
@@ -1299,16 +1301,20 @@ def _plot_sdss_raw_combined(groups, methods, output_dir):
                 v = method_result.get(metric) if method_result is not None else None
                 if v is not None:
                     raw_matrix[ri, mi] = v
+                    se_val = method_result.get(f'{metric}_se')
+                    if se_val is not None:
+                        se_matrix[ri, mi] = se_val
 
+        score_matrix = _metric_color_values(raw_matrix, direction)
         norm_matrix = np.full_like(raw_matrix, np.nan)
-        for ri in range(n_sizes):
-            row = raw_matrix[ri]
-            if np.all(np.isnan(row)):
-                continue
-            score_row = _metric_color_values(row, direction)
-            cmin, cmax = np.nanmin(score_row), np.nanmax(score_row)
+        finite_scores = score_matrix[np.isfinite(score_matrix)]
+        if finite_scores.size:
+            cmin, cmax = np.nanmin(finite_scores), np.nanmax(finite_scores)
             rng = cmax - cmin
-            norm_matrix[ri] = 0.5 if rng < 1e-10 else (score_row - cmin) / rng
+            if rng < 1e-10:
+                norm_matrix[np.isfinite(score_matrix)] = 0.5
+            else:
+                norm_matrix = (score_matrix - cmin) / rng
 
         scaled_scores = {}
         for mi, m in enumerate(base_methods):
@@ -1328,16 +1334,19 @@ def _plot_sdss_raw_combined(groups, methods, output_dir):
         col_order = [method_index[m] for m in ordered_methods]
         plot_norm = norm_matrix[:, col_order]
         plot_raw = raw_matrix[:, col_order]
+        plot_se = se_matrix[:, col_order]
 
         n_methods = len(ordered_methods)
         fig_w, fig_h = _heatmap_layout(n_methods, n_sizes)
+        fig_w *= 1.12
         fonts = _scaled_heatmap_font_sizes(n_methods, n_sizes, scale=1.15)
         method_fs = fonts['method']
         n_fs = fonts['dataset']
         title_fs = fonts['title']
         axis_fs = fonts['axis']
         tick_fs = fonts['tick']
-        cell_fs = fonts['cell']
+        value_fs = max(5.8, fonts['cell'] * 1.05)
+        se_fs = max(4.5, fonts['cell'] * 0.72)
 
         fig, ax = plt.subplots(figsize=(fig_w, fig_h))
         im = ax.imshow(plot_norm, cmap=_metric_cmap(direction), aspect='auto',
@@ -1347,8 +1356,15 @@ def _plot_sdss_raw_combined(groups, methods, output_dir):
             for j in range(n_methods):
                 val = plot_raw[i, j]
                 if np.isfinite(val):
-                    ax.text(j, i, _format_table_number(val), ha='center', va='center',
-                            fontsize=cell_fs, color='black', zorder=5)
+                    se_val = plot_se[i, j]
+                    ax.text(j, i - 0.12, _format_table_number(val),
+                            ha='center', va='center',
+                            fontsize=value_fs, fontweight='bold',
+                            color='black', zorder=5)
+                    if np.isfinite(se_val):
+                        ax.text(j, i + 0.17, f'({_format_table_number(se_val)})',
+                                ha='center', va='center',
+                                fontsize=se_fs, color='black', zorder=5)
 
         method_labels = [_display_method_name(m) for m in ordered_methods]
         ax.set_xticks(range(n_methods))
@@ -1368,7 +1384,7 @@ def _plot_sdss_raw_combined(groups, methods, output_dir):
         cbar = fig.colorbar(im, ax=ax, orientation='vertical',
                             fraction=0.02, pad=0.02, shrink=0.4)
         cbar.ax.tick_params(labelsize=tick_fs)
-        cbar.set_label('Scaled Within n', fontsize=axis_fs)
+        cbar.set_label('Scaled Across All n', fontsize=axis_fs)
 
         fig.subplots_adjust(top=0.90, bottom=0.14)
         for ext in ('pdf', 'png'):

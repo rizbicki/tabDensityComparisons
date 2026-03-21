@@ -128,10 +128,8 @@ utils/
 
 ### Penalized (Ridge) Variants
 
-The classical linear / GLM families above
-also have a
-Ridge-regularized variant with the penalty chosen by leave-one-out
-cross-validation (`RidgeCV`).
+The classical linear / GLM families above have a Ridge-regularized variant with
+the penalty chosen by leave-one-out cross-validation (`RidgeCV`).
 
 | Method | Description |
 |--------|-------------|

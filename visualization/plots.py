@@ -57,6 +57,7 @@ NONPARAMETRIC_MODELS = {
     'Flow-Spline',
     'Quantile-Tree',
     'CatMLP',
+    'MDN',
 }
 
 METHOD_GROUP_ORDER = ('parametric', 'nonparametric', 'foundational')
@@ -150,6 +151,7 @@ METHOD_ORDER_HINTS = [
     'Flow-Spline',
     'Quantile-Tree',
     'CatMLP',
+    'MDN',
     'TabPFN-Native',
     'TabPFN-2.5',
     'RealTabPFN-2.5',

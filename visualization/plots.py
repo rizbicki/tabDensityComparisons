@@ -1385,7 +1385,7 @@ def _plot_sdss_raw_combined(groups, methods, output_dir):
             tick.set_color(METHOD_GROUP_META[_method_group(method)]['accent'])
 
         _add_group_labels_top(ax, base_methods, axis_fs)
-        ax.set_title(f'{label} — SDSS Raw Values', fontsize=title_fs,
+        ax.set_title(f'{label} — SDSS', fontsize=title_fs,
                      fontweight='bold', pad=20)
 
         fig.subplots_adjust(top=0.90, bottom=0.14)

@@ -29,6 +29,7 @@ from visualization import (
     plot_performance_vs_n, plot_performance_vs_n_foundational,
     save_html_table,
     save_latex_table,
+    save_appendix_metric_tables,
 )
 from utils import save_cache, load_cache, print_summary, aggregate_reps
 
@@ -154,6 +155,7 @@ def main():
     print("\nGenerating plots and tables...")
     save_html_table(all_results, output_dir)
     save_latex_table(all_results, output_dir)
+    save_appendix_metric_tables(all_results, output_dir)
     plot_native_tab_subset(all_data, output_dir)
     plot_rankings_by_n(all_results, output_dir, all_data=all_data)
     plot_critical_difference(all_results, output_dir, all_data=all_data)

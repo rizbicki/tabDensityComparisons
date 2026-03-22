@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 from pathlib import Path
 from matplotlib.lines import Line2D
-from matplotlib.patches import Patch
+from matplotlib.patches import Patch, Rectangle
 from matplotlib.transforms import blended_transform_factory
 
 from evaluation.metrics import eval_pit, eval_pit_ks
@@ -250,6 +250,13 @@ def _metric_color_values(values, direction):
     if target is not None:
         return np.abs(vals - target)
     return vals
+
+
+def _text_color_for_bg(rgba, threshold=0.45):
+    """Return 'white' or 'black' depending on background luminance."""
+    r, g, b = rgba[:3]
+    luminance = 0.299 * r + 0.587 * g + 0.114 * b
+    return 'white' if luminance < threshold else 'black'
 
 
 def _metric_cmap(direction):
@@ -690,23 +697,6 @@ def _group_by_n_and_type(all_results):
     return dict(groups)
 
 
-def _sdss_scaling_slices(groups, kind='real'):
-    """Return ordered SDSS slices [(n_size, dataset_name, results), ...] or None."""
-    slices = []
-    for n_size in sorted(groups):
-        sub_results = groups[n_size][kind]
-        if not sub_results:
-            continue
-        if len(sub_results) != 1:
-            return None
-        ds = next(iter(sub_results))
-        base_name, _ = _parse_base_and_n(ds)
-        if not _is_sdss_base(base_name):
-            return None
-        slices.append((n_size, ds, sub_results))
-    return slices or None
-
-
 def _add_group_labels_top(ax, methods, fontsize):
     """Add Parametric / Nonparametric / Foundation labels spanning columns above heatmap."""
     spans = _method_group_spans(methods)
@@ -776,9 +766,13 @@ def _plot_rankings_grid(sub_results, methods, colors, n_size, kind_label,
         im = ax1.imshow(plot_matrix, cmap='RdYlGn_r', aspect='auto',
                         vmin=1, vmax=n_methods)
         # Bold numbers in the avg rank row
+        rank_cmap_r = plt.get_cmap('RdYlGn_r')
+        rank_norm_r = matplotlib.colors.Normalize(vmin=1, vmax=n_methods)
         for j, m in enumerate(ordered_methods):
+            rgba = rank_cmap_r(rank_norm_r(avg_ranks[m]))
+            text_color = _text_color_for_bg(rgba)
             ax1.text(j, n_ds, f'{avg_ranks[m]:.1f}', ha='center', va='center',
-                     fontsize=cell_fs, fontweight='bold', color='black', zorder=8)
+                     fontsize=cell_fs, fontweight='bold', color=text_color, zorder=8)
 
         # Separator line above avg row
         ax1.axhline(n_ds - 0.5, color='black', linewidth=1.5, zorder=7)
@@ -814,107 +808,6 @@ def _plot_rankings_grid(sub_results, methods, colors, n_size, kind_label,
         print(f"  saved {fname_prefix}_{metric.lower()}_n{n_size}.{{pdf,png}}")
 
 
-def _plot_sdss_rankings_combined(groups, methods, output_dir):
-    """One SDSS ranking heatmap per metric with rows=n and columns=methods."""
-    slices = _sdss_scaling_slices(groups, kind='real')
-    if not slices:
-        return
-
-    n_sizes = len(slices)
-    n_labels = [_fmt_n(n_size) for n_size, _, _ in slices]
-    base_methods = list(methods)
-
-    for metric, label, direction in METRICS_INFO:
-        rank_matrix = np.full((n_sizes, len(base_methods)), np.nan)
-        method_index = {m: i for i, m in enumerate(base_methods)}
-
-        for ri, (_, ds, sub_results) in enumerate(slices):
-            vals, avail = [], []
-            for m in base_methods:
-                method_result = _lookup_method(sub_results[ds], m)
-                v = method_result.get(metric) if method_result is not None else None
-                if v is not None:
-                    vals.append(v)
-                    avail.append(m)
-            if not vals:
-                continue
-            ranks = _metric_rank_values(np.array(vals), direction)
-            for m, rank in zip(avail, ranks):
-                rank_matrix[ri, method_index[m]] = rank
-
-        avg_ranks = {}
-        for mi, m in enumerate(base_methods):
-            vals = rank_matrix[:, mi]
-            vals = vals[np.isfinite(vals)]
-            avg_ranks[m] = np.mean(vals) if len(vals) else 99.0
-
-        ordered_methods = _ordered_methods(base_methods, score_map=avg_ranks)
-        col_order = [method_index[m] for m in ordered_methods]
-        plot_matrix = rank_matrix[:, col_order]
-
-        n_methods = len(ordered_methods)
-        fig_w, fig_h = _heatmap_layout(n_methods, n_sizes)
-        fig_w *= 1.12
-        fonts = _scaled_heatmap_font_sizes(n_methods, n_sizes, scale=1.15)
-        method_fs = fonts['method']
-        n_fs = fonts['dataset']
-        title_fs = fonts['title']
-        axis_fs = fonts['axis']
-        tick_fs = fonts['tick']
-        cell_fs = fonts['cell']
-
-        fig, ax = plt.subplots(figsize=(fig_w, fig_h))
-        im = ax.imshow(plot_matrix, cmap='RdYlGn_r', aspect='auto',
-                       vmin=1, vmax=max(1, n_methods))
-
-        for i in range(n_sizes):
-            for j in range(n_methods):
-                rank = plot_matrix[i, j]
-                if np.isfinite(rank):
-                    ax.text(j, i, f'{rank:.1f}', ha='center', va='center',
-                            fontsize=cell_fs, color='black', zorder=5)
-
-        method_labels = [_display_method_name(m) for m in ordered_methods]
-        ax.set_xticks(range(n_methods))
-        ax.set_xticklabels(method_labels, fontsize=method_fs,
-                           rotation=50, ha='right')
-        ax.set_yticks(range(n_sizes))
-        ax.set_yticklabels(n_labels, fontsize=n_fs)
-        ax.set_ylabel('n', fontsize=axis_fs, fontweight='bold')
-
-        for tick, method in zip(ax.get_xticklabels(), ordered_methods):
-            tick.set_color(METHOD_GROUP_META[_method_group(method)]['accent'])
-
-        _add_group_labels_top(ax, ordered_methods, axis_fs)
-        ax.set_title(f'{label} — SDSS Rankings', fontsize=title_fs,
-                     fontweight='bold', pad=20)
-
-        cbar = fig.colorbar(im, ax=ax, orientation='vertical',
-                            fraction=0.02, pad=0.02, shrink=0.4)
-        cbar.ax.tick_params(labelsize=tick_fs)
-        cbar.set_label('Rank', fontsize=axis_fs)
-
-        fig.subplots_adjust(top=0.90, bottom=0.14)
-        for ext in ('pdf', 'png'):
-            fname = f"rankings_real_{metric.lower()}_sdss.{ext}"
-            fig.savefig(output_dir / fname, dpi=300, bbox_inches='tight')
-        plt.close(fig)
-        print(f"  saved rankings_real_{metric.lower()}_sdss.{{pdf,png}}")
-
-
-def plot_sdss_rankings_by_n(all_results, output_dir, all_data=None):
-    """SDSS-only ranking heatmaps: one file per metric, rows=n, cols=methods."""
-    output_dirs = _resolve_output_dirs(output_dir)
-    groups = _group_by_n_and_type(all_results)
-    if not groups:
-        return
-
-    methods = sorted(_visible_methods(
-        m for ds in all_results.values() for m in ds.keys()
-    ))
-    _plot_sdss_rankings_combined(groups, methods, output_dirs['real'])
-
-
 def plot_rankings_by_n(all_results, output_dir, all_data=None):
     """Ranking heatmaps for each sample size, split into real and simulated."""
     output_dirs = _resolve_output_dirs(output_dir)
@@ -932,8 +825,6 @@ def plot_rankings_by_n(all_results, output_dir, all_data=None):
                                      ('real', 'Real', 'rankings_real')]:
             _plot_rankings_grid(groups[n_size][kind], methods, colors,
                                 n_size, label, prefix, output_dirs[kind], all_data)
-
-    _plot_sdss_rankings_combined(groups, methods, output_dirs['real'])
 
 
 def plot_critical_difference(all_results, output_dir, all_data=None):
@@ -1171,16 +1062,16 @@ def _plot_cd_single(sub_results, datasets, methods, metric, label, direction,
 
 
 def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
-                   fname_prefix, output_dir, all_data):
+                   fname_prefix, output_dir, all_data,
+                   summary_mode='score'):
     """Transposed raw-value heatmap: methods=columns, datasets=rows."""
     datasets = _ordered_dataset_names(sub_results.keys(), all_data)
     if not datasets:
         return
-    ordered_methods = _ordered_methods(methods)
-    n_methods = len(ordered_methods)
+    n_methods = len(methods)
     n_ds = len(datasets)
     ds_labels = _ds_labels(datasets, all_data)
-    method_index = {m: i for i, m in enumerate(ordered_methods)}
+    method_index = {m: i for i, m in enumerate(methods)}
     # +1 row for avg score summary
     fig_w, fig_h = _heatmap_layout(n_methods, n_ds + 1)
     fonts = _scaled_heatmap_font_sizes(n_methods, n_ds, scale=1.25)
@@ -1188,13 +1079,12 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
     ds_fs = fonts['dataset']
     title_fs = fonts['title']
     axis_fs = fonts['axis']
-    tick_fs = fonts['tick']
     cell_fs = fonts['cell']
 
     for metric, label, direction in METRICS_INFO:
         matrix = np.full((n_methods, n_ds), np.nan)
         for di, ds in enumerate(datasets):
-            for m in ordered_methods:
+            for m in methods:
                 mi = method_index[m]
                 method_result = _lookup_method(sub_results[ds], m)
                 v = method_result.get(metric) if method_result is not None else None
@@ -1218,7 +1108,7 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
                 norm_matrix[:, j] = (score_col - cmin) / rng
 
         scaled_scores = {}
-        for mi, m in enumerate(ordered_methods):
+        for mi, m in enumerate(methods):
             vals = norm_matrix[mi][~np.isnan(norm_matrix[mi])]
             if len(vals) == 0:
                 scaled_scores[m] = -1.0
@@ -1230,19 +1120,72 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
             )
             scaled_scores[m] = float(np.mean(scaled))
 
+        # Negate so ascending sort = best first (consistent with rankings plot)
+        neg_scores = {m: -v for m, v in scaled_scores.items()}
+        ordered_methods = _ordered_methods(methods, score_map=neg_scores)
+        col_order = [method_index[m] for m in ordered_methods]
         # Transposed: rows=datasets, columns=methods
-        data_norm = norm_matrix.T  # (n_ds, n_methods)
-        # Append avg scaled score row (map to [0,1] for colormap)
-        avg_row = np.array([[scaled_scores[m] for m in ordered_methods]])
-        plot_norm = np.vstack([data_norm, avg_row])
+        data_norm = norm_matrix[col_order, :].T  # (n_ds, n_methods)
+
+        if summary_mode == 'rank':
+            rank_matrix = np.full((n_methods, n_ds), np.nan)
+            for di, ds in enumerate(datasets):
+                vals, avail = [], []
+                for m in methods:
+                    method_result = _lookup_method(sub_results[ds], m)
+                    v = method_result.get(metric) if method_result is not None else None
+                    if v is not None:
+                        vals.append(v)
+                        avail.append(m)
+                if not vals:
+                    continue
+                vals = np.array(vals)
+                ranks = _metric_rank_values(vals, direction)
+                for m, r in zip(avail, ranks):
+                    rank_matrix[method_index[m], di] = r
+
+            summary_values = {}
+            for mi, m in enumerate(methods):
+                ranks = rank_matrix[mi][~np.isnan(rank_matrix[mi])]
+                summary_values[m] = float(np.mean(ranks)) if len(ranks) > 0 else np.nan
+            summary_label = 'Avg Rank'
+            summary_text = lambda v: f'{v:.1f}' if np.isfinite(v) else '—'
+            plot_norm = np.vstack([data_norm, np.full((1, n_methods), 0.5)])
+        else:
+            summary_values = {m: scaled_scores[m] for m in methods}
+            summary_label = 'Avg Score'
+            summary_text = lambda v: f'{v:.2f}' if np.isfinite(v) else '—'
+            # Append avg scaled score row (map to [0,1] for colormap)
+            avg_row = np.array([[summary_values[m] for m in ordered_methods]])
+            plot_norm = np.vstack([data_norm, avg_row])
 
         fig, ax1 = plt.subplots(figsize=(fig_w, fig_h))
 
-        im = ax1.imshow(plot_norm, cmap=cmap, aspect='auto', vmin=0, vmax=1)
-        # Bold numbers in the avg score row
-        for j, m in enumerate(ordered_methods):
-            ax1.text(j, n_ds, f'{scaled_scores[m]:.2f}', ha='center', va='center',
-                     fontsize=cell_fs, fontweight='bold', color='black', zorder=8)
+        ax1.imshow(plot_norm, cmap=cmap, aspect='auto', vmin=0, vmax=1)
+        if summary_mode == 'rank':
+            rank_cmap = plt.get_cmap('RdYlGn_r')
+            rank_norm = matplotlib.colors.Normalize(vmin=1, vmax=n_methods)
+            # Overlay only the summary row with rank-based colors.
+            for j, m in enumerate(ordered_methods):
+                value = summary_values[m]
+                facecolor = (
+                    rank_cmap(rank_norm(value))
+                    if np.isfinite(value)
+                    else '#d9d9d9'
+                )
+                ax1.add_patch(
+                    Rectangle((j - 0.5, n_ds - 0.5), 1.0, 1.0,
+                              facecolor=facecolor, edgecolor='none', zorder=6)
+                )
+                text_color = _text_color_for_bg(facecolor) if np.isfinite(value) else 'black'
+                ax1.text(j, n_ds, summary_text(value), ha='center', va='center',
+                         fontsize=cell_fs, fontweight='bold',
+                         color=text_color, zorder=8)
+        else:
+            for j, m in enumerate(ordered_methods):
+                ax1.text(j, n_ds, summary_text(summary_values[m]),
+                         ha='center', va='center', fontsize=cell_fs,
+                         fontweight='bold', color='black', zorder=8)
 
         # Separator line above avg row
         ax1.axhline(n_ds - 0.5, color='black', linewidth=1.5, zorder=7)
@@ -1252,8 +1195,7 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
         ax1.set_xticklabels(method_labels, fontsize=method_fs,
                             rotation=50, ha='right')
         ax1.set_yticks(range(n_ds + 1))
-        ax1.set_yticklabels(ds_labels + ['Avg Score'], fontsize=ds_fs)
-        # Bold the avg score label
+        ax1.set_yticklabels(ds_labels + [summary_label], fontsize=ds_fs)
         ax1.get_yticklabels()[-1].set_fontweight('bold')
 
         for tick, method in zip(ax1.get_xticklabels(), ordered_methods):
@@ -1265,148 +1207,13 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
         ax1.set_title(f'{label} — Raw Values (n={n_size}, {kind_label})',
                       fontsize=title_fs, fontweight='bold', pad=20)
 
-        cbar = fig.colorbar(im, ax=ax1, orientation='vertical',
-                            fraction=0.02, pad=0.02, shrink=0.4)
-        cbar.ax.tick_params(labelsize=tick_fs)
-        cbar.set_label('Scaled Within Dataset', fontsize=axis_fs)
-
         fig.subplots_adjust(top=0.90, bottom=0.14)
         for ext in ('pdf', 'png'):
             fname = f"{fname_prefix}_{metric.lower()}_n{n_size}.{ext}"
-            fig.savefig(output_dir / fname, dpi=300, bbox_inches='tight')
+            dpi = 150 if ext == 'png' else 300
+            fig.savefig(output_dir / fname, dpi=dpi, bbox_inches='tight')
         plt.close(fig)
         print(f"  saved {fname_prefix}_{metric.lower()}_n{n_size}.{{pdf,png}}")
-
-
-def _plot_sdss_raw_combined(groups, methods, output_dir):
-    """One SDSS raw-value heatmap per metric with rows=n and columns=methods."""
-    slices = _sdss_scaling_slices(groups, kind='real')
-    if not slices:
-        return
-
-    n_sizes = len(slices)
-    n_labels = [_fmt_n(n_size) for n_size, _, _ in slices]
-    base_methods = _ordered_methods(methods)
-
-    for metric, label, direction in METRICS_INFO:
-        raw_matrix = np.full((n_sizes, len(base_methods)), np.nan)
-        se_matrix = np.full((n_sizes, len(base_methods)), np.nan)
-        method_index = {m: i for i, m in enumerate(base_methods)}
-
-        for ri, (_, ds, sub_results) in enumerate(slices):
-            for m in base_methods:
-                mi = method_index[m]
-                method_result = _lookup_method(sub_results[ds], m)
-                v = method_result.get(metric) if method_result is not None else None
-                if v is not None:
-                    raw_matrix[ri, mi] = v
-                    se_val = method_result.get(f'{metric}_se')
-                    if se_val is not None:
-                        se_matrix[ri, mi] = se_val
-
-        score_matrix = _metric_color_values(raw_matrix, direction)
-        norm_matrix = np.full_like(raw_matrix, np.nan)
-        finite_scores = score_matrix[np.isfinite(score_matrix)]
-        if finite_scores.size:
-            cmin = np.nanmin(finite_scores)
-            cmax = np.nanpercentile(finite_scores, 95)
-            rng = cmax - cmin
-            if rng < 1e-10:
-                norm_matrix[np.isfinite(score_matrix)] = 0.5
-            else:
-                norm_matrix = np.clip((score_matrix - cmin) / rng, 0, 1)
-
-        scaled_scores = {}
-        for mi, m in enumerate(base_methods):
-            vals = norm_matrix[:, mi]
-            vals = vals[np.isfinite(vals)]
-            if len(vals) == 0:
-                scaled_scores[m] = -1.0
-                continue
-            scaled = (
-                1.0 - vals
-                if direction == 'lower' or _metric_target(direction) is not None
-                else vals
-            )
-            scaled_scores[m] = float(np.mean(scaled))
-
-        plot_norm = norm_matrix
-        plot_raw = raw_matrix
-        plot_se = se_matrix
-
-        n_methods = len(base_methods)
-        fig_w, fig_h = _heatmap_layout(n_methods, n_sizes)
-        fig_w *= 1.35
-        fonts = _scaled_heatmap_font_sizes(n_methods, n_sizes, scale=1.15)
-        method_fs = fonts['method']
-        n_fs = fonts['dataset']
-        title_fs = fonts['title']
-        axis_fs = fonts['axis']
-        tick_fs = fonts['tick']
-        value_fs = max(5.8, fonts['cell'] * 1.05)
-        se_fs = max(4.5, fonts['cell'] * 0.72)
-
-        fig, ax = plt.subplots(figsize=(fig_w, fig_h))
-        cmap_obj = plt.get_cmap(_metric_cmap(direction)).copy()
-        cmap_obj.set_bad(color='#e8e8e8')
-        im = ax.imshow(plot_norm, cmap=cmap_obj, aspect='auto',
-                       vmin=0, vmax=1)
-
-        for i in range(n_sizes):
-            for j in range(n_methods):
-                val = plot_raw[i, j]
-                if np.isfinite(val):
-                    norm_val = plot_norm[i, j]
-                    rgba = cmap_obj(norm_val if np.isfinite(norm_val) else 0.5)
-                    lum = 0.299 * rgba[0] + 0.587 * rgba[1] + 0.114 * rgba[2]
-                    text_color = 'white' if lum < 0.45 else 'black'
-                    se_val = plot_se[i, j]
-                    ax.text(j, i - 0.12, _format_sdss_heatmap_number(metric, val),
-                            ha='center', va='center',
-                            fontsize=value_fs, fontweight='bold',
-                            color=text_color, zorder=5)
-                    if np.isfinite(se_val):
-                        ax.text(j, i + 0.17, f'({_format_sdss_heatmap_number(metric, se_val)})',
-                                ha='center', va='center',
-                                fontsize=se_fs, color=text_color, zorder=5)
-                else:
-                    ax.text(j, i, '—', ha='center', va='center',
-                            fontsize=value_fs, color='#aaaaaa', zorder=5)
-
-        method_labels = [_display_method_name(m) for m in base_methods]
-        ax.set_xticks(range(n_methods))
-        ax.set_xticklabels(method_labels, fontsize=method_fs,
-                           rotation=50, ha='right')
-        ax.set_yticks(range(n_sizes))
-        ax.set_yticklabels(n_labels, fontsize=n_fs)
-        ax.set_ylabel('n', fontsize=axis_fs, fontweight='bold')
-
-        for tick, method in zip(ax.get_xticklabels(), base_methods):
-            tick.set_color(METHOD_GROUP_META[_method_group(method)]['accent'])
-
-        _add_group_labels_top(ax, base_methods, axis_fs)
-        ax.set_title(f'{label} — SDSS', fontsize=title_fs,
-                     fontweight='bold', pad=20)
-
-        fig.subplots_adjust(top=0.90, bottom=0.14)
-        for ext in ('pdf', 'png'):
-            fname = f"raw_real_{metric.lower()}_sdss.{ext}"
-            fig.savefig(output_dir / fname, dpi=300, bbox_inches='tight')
-        plt.close(fig)
-        print(f"  saved raw_real_{metric.lower()}_sdss.{{pdf,png}}")
-
-
-def plot_sdss_raw_metrics_by_n(all_results, output_dir, all_data=None):
-    """SDSS-only raw heatmaps: one file per metric, rows=n, cols=methods."""
-    output_dirs = _resolve_output_dirs(output_dir)
-    groups = _group_by_n_and_type(all_results)
-    if not groups:
-        return
-
-    methods = sorted(_visible_methods(
-        m for ds in all_results.values() for m in ds.keys()
-    ))
-    _plot_sdss_raw_combined(groups, methods, output_dirs['real'])
 
 
 def plot_raw_metrics_by_n(all_results, output_dir, all_data=None):
@@ -1424,10 +1231,10 @@ def plot_raw_metrics_by_n(all_results, output_dir, all_data=None):
     for n_size in sorted(groups):
         for kind, label, prefix in [('sim', 'Simulated', 'raw_sim'),
                                      ('real', 'Real', 'raw_real')]:
+            summary_mode = 'rank' if kind == 'real' else 'score'
             _plot_raw_grid(groups[n_size][kind], methods, colors, n_size, label,
-                           prefix, output_dirs[kind], all_data)
-
-    _plot_sdss_raw_combined(groups, methods, output_dirs['real'])
+                           prefix, output_dirs[kind], all_data,
+                           summary_mode=summary_mode)
 
 
 def plot_pit_histograms(all_data, output_dir):
@@ -1568,7 +1375,7 @@ def _save_html_table_single(all_results, output_dir,
                 se_val = r.get(f'{key}_se')
                 is_best = best.get(key) == m
                 is_second = second.get(key) == m
-                se_str = (f'<br><span class="se">\u00b1{_format_table_number(se_val)}</span>'
+                se_str = (f'<br><span class="se">\u00b1{se_val:.4f}</span>'
                           if se_val is not None else '')
                 if is_best:
                     cls = ' class="best"'
@@ -1576,9 +1383,9 @@ def _save_html_table_single(all_results, output_dir,
                     cls = ' class="second"'
                 else:
                     cls = ''
-                cells.append(f'<td{cls}>{_format_table_number(val)}{se_str}</td>')
+                cells.append(f'<td{cls}>{val:.4f}{se_str}</td>')
             cells.append(f'<td>{basis}</td>')
-            cells.append(f'<td>{_format_table_number(r["fit_time"])}s</td>')
+            cells.append(f'<td>{r["fit_time"]:.1f}s</td>')
             tbody_rows.append('<tr>' + ''.join(cells) + '</tr>')
 
         table = (f'<h2>{ds}</h2>'
@@ -1594,6 +1401,171 @@ def _save_html_table_single(all_results, output_dir,
     out = output_dir / 'results_table.html'
     out.write_text(html, encoding='utf-8')
     print("  saved results_table.html")
+
+
+def save_appendix_metric_tables(all_results, output_dir):
+    """One landscape table per (metric, n_size) for the paper appendix.
+
+    Writes ``appendix_metric_tables.tex`` to the real-data output dir.
+    Requires LaTeX packages: booktabs, pdflscape, adjustbox, graphicx.
+    Rows = datasets ordered by dimensionality.
+    Columns = methods in fixed group order (Parametric | Nonparametric | Foundation).
+    Cells show mean ± SE; bold = best, underline = second-best per row.
+    """
+    _APPENDIX_METRICS = [
+        ('CDE_loss',       'CDE Loss',  'lower'),
+        ('log_lik',        'Log-Lik',   'higher'),
+        ('CRPS',           'CRPS',      'lower'),
+        ('PIT_KS',         'PIT KS',   'lower'),
+        ('coverage_90',    '90\\% Cov', 'target_0.90'),
+        ('interval_width', 'Width',     'lower'),
+        ('fit_time',       'Fit Time',  'lower'),
+    ]
+
+    output_dirs = _resolve_output_dirs(output_dir)
+    real_out = output_dirs['real']
+
+    real_results = {ds: res for ds, res in all_results.items()
+                    if not _is_synthetic(ds)}
+    groups = _group_by_n(real_results)
+    if not groups:
+        return
+
+    # Fixed method order across all tables
+    all_methods = sorted(_visible_methods(
+        m for ds in real_results.values() for m in ds.keys()
+    ))
+    methods = _ordered_methods(all_methods)
+
+    # Methods per group for multicolumn header
+    group_counts = {g: sum(1 for m in methods if _method_group(m) == g)
+                    for g in METHOD_GROUP_ORDER}
+
+    # Column spec: l | {param} | {nonparam} | {found}
+    col_spec = 'l' + ''.join(f'|{"r" * group_counts[g]}' for g in METHOD_GROUP_ORDER)
+
+    # Cumulative column indices for \cmidrule
+    starts, ends = {}, {}
+    col = 2
+    for g in METHOD_GROUP_ORDER:
+        starts[g] = col
+        ends[g] = col + group_counts[g] - 1
+        col += group_counts[g]
+
+    preamble = (
+        '% Auto-generated appendix tables. \\input{} this in your appendix.\n'
+        '% Requires: \\usepackage{booktabs,pdflscape,adjustbox,graphicx}\n\n'
+    )
+    tables = []
+
+    for n_size in sorted(groups):
+        sub = groups[n_size]
+        datasets = _ordered_dataset_names(sub.keys())
+
+        for metric_key, metric_label, direction in _APPENDIX_METRICS:
+            # Best / second-best per dataset row
+            best_m, second_m = {}, {}
+            for ds in datasets:
+                res = sub[ds]
+                vals = {}
+                for m in methods:
+                    r = _lookup_method(res, m)
+                    v = r.get(metric_key) if r is not None else None
+                    if v is not None:
+                        vals[m] = v
+                if vals:
+                    ranked = sorted(vals,
+                                    key=lambda m, v=vals: (_metric_sort_score(v[m], direction), m))
+                    best_m[ds] = ranked[0]
+                    if len(ranked) > 1:
+                        second_m[ds] = ranked[1]
+
+            # Header row 1: group spans
+            grp_cells = ['\\textbf{Dataset}']
+            for g in METHOD_GROUP_ORDER:
+                lbl = METHOD_GROUP_META[g]['label']
+                grp_cells.append(f'\\multicolumn{{{group_counts[g]}}}{{c}}{{\\textbf{{{lbl}}}}}')
+            group_header = ' & '.join(grp_cells) + ' \\\\'
+
+            # Cmidrule lines
+            cmidrules = ' '.join(
+                f'\\cmidrule(lr){{{starts[g]}-{ends[g]}}}'
+                if g != METHOD_GROUP_ORDER[-1]
+                else f'\\cmidrule(l){{{starts[g]}-{ends[g]}}}'
+                for g in METHOD_GROUP_ORDER
+            )
+
+            # Header row 2: rotated method names
+            method_cells = ['']
+            for m in methods:
+                disp = _tex_escape(_display_method_name(m))
+                method_cells.append(f'\\rotatebox{{90}}{{\\textbf{{{disp}}}}}')
+            method_header = ' & '.join(method_cells) + ' \\\\'
+
+            # Data rows
+            body_rows = []
+            for ds in datasets:
+                base, _ = _parse_base_and_n(ds)
+                ds_label = _tex_escape(base if base is not None else ds)
+                res = sub[ds]
+                cells = [ds_label]
+                for m in methods:
+                    r = _lookup_method(res, m)
+                    v = r.get(metric_key) if r is not None else None
+                    se = r.get(f'{metric_key}_se') if r is not None else None
+                    if v is None:
+                        cells.append('---')
+                        continue
+                    if metric_key == 'fit_time':
+                        txt = f'{v:.1f}'
+                        if se is not None:
+                            txt += f' $\\pm$ {se:.1f}'
+                    else:
+                        txt = f'{v:.4f}'
+                        if se is not None:
+                            txt += f' $\\pm$ {se:.4f}'
+                    if best_m.get(ds) == m:
+                        txt = f'\\textbf{{{txt}}}'
+                    elif second_m.get(ds) == m:
+                        txt = f'\\underline{{{txt}}}'
+                    cells.append(txt)
+                body_rows.append(' & '.join(cells) + ' \\\\')
+
+            direction_note = _metric_better_note(direction)
+            caption = (
+                f'{metric_label} {direction_note}, $n = {n_size}$, real data. '
+                f'Bold = best per dataset, underline = second-best. '
+                f'Values shown as mean $\\pm$ SE.'
+            )
+            label = f'tab:appendix_{metric_key.lower()}_n{n_size}'
+
+            lines = [
+                '\\begin{landscape}',
+                '\\begin{table}[p]',
+                '\\centering',
+                f'\\caption{{{caption}}}',
+                f'\\label{{{label}}}',
+                '\\adjustbox{max width=\\linewidth, max height=0.85\\textheight}{%',
+                f'\\begin{{tabular}}{{{col_spec}}}',
+                '\\toprule',
+                group_header,
+                cmidrules,
+                method_header,
+                '\\midrule',
+            ] + body_rows + [
+                '\\bottomrule',
+                '\\end{tabular}%',
+                '}',
+                '\\end{table}',
+                '\\end{landscape}',
+                '\\clearpage',
+                '',
+            ]
+            tables.append('\n'.join(lines))
+
+    out = real_out / 'appendix_metric_tables.tex'
+    out.write_text(preamble + '\n'.join(tables), encoding='utf-8')
+    print(f'  saved {out}')
 
 
 def save_latex_table(all_results, output_dir,
@@ -1621,34 +1593,6 @@ def _tex_escape(s):
              .replace('&', '\\&')
              .replace('%', '\\%')
              .replace('#', '\\#'))
-
-
-def _format_table_number(val):
-    """Compact table formatting: one decimal in fixed-point, scientific if needed."""
-    val = float(val)
-    abs_val = abs(val)
-    if abs_val != 0 and (abs_val < 0.1 or abs_val >= 1000):
-        mantissa, exp = f'{val:.1e}'.split('e')
-        return f'{mantissa}e{int(exp)}'
-    return f'{val:.1f}'
-
-
-def _format_sdss_heatmap_number(metric, val):
-    """Formatting for SDSS raw heatmap cells."""
-    if metric == 'fit_time':
-        val = float(val)
-        if 0 < abs(val) < 0.01:
-            return '<0.01'
-        if abs(val) < 1:
-            return f'{val:.2f}s'
-        if abs(val) < 60:
-            return f'{val:.1f}s'
-        if abs(val) < 3600:
-            return f'{val / 60:.1f}m'
-        return f'{val / 3600:.1f}h'
-    if metric == 'CRPS':
-        return f'{float(val):.3f}'
-    return _format_table_number(val)
 
 
 def _save_latex_table_single(all_results, output_dir,
@@ -1710,9 +1654,14 @@ def _save_latex_table_single(all_results, output_dir,
                 if val is None:
                     cells.append('---')
                     continue
-                txt = _format_table_number(val)
-                if se_val is not None:
-                    txt += f' $\\pm$ {_format_table_number(se_val)}'
+                if key == 'fit_time':
+                    txt = f'{val:.1f}'
+                    if se_val is not None:
+                        txt += f' $\\pm$ {se_val:.1f}'
+                else:
+                    txt = f'{val:.4f}'
+                    if se_val is not None:
+                        txt += f' $\\pm$ {se_val:.4f}'
                 if best.get(key) == m:
                     txt = f'\\textbf{{{txt}}}'
                 elif second.get(key) == m:
@@ -1727,7 +1676,7 @@ def _save_latex_table_single(all_results, output_dir,
             f'\\centering',
             f'\\caption{{Results for {_tex_escape(ds)} ({se_caption}).}}',
             f'\\label{{tab:{ds.lower().replace(" ", "_")}}}',
-            f'\\begin{{adjustbox}}{{max width=\\linewidth}}',
+            f'\\small',
             f'\\begin{{tabular}}{{{col_spec}}}',
             f'\\toprule',
             header + ' \\\\',
@@ -1738,7 +1687,6 @@ def _save_latex_table_single(all_results, output_dir,
         table_lines += [
             f'\\bottomrule',
             f'\\end{{tabular}}',
-            f'\\end{{adjustbox}}',
             f'\\end{{table}}',
             '',
         ]
@@ -1746,7 +1694,7 @@ def _save_latex_table_single(all_results, output_dir,
 
     preamble = (
         '% Auto-generated LaTeX tables — include in your .tex with \\input{...}\n'
-        '% Requires: \\usepackage{booktabs} and \\usepackage{adjustbox}\n'
+        '% Requires: \\usepackage{booktabs}\n'
         '\n'
     )
     out = output_dir / 'results_table.tex'
@@ -1982,7 +1930,8 @@ def _foundational_perf_legend_handles():
 
 
 def _group_perf_legend_handles():
-    """Three-entry legend: Parametric, Nonparametric, Foundation."""
+    """Three-entry legend: Parametric, Nonparametric, Foundation,
+    plus a dashed-line note for beyond-native-limit regime."""
     handles = []
     for group in METHOD_GROUP_ORDER:
         meta = METHOD_GROUP_META[group]
@@ -1993,6 +1942,14 @@ def _group_perf_legend_handles():
             linewidth=3.5,
             label=meta['label'],
         ))
+    handles.append(Line2D(
+        [0], [0],
+        color='grey',
+        linestyle='--',
+        linewidth=2.5,
+        alpha=0.7,
+        label='Beyond native limit',
+    ))
     return handles
 
 
@@ -2150,8 +2107,7 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
             if full_ylim:
                 ax.set_ylim(*full_ylim)
 
-        panel_title = '' if is_sdss else base
-        ax.set_title(panel_title, fontsize=PERF_SUBPLOT_TITLE_FONTSIZE, fontweight='bold')
+        ax.set_title(base, fontsize=PERF_SUBPLOT_TITLE_FONTSIZE, fontweight='bold')
         ax.set_xlabel('n', fontsize=PERF_AXIS_LABEL_FONTSIZE)
         ax.set_ylabel(label, fontsize=PERF_AXIS_LABEL_FONTSIZE)
         ax.tick_params(labelsize=PERF_TICK_FONTSIZE)
@@ -2192,21 +2148,19 @@ def _plot_perf_grid(base_groups, all_results, methods, method_colors,
     if foundational_only:
         handles = _foundational_perf_legend_handles()
         fig.legend(handles, [h.get_label() for h in handles],
-                   loc='upper center', ncol=len(handles),
+                   loc='upper center', ncol=4,
                    fontsize=PERF_FOUNDATIONAL_LEGEND_FONTSIZE,
                    handlelength=2.8, columnspacing=1.7, labelspacing=0.9,
                    borderpad=0.7, framealpha=0.94, bbox_to_anchor=(0.5, 0.99))
     else:
         handles = _group_perf_legend_handles()
         fig.legend(handles, [h.get_label() for h in handles],
-                   loc='upper center', ncol=len(handles),
+                   loc='upper center', ncol=4,
                    fontsize=PERF_LEGEND_FONTSIZE + 2,
                    handlelength=2.5, columnspacing=2.0,
                    framealpha=0.92, bbox_to_anchor=(0.5, 0.99))
 
-    base_names = [base for base, _ in ordered_bases]
-    sdss_only = len(base_names) == 1 and _is_sdss_base(base_names[0])
-    title = f'{label} vs Sample Size{" - SDSS" if sdss_only else title_suffix}'
+    title = f'{label} vs Sample Size{title_suffix}'
     if better:
         title = f'{title} {better}'
     plt.suptitle(title,
@@ -2274,109 +2228,3 @@ def plot_performance_vs_n_foundational(all_results, output_dir, all_data=None):
                             f'perf_vs_n_foundational_{ml}_sim_d{d}.png',
                             output_dirs['sim'], foundational_only=True,
                             all_data=all_data)
-
-
-def plot_sdss_fit_time_vs_cde_loss(all_results, output_dir, all_data=None):
-    """Scatter plot: fit_time (x) vs CDE_loss (y) across SDSS sample sizes.
-
-    Each point represents one (method, sample-size) combination.  Points for
-    the same method are connected with a thin line ordered by sample size,
-    letting the reader trace how the time/quality trade-off evolves as n grows.
-    """
-    del all_data  # unused; accepted for call-site consistency with other plot functions
-    output_dir = Path(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    # Collect SDSS slices: {n: method_results_dict}
-    sdss_datasets = {}
-    for ds, results in all_results.items():
-        base, n = _parse_base_and_n(ds)
-        if base is not None and _is_sdss_base(base):
-            sdss_datasets[n] = results
-
-    if not sdss_datasets:
-        return
-
-    n_sizes = sorted(sdss_datasets.keys())
-    all_methods = sorted(_visible_methods(
-        m for res in sdss_datasets.values() for m in res.keys()
-    ))
-    plot_methods = _ordered_methods(all_methods)
-
-    group_color = {g: METHOD_GROUP_META[g]['accent'] for g in METHOD_GROUP_META}
-
-    # Map n → marker area (points²) on a log scale
-    log_ns = [np.log10(n) for n in n_sizes]
-    log_min, log_max = min(log_ns), max(log_ns)
-    log_span = max(log_max - log_min, 1e-6)
-
-    def _marker_area(n):
-        t = (np.log10(n) - log_min) / log_span
-        return 40 + t * 200  # range [40, 240] points²
-
-    fig, ax = plt.subplots(figsize=(11, 7))
-
-    for m in plot_methods:
-        color = group_color[_method_group(m)]
-        points = []
-        for n in n_sizes:
-            mr = _lookup_method(sdss_datasets[n], m)
-            if mr is None:
-                continue
-            ft = mr.get('fit_time')
-            cl = mr.get('CDE_loss')
-            if ft is None or cl is None:
-                continue
-            points.append((n, ft, cl))
-
-        if not points:
-            continue
-
-        xs = [p[1] for p in points]
-        ys = [p[2] for p in points]
-
-        # Connecting line
-        ax.plot(xs, ys, color=color, lw=1.0, alpha=0.45, zorder=2)
-
-        # Scatter points sized by n (vectorized)
-        sizes = [_marker_area(p[0]) for p in points]
-        ax.scatter(xs, ys, s=sizes, color=color, zorder=3,
-                   edgecolors='white', linewidths=0.6)
-
-    ax.set_xscale('log')
-    ax.invert_yaxis()
-    ax.set_xlabel('Fit Time (s)', fontsize=14)
-    ax.set_ylabel('CDE Loss', fontsize=14)
-    ax.set_title('SDSS Scaling: Fit Time vs CDE Loss\n'
-                 'lower CDE Loss values are better (y-axis inverted: top = better)',
-                 fontsize=13)
-    ax.grid(True, alpha=0.25, which='both')
-
-    # Group legend
-    group_handles = [
-        Patch(color=METHOD_GROUP_META[g]['accent'],
-              label=METHOD_GROUP_META[g]['label'])
-        for g in METHOD_GROUP_ORDER
-        if any(_method_group(m) == g for m in plot_methods)
-    ]
-    leg1 = ax.legend(handles=group_handles, loc='upper left', fontsize=9,
-                     framealpha=0.85)
-    ax.add_artist(leg1)
-
-    # Sample-size legend (marker size guide)
-    size_handles = [
-        Line2D([0], [0], marker='o', color='#555555',
-               label=_fmt_n(n),
-               markersize=2 * np.sqrt(_marker_area(n) / np.pi),
-               linestyle='None')
-        for n in n_sizes
-    ]
-    ax.legend(handles=size_handles, loc='lower right', fontsize=8,
-              title='Sample size (n)', title_fontsize=9, framealpha=0.85)
-
-    plt.tight_layout()
-    for ext in ('pdf', 'png'):
-        fig.savefig(output_dir / f'fit_time_vs_cde_loss_sdss.{ext}',
-                    dpi=150, bbox_inches='tight')
-    plt.close(fig)
-    print(f"  saved fit_time_vs_cde_loss_sdss.{{pdf,png}}")

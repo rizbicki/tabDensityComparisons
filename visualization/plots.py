@@ -2228,3 +2228,291 @@ def plot_performance_vs_n_foundational(all_results, output_dir, all_data=None):
                             f'perf_vs_n_foundational_{ml}_sim_d{d}.png',
                             output_dirs['sim'], foundational_only=True,
                             all_data=all_data)
+def plot_sdss_fit_time_vs_cde_loss(all_results, output_dir, all_data=None):
+    """Scatter plot: fit_time (x) vs CDE_loss (y) across SDSS sample sizes.
+
+    Each point represents one (method, sample-size) combination.  Points for
+    the same method are connected with a thin line ordered by sample size,
+    letting the reader trace how the time/quality trade-off evolves as n grows.
+    """
+    del all_data  # unused; accepted for call-site consistency with other plot functions
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Collect SDSS slices: {n: method_results_dict}
+    sdss_datasets = {}
+    for ds, results in all_results.items():
+        base, n = _parse_base_and_n(ds)
+        if base is not None and _is_sdss_base(base):
+            sdss_datasets[n] = results
+
+    if not sdss_datasets:
+        return
+
+    n_sizes = sorted(sdss_datasets.keys())
+    all_methods = sorted(_visible_methods(
+        m for res in sdss_datasets.values() for m in res.keys()
+    ))
+    plot_methods = _ordered_methods(all_methods)
+
+    group_color = {g: METHOD_GROUP_META[g]['accent'] for g in METHOD_GROUP_META}
+
+    # Map n → marker area (points²) on a log scale
+    log_ns = [np.log10(n) for n in n_sizes]
+    log_min, log_max = min(log_ns), max(log_ns)
+    log_span = max(log_max - log_min, 1e-6)
+
+    def _marker_area(n):
+        t = (np.log10(n) - log_min) / log_span
+        return 40 + t * 200  # range [40, 240] points²
+
+    fig, ax = plt.subplots(figsize=(11, 7))
+
+    for m in plot_methods:
+        color = group_color[_method_group(m)]
+        points = []
+        for n in n_sizes:
+            mr = _lookup_method(sdss_datasets[n], m)
+            if mr is None:
+                continue
+            ft = mr.get('fit_time')
+            cl = mr.get('CDE_loss')
+            if ft is None or cl is None:
+                continue
+            points.append((n, ft, cl))
+
+        if not points:
+            continue
+
+        xs = [p[1] for p in points]
+        ys = [p[2] for p in points]
+
+        # Connecting line
+        ax.plot(xs, ys, color=color, lw=1.0, alpha=0.45, zorder=2)
+
+        # Scatter points sized by n (vectorized)
+        sizes = [_marker_area(p[0]) for p in points]
+        ax.scatter(xs, ys, s=sizes, color=color, zorder=3,
+                   edgecolors='white', linewidths=0.6)
+
+    ax.set_xscale('log')
+    ax.invert_yaxis()
+    ax.set_xlabel('Fit Time (s)', fontsize=14)
+    ax.set_ylabel('CDE Loss', fontsize=14)
+    ax.set_title('SDSS Scaling: Fit Time vs CDE Loss\n'
+                 'lower CDE Loss values are better (y-axis inverted: top = better)',
+                 fontsize=13)
+    ax.grid(True, alpha=0.25, which='both')
+
+    # Group legend
+    group_handles = [
+        Patch(color=METHOD_GROUP_META[g]['accent'],
+              label=METHOD_GROUP_META[g]['label'])
+        for g in METHOD_GROUP_ORDER
+        if any(_method_group(m) == g for m in plot_methods)
+    ]
+    leg1 = ax.legend(handles=group_handles, loc='upper left', fontsize=9,
+                     framealpha=0.85)
+    ax.add_artist(leg1)
+
+    # Sample-size legend (marker size guide)
+    size_handles = [
+        Line2D([0], [0], marker='o', color='#555555',
+               label=_fmt_n(n),
+               markersize=2 * np.sqrt(_marker_area(n) / np.pi),
+               linestyle='None')
+        for n in n_sizes
+    ]
+    ax.legend(handles=size_handles, loc='lower right', fontsize=8,
+              title='Sample size (n)', title_fontsize=9, framealpha=0.85)
+
+    plt.tight_layout()
+    for ext in ('pdf', 'png'):
+        fig.savefig(output_dir / f'fit_time_vs_cde_loss_sdss.{ext}',
+                    dpi=150, bbox_inches='tight')
+    plt.close(fig)
+    print(f"  saved fit_time_vs_cde_loss_sdss.{{pdf,png}}")
+
+
+def plot_perf_vs_n_cde_improved(all_results, output_dir, all_data=None):
+    """Improved CDE Loss vs n for SDSS: parametric band, labeled nonpar/foundation lines, SE bands."""
+    del all_data
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    sdss_datasets = {}
+    for ds, results in all_results.items():
+        base, n = _parse_base_and_n(ds)
+        if base is not None and _is_sdss_base(base) and n is not None:
+            sdss_datasets[n] = results
+    if not sdss_datasets:
+        return
+
+    all_ns = sorted(sdss_datasets.keys())
+    MAX_N = max(all_ns)
+
+    METRIC = 'CDE_loss'
+    C_PARAM  = METHOD_GROUP_META['parametric']['accent']
+    C_NONPAR = METHOD_GROUP_META['nonparametric']['accent']
+    C_FOUND  = METHOD_GROUP_META['foundational']['accent']
+
+    PARAMETRIC_BASE = {
+        'LinearGauss-Homo', 'LinearGauss-Hetero', 'Student-t',
+        'LogNormal-Homo', 'LogNormal-Hetero', 'Gamma-GLM',
+    }
+    NONPARAMETRIC = {'MDN', 'Flow-Spline', 'BART-Homo', 'BART-Hetero',
+                     'FlexCode-RF', 'CatMLP', 'Quantile-Tree'}
+    FOUND_STYLES_LOCAL = {
+        'TabPFN-Native':    {'ls': '-',  'marker': 'o'},
+        'TabPFN-2.5':       {'ls': '-',  'marker': 'o'},
+        'RealTabPFN-2.5':   {'ls': '-.', 'marker': '^'},
+        'TabICL-Quantiles': {'ls': ':',  'marker': 'D'},
+    }
+    FOUND_MERGE = {'TabPFN-Native', 'TabPFN-2.5'}
+    NONPAR_LINES = ['-', '--', '-.', ':', (0,(3,1,1,1)), (0,(5,2))]
+    MIN_GAP = 0.55
+
+    def _get_series(method):
+        vals, ses, ns = [], [], []
+        for n in all_ns:
+            r = _lookup_method(sdss_datasets[n], method)
+            if r is not None and r.get(METRIC) is not None:
+                vals.append(float(r[METRIC]))
+                ses.append(float(r.get(f'{METRIC}_se') or 0))
+                ns.append(n)
+        return ns, vals, ses
+
+    def _place_labels(ax, series, label_x, fontsize=9):
+        if not series:
+            return
+        series = sorted(series, key=lambda t: t[0])
+        placed = []
+        for y_raw, x_src, label, col in series:
+            y = y_raw
+            for _ in range(len(placed) + 1):
+                for py in placed:
+                    if abs(y - py) < MIN_GAP:
+                        y = py - MIN_GAP if y < py else py + MIN_GAP
+            placed.append(y)
+            needs_arrow = abs(y - y_raw) > 0.05 or x_src < label_x * 0.92
+            ax.annotate(
+                label,
+                xy=(x_src, y_raw), xytext=(label_x, y),
+                fontsize=fontsize, color=col, va='center', ha='left',
+                fontweight='bold', clip_on=False,
+                arrowprops=dict(arrowstyle='-', color=col, lw=0.6, alpha=0.55)
+                if needs_arrow else None,
+                bbox=dict(boxstyle='round,pad=0.15', fc='white',
+                          ec=col, lw=0.7, alpha=0.9),
+                annotation_clip=False,
+            )
+
+    fig, ax = plt.subplots(figsize=(10, 7))
+    label_series = []
+
+    # ── Parametric band (PARAMETRIC_BASE only) ────────────────────────────────
+    param_by_n = {n: [] for n in all_ns}
+    best_ns, best_vals, best_ses, best_name, best_last = None, None, None, None, None
+    for m in sorted(PARAMETRIC_BASE):
+        ns, vals, ses = _get_series(m)
+        if not ns:
+            continue
+        for n, v in zip(ns, vals):
+            param_by_n[n].append(v)
+        if best_last is None or vals[-1] < best_last:
+            best_ns, best_vals, best_ses = ns, vals, ses
+            best_name, best_last = m, vals[-1]
+
+    band_ns   = sorted(n for n, vs in param_by_n.items() if vs)
+    band_mins = [min(param_by_n[n]) for n in band_ns]
+    band_maxs = [max(param_by_n[n]) for n in band_ns]
+    ax.fill_between(band_ns, band_mins, band_maxs,
+                    color=C_PARAM, alpha=0.18, zorder=1)
+
+    if best_ns:
+        ax.plot(best_ns, best_vals, color=C_PARAM, lw=2.4, ls='-', zorder=4)
+        arr_v  = np.array(best_vals); arr_se = np.array(best_ses)
+        ax.fill_between(best_ns, arr_v - arr_se, arr_v + arr_se,
+                        color=C_PARAM, alpha=0.20, zorder=3)
+        label_series.append((best_vals[-1], best_ns[-1],
+                              _display_method_name(best_name), C_PARAM))
+        if best_ns[-1] < MAX_N:
+            ax.plot(best_ns[-1], best_vals[-1], 'x',
+                    color=C_PARAM, ms=7, mew=1.8, zorder=6)
+
+    # ── Nonparametric: top-3 get SE bands ─────────────────────────────────────
+    nonpar_all = [(m, *_get_series(m)) for m in NONPARAMETRIC if _get_series(m)[0]]
+    nonpar_all.sort(key=lambda t: t[2][-1])
+    top3 = {t[0] for t in nonpar_all[:3]}
+    for i, (m, ns, vals, ses) in enumerate(nonpar_all):
+        ls = NONPAR_LINES[i % len(NONPAR_LINES)]
+        ax.plot(ns, vals, color=C_NONPAR, lw=2.0, ls=ls, zorder=5, alpha=0.88)
+        if m in top3:
+            arr = np.array(vals); arr_se = np.array(ses)
+            ax.fill_between(ns, arr - arr_se, arr + arr_se,
+                            color=C_NONPAR, alpha=0.07, zorder=4)
+        label_series.append((vals[-1], ns[-1], _display_method_name(m), C_NONPAR))
+        if ns[-1] < MAX_N:
+            ax.plot(ns[-1], vals[-1], 'x', color=C_NONPAR, ms=7, mew=1.8, zorder=7)
+
+    # ── Foundation ────────────────────────────────────────────────────────────
+    merged_added = False
+    found_methods = sorted(m for m in FOUNDATIONAL_MODELS if _get_series(m)[0])
+    for m in found_methods:
+        ns, vals, ses = _get_series(m)
+        sty = FOUND_STYLES_LOCAL.get(m, {'ls': '-', 'marker': 'o'})
+        ax.plot(ns, vals, color=C_FOUND, lw=3.2, ls=sty['ls'],
+                marker=sty['marker'], ms=6, zorder=8, alpha=0.95)
+        arr = np.array(vals); arr_se = np.array(ses)
+        ax.fill_between(ns, arr - arr_se, arr + arr_se,
+                        color=C_FOUND, alpha=0.14, zorder=7)
+        if m in FOUND_MERGE:
+            if not merged_added:
+                label_series.append((vals[-1], ns[-1], 'TabPFN Native/2.5', C_FOUND))
+                merged_added = True
+        else:
+            label_series.append((vals[-1], ns[-1], _display_method_name(m), C_FOUND))
+        if ns[-1] < MAX_N:
+            ax.plot(ns[-1], vals[-1], 'x', color=C_FOUND, ms=9, mew=2.2, zorder=9)
+
+    # ── Axes ──────────────────────────────────────────────────────────────────
+    ax.set_xscale('log')
+    ax.set_xticks(all_ns)
+    ax.set_xticklabels([_fmt_n(n) for n in all_ns], fontsize=13)
+    ax.xaxis.set_minor_locator(mticker.NullLocator())
+    ax.set_xlabel('n', fontsize=15)
+    ax.set_ylabel('CDE Loss', fontsize=15)
+    ax.tick_params(labelsize=13)
+    ax.grid(alpha=0.25, linewidth=0.8)
+
+    all_line_vals = (
+        (best_vals or [])
+        + [v for _, ns, vals, ses in nonpar_all for v in vals]
+        + [v for m in found_methods for v in _get_series(m)[1]]
+    )
+    if all_line_vals:
+        ax.set_ylim(min(all_line_vals) - 0.4, max(all_line_vals) + 0.4)
+    ax.invert_yaxis()
+    ax.set_xlim(left=min(all_ns) * 0.7, right=MAX_N * 3.2)
+
+    ax.figure.canvas.draw()
+    _place_labels(ax, label_series, label_x=MAX_N * 1.06)
+
+    legend_handles = [
+        Patch(facecolor=C_PARAM,  alpha=0.35, label='Parametric (range)'),
+        Patch(facecolor=C_NONPAR, alpha=0.35, label='Nonparametric (SE band)'),
+        Patch(facecolor=C_FOUND,  alpha=0.35, label='Foundation (SE band)'),
+        Line2D([0],[0], color='gray', lw=0, marker='x', ms=7,
+               mew=1.8, label='Last available n'),
+    ]
+    ax.legend(handles=legend_handles, loc='lower left', fontsize=9.5,
+              framealpha=0.92, borderpad=0.7)
+    ax.set_title('CDE Loss vs Sample Size — SDSS  (lower is better, top = better)',
+                 fontsize=14, fontweight='bold', pad=10)
+
+    fig.tight_layout()
+    for ext in ('pdf', 'png'):
+        fig.savefig(output_dir / f'perf_vs_n_cde_loss_improved.{ext}',
+                    dpi=180, bbox_inches='tight')
+    plt.close(fig)
+    print(f"  saved perf_vs_n_cde_loss_improved.{{pdf,png}}")

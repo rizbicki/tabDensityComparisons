@@ -193,6 +193,8 @@ It is example-only and is not included in the default benchmark schedule.
 
 From OpenML and SDSS DR18, subsampled consistently so smaller n is always
 a strict subset of larger n.
+The default schedule currently excludes `Yprop` because it has been
+disproportionately slow in the real-data benchmark.
 
 | Dataset | Source | Max n |
 |---------|--------|-------|
@@ -236,21 +238,19 @@ To compare methods on SDSS across larger sample sizes:
 ```
 
 The default sample-size spec is
-`500,1000,10000,50000,100000,250000,500000,full`. The parser deduplicates
-repeated sizes, so with the bundled 500k-row SDSS CSV this currently becomes
-the seven unique sizes `500, 1k, 10k, 50k, 100k, 250k, 500k`. Outputs are
-written to
+`1000,10000,50000,100000,250000,500000,full`. The parser deduplicates repeated
+sizes, so with the bundled 500k-row SDSS CSV this currently becomes the six
+unique sizes `1k, 10k, 50k, 100k, 250k, 500k`. Outputs are written to
 `results_real/sdss_scaling/`, metrics are averaged over `4` repetitions per
 sample size by default, and the script regenerates the SDSS-only HTML table and
 performance-vs-`n` plots there.
 
 The default schedule still prunes methods that hit explicit limits or are
-conservatively capped for runtime reasons. `BART-Homo`, `BART-Hetero`,
-`Quantile-Tree`, and `CatMLP` remain available through `n=100,000`,
-`TabICL-Quantiles` is capped below `n=50,000`, and the TabPFN variants are
-capped at `n=50,000`. You can override the schedule with `--methods ...`,
-disable pruning with `--all-methods-at-all-sizes`, inspect the exact chosen
-methods with
+conservatively capped for runtime reasons. `Quantile-Tree`, `BART-Homo`,
+`BART-Hetero`, and `CatMLP` remain available at all bundled SDSS sizes, while
+`TabICL-Quantiles` is capped below `n=50,000`. You can override the schedule
+with `--methods ...`, disable pruning with `--all-methods-at-all-sizes`,
+inspect the exact chosen methods with
 `results_real/sdss_scaling/method_policy.json`, or change the repetition count
 with `--n-reps`.
 

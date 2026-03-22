@@ -13,6 +13,10 @@ import json
 import re
 from pathlib import Path
 
+import torch
+if torch.cuda.is_available():
+    torch.cuda.set_per_process_memory_fraction(0.85)
+
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -34,9 +38,69 @@ from visualization import (
 from utils import save_cache, load_cache, print_summary, aggregate_reps
 
 
+DEFAULT_REAL_METHODS = [
+    'FlexCode-RF',
+    'TabPFN-Native',
+    'TabPFN-2.5',
+    'RealTabPFN-2.5',
+    'TabICL-Quantiles',
+    'LinearGauss-Homo',
+    'LinearGauss-Hetero',
+    'Student-t',
+    'LogNormal-Homo',
+    'LogNormal-Hetero',
+    'MDN',
+    'Flow-Spline',
+    'Quantile-Tree',
+    'Gamma-GLM',
+    'LinGauss-Homo-Ridge',
+    'LinGauss-Hetero-Ridge',
+    'Student-t-Ridge',
+    'LogNormal-Homo-Ridge',
+    'LogNormal-Hetero-Ridge',
+    'Gamma-GLM-Ridge',
+    'BART-Homo',
+    'BART-Hetero',
+    'CatMLP',
+]
+
+LARGE_REAL_N_EXCLUDED_METHODS = {
+    'BART-Hetero',
+    'Quantile-Tree',
+}
+
+
 def _dataset_target_n(name):
     match = re.search(r'-(\d+)$', name)
     return int(match.group(1)) if match else None
+
+
+def _canonical_method_name(name):
+    return 'MDN' if name == 'MDN-2mix' else name
+
+
+def _selected_real_methods(dataset_name):
+    target_n = _dataset_target_n(dataset_name)
+    methods = list(DEFAULT_REAL_METHODS)
+    if target_n is not None and target_n >= 10_000:
+        methods = [
+            m for m in methods
+            if _canonical_method_name(m) not in LARGE_REAL_N_EXCLUDED_METHODS
+        ]
+    return methods
+
+
+def _filter_method_mapping(mapping, methods):
+    allowed = {_canonical_method_name(m) for m in methods}
+    filtered = {}
+    for name, value in mapping.items():
+        canonical = _canonical_method_name(name)
+        if canonical not in allowed:
+            continue
+        if canonical in filtered and name != canonical:
+            continue
+        filtered[canonical] = value
+    return filtered
 
 
 def _effective_n_reps(dataset_name, requested_n_reps):
@@ -91,11 +155,20 @@ def main():
 
     for X, z, name, true_density_fn in datasets:
         n_reps = _effective_n_reps(name, requested_n_reps)
+        selected_methods = _selected_real_methods(name)
         cache_file = cache_dir / f"{name}.npz"
 
         if n_reps != requested_n_reps:
             print(f"\n  [{name}] using {n_reps} repetitions "
                   f"(10x requested {requested_n_reps} for n=50)")
+        excluded_methods = [
+            m for m in DEFAULT_REAL_METHODS
+            if _canonical_method_name(m)
+            not in {_canonical_method_name(s) for s in selected_methods}
+        ]
+        if excluded_methods:
+            print(f"  [{name}] skipping methods by large-n real policy: "
+                  f"{', '.join(excluded_methods)}")
 
         # Count how many reps are already fully cached
         cached_reps = 0
@@ -117,9 +190,13 @@ def main():
                   f"reps cached. Use --force to re-run.")
             cdes, zgrids, X_te, z_te, true_cde, true_zgrid, n_total = \
                 load_cache(cache_file)
+            cdes = _filter_method_mapping(cdes, selected_methods)
+            zgrids = _filter_method_mapping(zgrids, selected_methods)
             all_results[name] = {
-                m: {k: v for k, v in existing_results[name][m].items()}
-                for m in existing_results[name]
+                m: {k: v for k, v in metrics.items()}
+                for m, metrics in _filter_method_mapping(
+                    existing_results[name], selected_methods
+                ).items()
             }
         else:
             if cached_reps > 0 and cached_reps < n_reps:
@@ -136,6 +213,7 @@ def main():
                         true_density_fn=true_density_fn,
                         partial_dir=rep_partial, force=args.force,
                         random_state=rep,
+                        methods=selected_methods,
                     )
                 per_rep_results.append(res)
             n_total = len(z)

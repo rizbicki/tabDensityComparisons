@@ -14,6 +14,10 @@ import json
 import warnings
 from pathlib import Path
 
+import torch
+if torch.cuda.is_available():
+    torch.cuda.set_per_process_memory_fraction(0.85)
+
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler

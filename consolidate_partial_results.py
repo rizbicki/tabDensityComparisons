@@ -46,7 +46,6 @@ def _consolidate_source(source_dir, all_results, output_cache_dir):
             except Exception as e:
                 print(f"    ! {mf}: {e}")
 
-    last_rep = rep_dirs[-1]
     for ds_name in sorted(dataset_reps):
         reps = dataset_reps[ds_name]
         all_results[ds_name] = aggregate_reps(reps)
@@ -57,10 +56,17 @@ def _consolidate_source(source_dir, all_results, output_cache_dir):
         npz_path = output_cache_dir / f"{ds_name}.npz"
         if npz_path.exists():
             continue
+        source_rep = None
+        for rep_dir in reversed(rep_dirs):
+            if any(rep_dir.glob(f"{ds_name}_*_cdes.npy")):
+                source_rep = rep_dir
+                break
+        if source_rep is None:
+            continue
         methods, arrays = [], {}
-        for cdes_file in sorted(last_rep.glob(f"{ds_name}_*_cdes.npy")):
+        for cdes_file in sorted(source_rep.glob(f"{ds_name}_*_cdes.npy")):
             method = cdes_file.stem[len(ds_name) + 1:].replace("_cdes", "")
-            zgrid_file = last_rep / f"{ds_name}_{method}_zgrid.npy"
+            zgrid_file = source_rep / f"{ds_name}_{method}_zgrid.npy"
             if zgrid_file.exists():
                 try:
                     arrays[f'cde_{method}'] = np.load(cdes_file)

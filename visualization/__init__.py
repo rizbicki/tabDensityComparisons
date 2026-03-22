@@ -12,6 +12,7 @@ from .plots import (
     plot_sdss_fit_time_vs_cde_loss,
     plot_perf_vs_n_cde_improved,
     save_html_table,
+    save_appendix_metric_tables,
     save_latex_table,
     METHOD_STYLES,
     FOUNDATIONAL_MODELS,

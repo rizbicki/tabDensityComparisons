@@ -24,6 +24,14 @@ VENV_DIR=".venv"
 PYTHON="${VENV_DIR}/bin/python"
 PIP="${VENV_DIR}/bin/pip"
 
+run_with_device_env() {
+    if [ "$DEVICE" = "cpu" ]; then
+        CUDA_VISIBLE_DEVICES="" "$@"
+    else
+        "$@"
+    fi
+}
+
 # Parse args — pass everything through to the Python script
 EXTRA_ARGS=()
 DEVICE="auto"
@@ -43,6 +51,10 @@ done
 if [ "$REAL_ONLY" -eq 1 ] && [ "$SIM_ONLY" -eq 1 ]; then
     echo "Cannot combine --real-only and --sim-only."
     exit 1
+fi
+
+if [ "$DEVICE" = "cpu" ]; then
+    echo "CPU mode requested; hiding CUDA devices during startup and runs."
 fi
 
 # ── 1. Create venv ──────────────────────────────────────────────
@@ -69,7 +81,7 @@ echo "Installing dependencies..."
 # Check what actually installed
 echo ""
 echo "Installed models:"
-"$PYTHON" -c "
+run_with_device_env "$PYTHON" -c "
 try:
     import tabpfn; print('  ✓ TabPFN', tabpfn.__version__ if hasattr(tabpfn, '__version__') else '')
 except ImportError:
@@ -87,7 +99,11 @@ try:
 except ImportError:
     print('  ✗ XBART — install failed, will skip BART methods')
 try:
-    import torch; print('  ✓ PyTorch', torch.__version__, '(CUDA:', torch.cuda.is_available(), ')')
+    import torch
+    if '${DEVICE}' == 'cpu':
+        print('  ✓ PyTorch', torch.__version__, '(CUDA: hidden for CPU mode)')
+    else:
+        print('  ✓ PyTorch', torch.__version__, '(CUDA:', torch.cuda.is_available(), ')')
 except ImportError:
     print('  ✗ PyTorch not found')
 "
@@ -108,13 +124,13 @@ echo "============================================================"
 echo ""
 
 if [ "$REAL_ONLY" -eq 1 ]; then
-    "$PYTHON" run_real_experiments.py --n-reps 4 "${EXTRA_ARGS[@]}"
+    run_with_device_env "$PYTHON" run_real_experiments.py --n-reps 4 "${EXTRA_ARGS[@]}"
     echo ""
     echo "============================================================"
     echo "  Done! Results are in results_real/"
     echo "============================================================"
 else
-    "$PYTHON" run_experiments.py --n-reps 4 "${EXTRA_ARGS[@]}"
+    run_with_device_env "$PYTHON" run_experiments.py --n-reps 4 "${EXTRA_ARGS[@]}"
     echo ""
     echo "============================================================"
     echo "  Done! Simulated results are in results_simulated/"

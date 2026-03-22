@@ -18,6 +18,7 @@ from visualization import (
     plot_performance_vs_n, plot_performance_vs_n_foundational,
     save_html_table,
     save_latex_table,
+    save_appendix_metric_tables,
 )
 
 
@@ -99,6 +100,8 @@ def main():
     print("  ✓ HTML table")
     save_latex_table(all_results, output_dirs)
     print("  ✓ LaTeX table")
+    save_appendix_metric_tables(all_results, output_dirs)
+    print("  ✓ Appendix metric tables")
 
     if args.metrics_only:
         print("  - Native TabPFN subset plots skipped (--metrics-only)")

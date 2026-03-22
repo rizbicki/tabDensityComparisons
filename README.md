@@ -194,7 +194,8 @@ It is example-only and is not included in the default benchmark schedule.
 From OpenML and SDSS DR18, subsampled consistently so smaller n is always
 a strict subset of larger n.
 The default schedule currently excludes `Yprop` because it has been
-disproportionately slow in the real-data benchmark.
+disproportionately slow in the real-data benchmark, and skips
+`Quantile-Tree` plus `BART-Hetero` once `n>=10000`.
 
 | Dataset | Source | Max n |
 |---------|--------|-------|

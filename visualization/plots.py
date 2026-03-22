@@ -821,6 +821,11 @@ def _plot_rankings_grid(sub_results, methods, colors, n_size, kind_label,
     datasets = _ordered_dataset_names(sub_results.keys(), all_data)
     if not datasets:
         return
+    methods = [m for m in methods if any(
+        _lookup_method(sub_results[ds], m) is not None for ds in datasets
+    )]
+    if not methods:
+        return
     n_methods = len(methods)
     n_ds = len(datasets)
     ds_labels = _ds_labels(datasets, all_data)
@@ -1331,6 +1336,11 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
     datasets = _ordered_dataset_names(sub_results.keys(), all_data)
     if not datasets:
         return
+    methods = [m for m in methods if any(
+        _lookup_method(sub_results[ds], m) is not None for ds in datasets
+    )]
+    if not methods:
+        return
     n_methods = len(methods)
     n_ds = len(datasets)
     ds_labels = _ds_labels(datasets, all_data)
@@ -1511,6 +1521,59 @@ def plot_raw_metrics_by_n(all_results, output_dir, all_data=None):
             _plot_raw_grid(groups[n_size][kind], methods, colors, n_size, label,
                            prefix, output_dirs[kind], all_data,
                            summary_mode=summary_mode)
+
+
+def plot_pit_histograms(all_data, output_dir):
+    """PIT calibration histograms."""
+    output_dirs = _resolve_output_dirs(output_dir)
+    split_data = _split_by_type(all_data)
+
+    for kind, data_subset in split_data.items():
+        if not data_subset:
+            continue
+        _plot_pit_histograms_single(data_subset, output_dirs[kind])
+
+
+def _plot_pit_histograms_single(all_data, output_dir):
+    """PIT calibration histograms for one dataset type."""
+    datasets_to_show = _ordered_dataset_names(all_data.keys(), all_data)[:4]
+    sample_methods = _visible_methods(list(list(all_data.values())[0]['cdes'].keys()))
+
+    n_ds = len(datasets_to_show)
+    n_m = len(sample_methods)
+
+    fig, axes = plt.subplots(n_ds, n_m, figsize=(3.5 * n_m, 3 * n_ds))
+    if n_ds == 1:
+        axes = axes[np.newaxis, :]
+
+    for i, ds in enumerate(datasets_to_show):
+        d = all_data[ds]
+        for j, m in enumerate(sample_methods):
+            ax = axes[i, j]
+            cde = _lookup_method(d['cdes'], m)
+            zg = _lookup_method(d['zgrids'], m)
+            if cde is not None and zg is not None:
+                pit = eval_pit(cde, zg, d['z_test'])
+                ks = eval_pit_ks(pit)
+                ax.hist(pit, bins=20, density=True, alpha=0.7,
+                        color='steelblue', edgecolor='white')
+                ax.axhline(1.0, color='red', ls='--', lw=1.5)
+                ax.text(0.05, 0.95, f'KS={ks:.3f}', transform=ax.transAxes,
+                        fontsize=8, va='top',
+                        bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+            if i == 0:
+                ax.set_title(_display_method_name(m), fontsize=8, fontweight='bold')
+            if j == 0:
+                n_label = all_data[ds].get('n_total', '')
+                ds_label = f"{ds}\n(n={n_label})" if n_label else ds
+                ax.set_ylabel(ds_label, fontsize=8, fontweight='bold')
+            ax.set_xlim(0, 1)
+            ax.tick_params(labelsize=6)
+
+    plt.suptitle('PIT Calibration (uniform = ideal)', fontsize=12, fontweight='bold')
+    plt.tight_layout()
+    plt.savefig(output_dir / 'pit_calibration.png', dpi=150, bbox_inches='tight')
+    plt.close()
 
 
 def save_html_table(all_results, output_dir,

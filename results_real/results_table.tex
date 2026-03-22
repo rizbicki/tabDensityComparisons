@@ -149,6 +149,41 @@ TabPFN Native & \underline{-8465.3057} & \underline{8.1707} & 0.0001 & \underlin
 \end{tabular}
 \end{table}
 
+% ---- Ailerons-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for Ailerons-10000 ($\pm$SE across repetitions).}
+\label{tab:ailerons-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -253.4407 & 5.5333 & 0.0006 & 0.5190 & 1.0000 & 0.0036 & 25.4 \\
+CatMLP & -1918.2384 & 7.3428 & 0.0001 & \textbf{0.0235} & 0.9044 & 0.0005 & 7.0 \\
+FlexCode-RF & -1904.9957 & 7.2164 & 0.0001 & 0.1277 & 0.9868 & 0.0019 & 13.0 \\
+Flow-Spline & -2044.3401 & 7.3781 & 0.0001 & 0.0779 & 0.8492 & 0.0004 & 37.9 \\
+Gamma-GLM & -1715.7652 & 7.2029 & 0.0001 & 0.0627 & 0.9084 & 0.0006 & 0.2 \\
+Gamma-GLM-Ridge & -1347.4359 & 6.9834 & 0.0001 & 0.0881 & 0.9144 & 0.0008 & 0.1 \\
+LinGauss-Hetero-Ridge & -1201.2359 & 6.6288 & 0.0001 & 0.1563 & 0.6212 & \textbf{0.0003} & 0.1 \\
+LinGauss-Homo-Ridge & -1770.7409 & 7.2364 & 0.0001 & 0.0563 & \textbf{0.9036} & 0.0006 & 0.1 \\
+LinearGauss-Hetero & -1190.1975 & 6.6529 & 0.0001 & 0.1550 & 0.6232 & 0.0003 & \textbf{0.0} \\
+LinearGauss-Homo & -1770.4552 & 7.2364 & 0.0001 & 0.0565 & \underline{0.9036} & 0.0006 & \underline{0.0} \\
+LogNormal-Hetero & -1140.9129 & 6.6172 & 0.0001 & 0.1571 & 0.6172 & 0.0003 & 0.1 \\
+LogNormal-Hetero-Ridge & -1146.5324 & 6.5986 & 0.0001 & 0.1593 & 0.6148 & \underline{0.0003} & 0.2 \\
+LogNormal-Homo & -1713.4926 & 7.2021 & 0.0001 & 0.0631 & 0.9084 & 0.0006 & 0.1 \\
+LogNormal-Homo-Ridge & -1713.5693 & 7.2021 & 0.0001 & 0.0630 & 0.9084 & 0.0006 & 0.2 \\
+MDN & -2127.9585 & 7.4178 & 0.0001 & 0.0257 & 0.8820 & 0.0005 & 5.4 \\
+RealTabPFN 2.5 & \textbf{-6627.6397} & 8.1470 & \textbf{0.0001} & 0.0371 & 0.9104 & 0.0004 & 4.6 \\
+Student-t & -1818.7503 & 7.2747 & 0.0001 & \underline{0.0240} & 0.8888 & 0.0005 & 0.0 \\
+Student-t-Ridge & -1818.7515 & 7.2747 & 0.0001 & 0.0240 & 0.8888 & 0.0005 & 0.1 \\
+TabICL Quantiles & -2715.9702 & 7.4855 & 0.0001 & 0.0241 & 0.9060 & 0.0005 & 29.3 \\
+TabPFN 2.5 & \underline{-6580.7400} & \textbf{8.1895} & \underline{0.0001} & 0.0307 & 0.9040 & 0.0004 & 4.6 \\
+TabPFN Native & -6580.7400 & \underline{8.1895} & 0.0001 & 0.0307 & 0.9040 & 0.0004 & 4.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ---- Ailerons-50 ----
 \begin{table}[ht]
 \centering
@@ -408,6 +443,76 @@ TabPFN Native & -0.0000 & -10.7759 & 10566.7799 & 0.1079 & 0.9120 & 55285.1356 &
 \end{tabular}
 \end{table}
 
+% ---- Bank8FM-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for Bank8FM-10000 ($\pm$SE across repetitions).}
+\label{tab:bank8fm-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0000 & -12.1576 & 25214.1198 & 0.3436 & 0.9312 & 151016.1546 & 16.3 \\
+CatMLP & -0.0000 & -10.9748 & 12059.0698 & 0.0873 & 0.9460 & 73399.9061 & 8.1 \\
+FlexCode-RF & -0.0000 & -11.3886 & 14495.5570 & 0.1711 & 0.9932 & 265277.0576 & 8.3 \\
+Flow-Spline & -0.0000 & -10.9227 & 12268.6579 & 0.1042 & 0.8756 & 57884.9699 & 72.2 \\
+Gamma-GLM & -0.0000 & -11.3906 & 16543.7946 & 0.0962 & 0.9244 & 83788.5093 & 0.1 \\
+Gamma-GLM-Ridge & -0.0000 & -11.4956 & 18339.7710 & 0.0949 & 0.9188 & 85415.0903 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0000 & -12.2473 & 19012.8427 & 0.2162 & 0.6700 & 48513.7875 & 0.0 \\
+LinGauss-Homo-Ridge & -0.0000 & -11.9000 & 19419.2954 & 0.2348 & 0.9428 & 118941.3864 & 0.0 \\
+LinearGauss-Hetero & -0.0000 & -12.2485 & 19003.0686 & 0.2113 & 0.6716 & 48950.5534 & \textbf{0.0} \\
+LinearGauss-Homo & -0.0000 & -11.8994 & 19406.0421 & 0.2331 & 0.9428 & 118835.0301 & \underline{0.0} \\
+LogNormal-Hetero & -0.0000 & -11.9780 & 17185.2978 & 0.1536 & 0.6332 & \underline{36868.2937} & 0.1 \\
+LogNormal-Hetero-Ridge & -0.0000 & -11.9754 & 17252.3921 & 0.1543 & 0.6348 & \textbf{36851.8887} & 0.1 \\
+LogNormal-Homo & -0.0000 & -11.3517 & 16795.3361 & 0.0695 & 0.9088 & 81362.9388 & 0.1 \\
+LogNormal-Homo-Ridge & -0.0000 & -11.3525 & 16846.7069 & 0.0698 & 0.9092 & 81080.4108 & 0.1 \\
+MDN & -0.0000 & -10.9250 & 12298.0061 & \textbf{0.0294} & 0.9156 & 70175.2399 & 7.0 \\
+RealTabPFN 2.5 & \underline{-0.0000} & -10.7030 & 10619.0160 & 0.0504 & 0.9076 & 57837.4795 & 1.7 \\
+Student-t & -0.0000 & -11.6924 & 18762.2994 & 0.1618 & \textbf{0.9004} & 87275.6529 & 0.0 \\
+Student-t-Ridge & -0.0000 & -11.6906 & 18755.0890 & 0.1657 & \underline{0.8988} & 86979.3101 & 0.0 \\
+TabICL Quantiles & \textbf{-0.0000} & -10.7272 & \textbf{10430.8860} & 0.0524 & 0.9132 & 58509.4864 & 18.6 \\
+TabPFN 2.5 & -0.0000 & \textbf{-10.6892} & \underline{10525.4157} & \underline{0.0463} & 0.9072 & 57480.8243 & 1.6 \\
+TabPFN Native & -0.0000 & \underline{-10.6892} & 10525.4157 & 0.0463 & 0.9072 & 57480.8243 & 1.7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- Bank8FM-20000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for Bank8FM-20000 ($\pm$SE across repetitions).}
+\label{tab:bank8fm-20000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0000 & -12.1215 & 24163.3312 & 0.3379 & 0.9374 & 154271.4031 & 30.9 \\
+CatMLP & -0.0000 & -10.9241 & 10986.1756 & 0.0752 & 0.9344 & 65704.0482 & 19.7 \\
+FlexCode-RF & -0.0000 & -11.3310 & 13998.8533 & 0.1769 & 0.9950 & 267189.4485 & 18.2 \\
+Flow-Spline & -0.0000 & -10.8762 & 11473.4449 & 0.1099 & \textbf{0.8950} & 63748.4067 & 166.9 \\
+Gamma-GLM & -0.0000 & -11.3866 & 15851.6753 & 0.1117 & 0.9280 & 85491.1177 & 0.1 \\
+Gamma-GLM-Ridge & -0.0000 & -11.4803 & 17421.3948 & 0.1175 & 0.9222 & 87599.0072 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0000 & -12.2254 & 18547.9936 & 0.2424 & 0.6792 & 49702.5863 & 0.1 \\
+LinGauss-Homo-Ridge & -0.0000 & -11.8698 & 18774.5721 & 0.2508 & 0.9464 & 123569.8460 & 0.0 \\
+LinearGauss-Hetero & -0.0000 & -12.2258 & 18546.1461 & 0.2403 & 0.6808 & 49979.1083 & \underline{0.0} \\
+LinearGauss-Homo & -0.0000 & -11.8697 & 18767.1955 & 0.2500 & 0.9464 & 123515.0474 & \textbf{0.0} \\
+LogNormal-Hetero & -0.0000 & -11.9833 & 16481.4624 & 0.1658 & 0.6308 & \underline{36684.2173} & 0.2 \\
+LogNormal-Hetero-Ridge & -0.0000 & -11.9884 & 16522.4968 & 0.1664 & 0.6300 & \textbf{36554.1835} & 0.2 \\
+LogNormal-Homo & -0.0000 & -11.3344 & 15778.6173 & 0.0858 & 0.9120 & 83047.6551 & 0.1 \\
+LogNormal-Homo-Ridge & -0.0000 & -11.3347 & 15800.1205 & 0.0855 & 0.9116 & 82902.4944 & 0.2 \\
+MDN & -0.0000 & -10.8691 & 11376.3019 & \textbf{0.0355} & 0.9126 & 67672.5064 & 18.3 \\
+RealTabPFN 2.5 & -0.0000 & -10.6908 & 10112.3136 & 0.0754 & \underline{0.9064} & 56721.1304 & 4.4 \\
+Student-t & -0.0000 & -11.6960 & 18047.5866 & 0.1962 & 0.9080 & 90823.1418 & 0.0 \\
+Student-t-Ridge & -0.0000 & -11.6951 & 18043.9394 & 0.1973 & 0.9072 & 90650.5036 & 0.1 \\
+TabICL Quantiles & \textbf{-0.0000} & -10.7060 & \textbf{9972.0609} & \underline{0.0403} & 0.9200 & 57824.6102 & 47.7 \\
+TabPFN 2.5 & \underline{-0.0000} & \textbf{-10.6742} & \underline{10064.5233} & 0.0700 & 0.9102 & 57134.6133 & 4.4 \\
+TabPFN Native & -0.0000 & \underline{-10.6742} & 10064.5233 & 0.0700 & 0.9102 & 57134.6133 & 4.4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ---- Bank8FM-50 ----
 \begin{table}[ht]
 \centering
@@ -552,6 +657,41 @@ Student-t-Ridge & -0.0025 & -6.1486 & 71.1564 & 0.2392 & 0.9080 & 384.1418 & 0.0
 TabICL Quantiles & -0.0188 & -4.7601 & 20.2973 & 0.0845 & 0.9120 & 127.1946 & 1.6 \\
 TabPFN 2.5 & \textbf{-0.0199} & \textbf{-4.5646} & \textbf{18.2738} & 0.0928 & 0.9160 & \textbf{116.7355} & 0.2 \\
 TabPFN Native & \underline{-0.0199} & \underline{-4.5646} & \underline{18.2738} & 0.0928 & 0.9160 & \underline{116.7355} & 0.3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- BikeSharing-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for BikeSharing-10000 ($\pm$SE across repetitions).}
+\label{tab:bikesharing-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0020 & -6.4316 & 95.9056 & 0.1280 & 0.9196 & 505.1455 & 24.5 \\
+CatMLP & -0.0116 & -5.1077 & 29.4613 & 0.0683 & 0.9408 & 196.2490 & 8.6 \\
+FlexCode-RF & -0.0078 & -5.3756 & 37.7946 & 0.1854 & 0.9960 & 611.1449 & 4.7 \\
+Flow-Spline & -0.0174 & -4.7167 & 21.3584 & \textbf{0.0212} & 0.8856 & 125.9861 & 96.6 \\
+Gamma-GLM & -0.0047 & -5.9847 & 73.7440 & \underline{0.0566} & 0.9248 & 455.4285 & 0.1 \\
+Gamma-GLM-Ridge & -0.0038 & -6.0587 & 78.4392 & 0.0859 & 0.9100 & 461.2601 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0016 & -6.8008 & 76.9912 & 0.1952 & 0.6576 & 230.5217 & 0.0 \\
+LinGauss-Homo-Ridge & -0.0025 & -6.2514 & 76.1546 & 0.2157 & 0.9088 & 401.3309 & 0.0 \\
+LinearGauss-Hetero & -0.0016 & -6.7969 & 76.9483 & 0.1949 & 0.6584 & 231.2579 & \textbf{0.0} \\
+LinearGauss-Homo & -0.0025 & -6.2512 & 76.1432 & 0.2156 & 0.9084 & 401.2263 & \underline{0.0} \\
+LogNormal-Hetero & -0.0034 & -6.4481 & 81.2951 & 0.1662 & 0.6352 & 228.1965 & 0.1 \\
+LogNormal-Hetero-Ridge & -0.0034 & -6.4411 & 81.0577 & 0.1660 & 0.6340 & 227.3828 & 0.1 \\
+LogNormal-Homo & -0.0051 & -5.9619 & 74.3524 & 0.0931 & \underline{0.9052} & 478.5406 & 0.1 \\
+LogNormal-Homo-Ridge & -0.0051 & -5.9627 & 74.3187 & 0.0934 & \textbf{0.9036} & 478.5004 & 0.1 \\
+MDN & -0.0102 & -5.2400 & 37.8226 & 0.0580 & 0.9092 & 226.2886 & 9.0 \\
+RealTabPFN 2.5 & -0.0225 & -4.3250 & \textbf{14.4569} & 0.0710 & 0.9288 & 91.6940 & 2.8 \\
+Student-t & -0.0026 & -6.2197 & 75.4714 & 0.2066 & 0.8868 & 379.4619 & 0.0 \\
+Student-t-Ridge & -0.0026 & -6.2199 & 75.4789 & 0.2077 & 0.8876 & 379.4697 & 0.1 \\
+TabICL Quantiles & -0.0223 & -4.4294 & 14.8825 & 0.0691 & 0.9356 & 96.8924 & 22.8 \\
+TabPFN 2.5 & \textbf{-0.0228} & \textbf{-4.3246} & \underline{14.5019} & 0.0590 & 0.9200 & \textbf{89.3173} & 2.8 \\
+TabPFN Native & \underline{-0.0228} & \underline{-4.3246} & 14.5019 & 0.0590 & 0.9200 & \underline{89.3173} & 2.8 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -704,6 +844,41 @@ TabPFN Native & \underline{-0.0003} & \underline{-8.2468} & 1839.3521 & 0.1173 &
 \end{tabular}
 \end{table}
 
+% ---- BlackFriday-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for BlackFriday-10000 ($\pm$SE across repetitions).}
+\label{tab:blackfriday-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0000 & -10.1828 & 3547.7285 & 0.2929 & 0.9968 & 21160.7184 & 34.2 \\
+CatMLP & -0.0003 & -8.5589 & 2202.1781 & \underline{0.0254} & 0.8920 & 12081.0210 & 7.6 \\
+FlexCode-RF & -0.0002 & -8.9253 & 1902.9393 & 0.0543 & 0.9504 & 13702.9221 & 3.9 \\
+Flow-Spline & -0.0001 & -9.0497 & 2359.3151 & \textbf{0.0172} & 0.9048 & 14229.9624 & 58.3 \\
+Gamma-GLM & -0.0001 & -9.8935 & 2622.4548 & 0.1092 & 0.8804 & 15754.1523 & 0.1 \\
+Gamma-GLM-Ridge & -0.0001 & -9.9242 & 2738.3644 & 0.1066 & 0.8872 & 16204.3560 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0000 & -10.3035 & 2687.7571 & 0.1481 & 0.6396 & 8540.5252 & 0.1 \\
+LinGauss-Homo-Ridge & -0.0001 & -9.8259 & 2548.5300 & 0.0512 & 0.9020 & 14715.9907 & 0.0 \\
+LinearGauss-Hetero & -0.0000 & -10.3091 & 2686.2394 & 0.1477 & 0.6404 & 8544.2241 & \textbf{0.0} \\
+LinearGauss-Homo & -0.0001 & -9.8257 & 2547.0743 & 0.0505 & 0.9016 & 14711.7261 & \underline{0.0} \\
+LogNormal-Hetero & -0.0000 & -10.7567 & 2725.4094 & 0.2069 & 0.6160 & \underline{7858.3871} & 0.1 \\
+LogNormal-Hetero-Ridge & -0.0000 & -10.7632 & 2726.5102 & 0.2072 & 0.6148 & \textbf{7853.1719} & 0.1 \\
+LogNormal-Homo & -0.0001 & -9.9204 & 2629.6741 & 0.1576 & 0.8780 & 15736.4028 & 0.1 \\
+LogNormal-Homo-Ridge & -0.0001 & -9.9206 & 2630.0732 & 0.1575 & 0.8780 & 15740.3208 & 0.1 \\
+MDN & -0.0001 & -9.7422 & 2419.1826 & 0.0493 & 0.8552 & 13130.4355 & 5.7 \\
+RealTabPFN 2.5 & -0.0003 & -8.1873 & 1871.3876 & 0.0758 & 0.8784 & 10709.4452 & 2.9 \\
+Student-t & -0.0001 & -9.8236 & 2547.1800 & 0.0519 & \underline{0.8996} & 14622.6477 & 0.0 \\
+Student-t-Ridge & -0.0001 & -9.8241 & 2548.6369 & 0.0522 & \textbf{0.9000} & 14637.4977 & 0.1 \\
+TabICL Quantiles & -0.0002 & -9.0021 & \textbf{1854.2674} & 0.0376 & 0.8796 & 10894.3948 & 23.3 \\
+TabPFN 2.5 & \textbf{-0.0003} & \textbf{-8.1725} & \underline{1860.4004} & 0.0456 & 0.8768 & 10667.5783 & 2.9 \\
+TabPFN Native & \underline{-0.0003} & \underline{-8.1725} & 1860.4004 & 0.0456 & 0.8768 & 10667.5783 & 2.9 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ---- BlackFriday-50 ----
 \begin{table}[ht]
 \centering
@@ -852,6 +1027,41 @@ TabPFN Native & -0.0038 & -5.3631 & 36.1709 & 0.2894 & 1.0000 & 328.9984 & 0.4 \
 \end{tabular}
 \end{table}
 
+% ---- BrazilianHouses-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for BrazilianHouses-10000 ($\pm$SE across repetitions).}
+\label{tab:brazilianhouses-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0000 & -10.6679 & 4896.0812 & 0.5151 & 0.9980 & 50717.7916 & 67.2 \\
+CatMLP & -0.0000 & -10.2931 & 3019.0966 & 0.3036 & 1.0000 & 36324.1186 & 6.4 \\
+FlexCode-RF & -0.0000 & -11.5711 & 36151.9594 & 0.6422 & 1.0000 & 927314.9579 & 7.5 \\
+Flow-Spline & -0.0001 & -9.8372 & 4643.2419 & 0.3534 & 0.9988 & 73282.0434 & 106.8 \\
+Gamma-GLM & -0.0001 & -9.3770 & 2209.1554 & 0.3095 & 0.9944 & 14109.6487 & 0.1 \\
+Gamma-GLM-Ridge & -0.0000 & -9.5039 & 1698.5769 & 0.2454 & 0.9948 & 12863.0109 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0000 & -22.9744 & 1165993.3076 & 0.9964 & 0.0036 & \textbf{40.0992} & 0.1 \\
+LinGauss-Homo-Ridge & -0.0000 & -22.3750 & 1117004.8002 & 0.9544 & 0.0456 & 507.9235 & 0.1 \\
+LinearGauss-Hetero & -0.0000 & -22.9744 & 1165993.3076 & 0.9964 & 0.0036 & \underline{40.0992} & \underline{0.1} \\
+LinearGauss-Homo & -0.0000 & -22.3978 & 1118871.1470 & 0.9560 & 0.0440 & 490.1017 & \textbf{0.0} \\
+LogNormal-Hetero & -0.0000 & -9.6968 & 1895.0772 & 0.3382 & \textbf{0.9676} & 12400.5841 & 0.1 \\
+LogNormal-Hetero-Ridge & -0.0000 & -9.6550 & 1764.0294 & 0.3151 & \underline{0.9724} & 11811.7434 & 0.2 \\
+LogNormal-Homo & -0.0000 & -9.7795 & 2689.8279 & 0.3858 & 1.0000 & 53459.8098 & 0.1 \\
+LogNormal-Homo-Ridge & -0.0001 & -9.7766 & 2508.0863 & 0.3974 & 1.0000 & 49949.2471 & 0.2 \\
+MDN & -0.0001 & -9.4808 & 1706.5180 & 0.3137 & 0.9868 & 13918.1611 & 6.1 \\
+RealTabPFN 2.5 & 0.0000 & -15.0182 & 133272.2433 & \textbf{0.1471} & 0.7172 & 315690.5262 & 5.7 \\
+Student-t & \underline{-0.0001} & \textbf{-9.1264} & 1310.4721 & 0.3848 & 1.0000 & 13078.4680 & 0.1 \\
+Student-t-Ridge & \textbf{-0.0001} & \underline{-9.1264} & \underline{1310.4717} & 0.3848 & 1.0000 & 13078.4711 & 0.2 \\
+TabICL Quantiles & -0.0001 & -9.4361 & \textbf{911.2285} & 0.2564 & 0.9992 & 16221.5109 & 33.2 \\
+TabPFN 2.5 & 0.0000 & -15.1216 & 208249.1754 & \underline{0.2024} & 0.7120 & 394679.0257 & 5.7 \\
+TabPFN Native & 0.0000 & -15.1216 & 208249.1754 & 0.2024 & 0.7120 & 394679.0257 & 5.8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ---- BrazilianHouses-50 ----
 \begin{table}[ht]
 \centering
@@ -996,6 +1206,41 @@ Student-t-Ridge & -0.0011 & -7.1198 & 170.2530 & 0.1744 & 0.9040 & 889.1484 & 0.
 TabICL Quantiles & \textbf{-0.0014} & -7.0713 & \textbf{154.4339} & 0.0556 & 0.8920 & 895.6504 & 1.4 \\
 TabPFN 2.5 & -0.0014 & \underline{-6.9565} & 154.9523 & \textbf{0.0376} & 0.8800 & 818.3237 & 0.2 \\
 TabPFN Native & -0.0014 & -6.9565 & 154.9523 & \underline{0.0376} & 0.8800 & 818.3237 & 0.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- CPS88Wages-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for CPS88Wages-10000 ($\pm$SE across repetitions).}
+\label{tab:cps88wages-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0004 & -7.7960 & 310.7094 & 0.4362 & 0.9504 & 1864.7503 & 18.4 \\
+CatMLP & -0.0012 & -6.9663 & 151.8167 & 0.0883 & 0.9544 & 1096.5581 & 6.8 \\
+FlexCode-RF & -0.0009 & -7.4113 & 259.9801 & 0.1846 & 0.9964 & 6645.0772 & 2.2 \\
+Flow-Spline & -0.0014 & -6.8921 & 151.0119 & 0.0675 & 0.9184 & 977.2622 & 38.2 \\
+Gamma-GLM & -0.0013 & -6.9601 & 157.7129 & 0.0422 & 0.9336 & 1012.3870 & 0.1 \\
+Gamma-GLM-Ridge & -0.0011 & -7.0312 & 170.0949 & 0.0280 & 0.9344 & 1028.4550 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0007 & -7.6126 & 172.4750 & 0.1717 & 0.6656 & 520.6210 & 0.0 \\
+LinGauss-Homo-Ridge & -0.0010 & -7.2005 & 169.9056 & 0.1022 & 0.9564 & 1218.8744 & 0.0 \\
+LinearGauss-Hetero & -0.0007 & -7.6123 & 172.4513 & 0.1714 & 0.6648 & 521.1792 & \underline{0.0} \\
+LinearGauss-Homo & -0.0010 & -7.2005 & 169.9114 & 0.1018 & 0.9564 & 1218.8565 & \textbf{0.0} \\
+LogNormal-Hetero & -0.0008 & -7.4558 & 166.2414 & 0.1471 & 0.6760 & \textbf{496.1610} & 0.1 \\
+LogNormal-Hetero-Ridge & -0.0008 & -7.4525 & 166.1466 & 0.1465 & 0.6784 & \underline{497.9852} & 0.1 \\
+LogNormal-Homo & -0.0013 & -6.9519 & 157.9920 & 0.0481 & 0.9312 & 1077.8041 & 0.1 \\
+LogNormal-Homo-Ridge & -0.0013 & -6.9519 & 157.9938 & 0.0480 & 0.9316 & 1077.5371 & 0.1 \\
+MDN & -0.0014 & -6.8814 & 148.3986 & \underline{0.0230} & 0.9132 & 892.6670 & 5.9 \\
+RealTabPFN 2.5 & \underline{-0.0014} & \textbf{-6.8551} & \textbf{147.6398} & \textbf{0.0211} & \textbf{0.9024} & 844.8252 & 2.1 \\
+Student-t & -0.0010 & -7.1000 & 165.8146 & 0.0762 & 0.9272 & 1026.2217 & 0.0 \\
+Student-t-Ridge & -0.0010 & -7.1000 & 165.8067 & 0.0760 & 0.9272 & 1026.1784 & 0.0 \\
+TabICL Quantiles & \textbf{-0.0014} & -6.9000 & 147.9804 & 0.0446 & 0.9320 & 967.6396 & 20.7 \\
+TabPFN 2.5 & -0.0014 & \underline{-6.8567} & \underline{147.6833} & 0.0314 & \underline{0.9080} & 855.2750 & 2.1 \\
+TabPFN Native & -0.0014 & -6.8567 & 147.6833 & 0.0314 & 0.9080 & 855.2750 & 2.1 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1296,6 +1541,41 @@ TabPFN Native & -0.2189 & -1.7879 & 1.0801 & 0.0947 & 0.9320 & 7.4528 & 2.5 \\
 \end{tabular}
 \end{table}
 
+% ---- CTSlices-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for CTSlices-10000 ($\pm$SE across repetitions).}
+\label{tab:ctslices-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0387 & -3.5869 & 4.4565 & 0.0826 & 0.8052 & 20.6123 & 1284.8 \\
+CatMLP & -0.2961 & -1.4364 & 0.6342 & 0.1224 & 0.9716 & 4.9939 & 7.3 \\
+FlexCode-RF & -0.1232 & -2.4590 & 2.6668 & 0.2365 & 0.9996 & 65.2209 & 104.3 \\
+Flow-Spline & -0.2926 & -1.4396 & 0.6304 & 0.0354 & 0.8660 & 3.2752 & 52.7 \\
+Gamma-GLM & -0.0443 & -3.4318 & 4.3494 & 0.0770 & 0.8928 & 26.5688 & 91.8 \\
+Gamma-GLM-Ridge & -0.0435 & -3.5110 & 4.7938 & 0.0839 & 0.8908 & 28.8892 & 7.7 \\
+LinGauss-Hetero-Ridge & -0.0224 & -4.1784 & 4.8244 & 0.1647 & 0.6108 & 13.8957 & 1.1 \\
+LinGauss-Homo-Ridge & -0.0359 & -3.5655 & 4.6570 & 0.0472 & \underline{0.8976} & 27.1241 & 1.1 \\
+LinearGauss-Hetero & -0.0201 & -4.2909 & 4.8454 & 0.1550 & 0.6184 & 14.7684 & 1.1 \\
+LinearGauss-Homo & -0.0355 & -3.5693 & 4.6846 & 0.0434 & \textbf{0.8984} & 27.2543 & \textbf{0.8} \\
+LogNormal-Hetero & -0.0208 & -4.1918 & 4.5640 & 0.1671 & 0.6288 & 14.0353 & 1.1 \\
+LogNormal-Hetero-Ridge & -0.0272 & -4.0066 & 4.5425 & 0.1736 & 0.6252 & 13.5526 & 1.1 \\
+LogNormal-Homo & -0.0431 & -3.4461 & 4.4028 & 0.0703 & 0.8960 & 27.0384 & 0.9 \\
+LogNormal-Homo-Ridge & -0.0441 & -3.4405 & 4.3893 & 0.0719 & 0.8972 & 26.9078 & 1.0 \\
+MDN & -0.1480 & -2.2111 & 1.5606 & 0.0706 & 0.9104 & 10.0900 & 6.2 \\
+RealTabPFN 2.5 & \underline{-0.6352} & \underline{-0.7217} & \underline{0.2900} & 0.1716 & 0.9824 & 2.7704 & 28.8 \\
+Student-t & -0.0360 & -3.5457 & 4.6930 & \textbf{0.0246} & 0.8860 & 25.6921 & \underline{0.8} \\
+Student-t-Ridge & -0.0365 & -3.5386 & 4.6641 & \underline{0.0250} & 0.8828 & 25.3720 & 0.9 \\
+TabICL Quantiles & \textbf{-0.8091} & \textbf{-0.4037} & \textbf{0.2009} & 0.1952 & 0.9828 & \textbf{1.8935} & 148.3 \\
+TabPFN 2.5 & -0.6229 & -0.7459 & 0.2959 & 0.1783 & 0.9808 & \underline{2.7461} & 29.8 \\
+TabPFN Native & -0.6229 & -0.7459 & 0.2959 & 0.1783 & 0.9808 & 2.7461 & 28.8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ---- CTSlices-50 ----
 \begin{table}[ht]
 \centering
@@ -1440,6 +1720,76 @@ Student-t-Ridge & -0.0000 & -12.5339 & 38313.7738 & 0.0912 & 0.8520 & 193541.382
 TabICL Quantiles & \textbf{-0.0000} & \textbf{-11.8390} & \textbf{24512.0385} & 0.0475 & 0.9240 & 144569.5822 & 1.3 \\
 TabPFN 2.5 & -0.0000 & \underline{-11.9319} & \underline{25603.8364} & \textbf{0.0361} & 0.8880 & 141851.5480 & 0.2 \\
 TabPFN Native & -0.0000 & -11.9319 & 25603.8364 & \underline{0.0361} & 0.8880 & 141851.5480 & 0.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- CalHousing-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for CalHousing-10000 ($\pm$SE across repetitions).}
+\label{tab:calhousing-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0000 & -13.1095 & 67850.5199 & 0.2040 & 0.9208 & 412910.0262 & 15.7 \\
+CatMLP & -0.0000 & -11.9864 & 27037.9032 & 0.0432 & 0.9064 & 159880.3934 & 7.6 \\
+FlexCode-RF & -0.0000 & -12.2450 & 29269.5341 & 0.1007 & 0.9792 & 306718.5676 & 8.3 \\
+Flow-Spline & \underline{-0.0000} & -11.8593 & 26182.5703 & \underline{0.0150} & 0.9016 & 156134.8417 & 87.4 \\
+Gamma-GLM & -0.0000 & -12.3750 & 35321.5596 & 0.0336 & 0.9124 & 209713.4723 & 0.1 \\
+Gamma-GLM-Ridge & -0.0000 & -12.6996 & 50243.7161 & 0.0384 & 0.8640 & 271443.8790 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0000 & -13.0181 & 38179.3937 & 0.1941 & 0.6356 & 107764.4092 & 0.0 \\
+LinGauss-Homo-Ridge & -0.0000 & -12.5084 & 36149.0451 & 0.1074 & 0.9172 & 220685.4009 & 0.0 \\
+LinearGauss-Hetero & -0.0000 & -13.0199 & 38174.1545 & 0.1944 & 0.6332 & 107670.8391 & \underline{0.0} \\
+LinearGauss-Homo & -0.0000 & -12.5080 & 36134.4874 & 0.1077 & 0.9164 & 220650.6894 & \textbf{0.0} \\
+LogNormal-Hetero & -0.0000 & -12.9088 & 36046.4416 & 0.1498 & 0.6268 & \textbf{98037.8596} & 0.1 \\
+LogNormal-Hetero-Ridge & -0.0000 & -12.9060 & 36064.3345 & 0.1498 & 0.6248 & \underline{98072.5501} & 0.1 \\
+LogNormal-Homo & -0.0000 & -12.3509 & 35115.5112 & 0.0420 & 0.9084 & 208419.7875 & 0.1 \\
+LogNormal-Homo-Ridge & -0.0000 & -12.3512 & 35132.9555 & 0.0410 & 0.9088 & 208407.0786 & 0.1 \\
+MDN & -0.0000 & -12.0065 & 26640.7495 & 0.0389 & 0.8840 & 151553.6308 & 10.0 \\
+RealTabPFN 2.5 & -0.0000 & -11.5651 & 19612.6995 & 0.0337 & 0.9020 & 110869.9756 & 1.6 \\
+Student-t & -0.0000 & -12.4633 & 35983.1076 & 0.0962 & 0.9020 & 203929.1407 & 0.0 \\
+Student-t-Ridge & -0.0000 & -12.4636 & 35997.8032 & 0.0970 & 0.9020 & 203933.1379 & 0.0 \\
+TabICL Quantiles & \textbf{-0.0000} & \textbf{-11.5351} & \textbf{18682.2901} & \textbf{0.0146} & 0.8936 & 105178.0044 & 18.7 \\
+TabPFN 2.5 & -0.0000 & \underline{-11.5590} & \underline{19465.6364} & 0.0256 & \textbf{0.9008} & 109131.5317 & 1.7 \\
+TabPFN Native & -0.0000 & -11.5590 & 19465.6364 & 0.0256 & \underline{0.9008} & 109131.5317 & 1.7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- CalHousing-20000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for CalHousing-20000 ($\pm$SE across repetitions).}
+\label{tab:calhousing-20000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0000 & -13.0993 & 66794.0042 & 0.1982 & 0.9286 & 413154.5830 & 29.0 \\
+CatMLP & -0.0000 & -11.9258 & 25359.3492 & 0.0351 & 0.9128 & 152638.8046 & 19.5 \\
+FlexCode-RF & -0.0000 & -12.1864 & 28953.7699 & 0.0971 & 0.9758 & 310059.0467 & 17.8 \\
+Flow-Spline & \underline{-0.0000} & -11.7724 & 24816.4745 & 0.0590 & \textbf{0.9016} & 148342.2533 & 191.7 \\
+Gamma-GLM & -0.0000 & -12.3629 & 34401.4208 & 0.0356 & 0.9112 & 206256.9633 & 0.1 \\
+Gamma-GLM-Ridge & -0.0000 & -12.6863 & 49003.4694 & 0.0273 & 0.8700 & 269930.7265 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0000 & -12.9361 & 37072.6082 & 0.1771 & 0.6520 & 107156.7254 & 0.1 \\
+LinGauss-Homo-Ridge & -0.0000 & -12.4898 & 35318.0393 & 0.1022 & 0.9242 & 218789.2737 & 0.0 \\
+LinearGauss-Hetero & -0.0000 & -12.9342 & 37061.7113 & 0.1766 & 0.6528 & 107307.8626 & \underline{0.0} \\
+LinearGauss-Homo & -0.0000 & -12.4897 & 35313.2543 & 0.1020 & 0.9244 & 218768.5834 & \textbf{0.0} \\
+LogNormal-Hetero & -0.0000 & -12.8598 & 34960.4971 & 0.1395 & 0.6378 & \underline{97343.4914} & 0.1 \\
+LogNormal-Hetero-Ridge & -0.0000 & -12.8629 & 34980.3083 & 0.1401 & 0.6380 & \textbf{97169.3780} & 0.2 \\
+LogNormal-Homo & -0.0000 & -12.3438 & 34223.6862 & 0.0443 & 0.9040 & 204600.3164 & 0.1 \\
+LogNormal-Homo-Ridge & -0.0000 & -12.3439 & 34230.3291 & 0.0444 & \underline{0.9038} & 204588.3113 & 0.2 \\
+MDN & -0.0000 & -11.9643 & 26230.1816 & \underline{0.0218} & 0.9090 & 158903.4009 & 19.7 \\
+RealTabPFN 2.5 & -0.0000 & -11.5176 & 18406.7518 & 0.0322 & 0.9088 & 109294.1679 & 4.4 \\
+Student-t & -0.0000 & -12.4365 & 35114.0103 & 0.0846 & 0.9084 & 202641.2086 & 0.0 \\
+Student-t-Ridge & -0.0000 & -12.4366 & 35118.4193 & 0.0850 & 0.9082 & 202639.9175 & 0.1 \\
+TabICL Quantiles & \textbf{-0.0000} & \textbf{-11.4658} & \textbf{17468.0138} & \textbf{0.0160} & 0.8958 & 101926.6222 & 47.6 \\
+TabPFN 2.5 & -0.0000 & \underline{-11.5100} & \underline{18268.9402} & 0.0252 & 0.9076 & 108112.3241 & 4.4 \\
+TabPFN Native & -0.0000 & -11.5100 & 18268.9402 & 0.0252 & 0.9076 & 108112.3241 & 4.4 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1740,6 +2090,76 @@ TabPFN Native & \underline{-0.0017} & -6.8746 & 233.7799 & 0.0691 & 0.9440 & 141
 \end{tabular}
 \end{table}
 
+% ---- Diamonds-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for Diamonds-10000 ($\pm$SE across repetitions).}
+\label{tab:diamonds-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0001 & -9.4393 & 2072.2746 & 0.1267 & 0.9164 & 10908.6747 & 39.6 \\
+CatMLP & -0.0012 & -7.1985 & 238.9474 & 0.1142 & 0.9632 & 1691.2528 & 7.5 \\
+FlexCode-RF & -0.0006 & -7.8418 & 503.6665 & 0.2274 & 0.9912 & 11235.9929 & 6.1 \\
+Flow-Spline & -0.0014 & -7.0519 & 239.8902 & 0.1027 & \textbf{0.8944} & 1264.1748 & 52.6 \\
+Gamma-GLM & 0.0004 & -9.2754 & 1619.0563 & 0.6034 & 0.9808 & 9002.2343 & 0.1 \\
+Gamma-GLM-Ridge & -0.0005 & -8.1339 & 701.8719 & \textbf{0.0250} & 0.9252 & 3737.8163 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0001 & -8.8183 & 530.0664 & 0.1867 & 0.6648 & 1541.8696 & 0.1 \\
+LinGauss-Homo-Ridge & -0.0003 & -8.3286 & 510.0884 & 0.1797 & 0.9392 & 3427.2769 & 0.0 \\
+LinearGauss-Hetero & -0.0001 & -8.8200 & 530.3693 & 0.1857 & 0.6648 & 1539.1529 & \underline{0.0} \\
+LinearGauss-Homo & -0.0003 & -8.3270 & 509.9974 & 0.1786 & 0.9396 & 3428.2624 & \textbf{0.0} \\
+LogNormal-Hetero & -0.0007 & -7.5949 & 298.8299 & 0.1196 & 0.7184 & \textbf{922.7630} & 0.1 \\
+LogNormal-Hetero-Ridge & -0.0007 & -7.6000 & 303.3544 & 0.1223 & 0.7268 & \underline{943.5028} & 0.1 \\
+LogNormal-Homo & -0.0012 & -7.2628 & 290.8753 & 0.0940 & 0.9720 & 2164.1890 & 0.1 \\
+LogNormal-Homo-Ridge & -0.0012 & -7.2760 & 293.6726 & 0.0953 & 0.9712 & 2169.1237 & 0.1 \\
+MDN & -0.0017 & -6.9213 & 228.0948 & \underline{0.0439} & \underline{0.9136} & 1334.5873 & 7.7 \\
+RealTabPFN 2.5 & -0.0022 & -6.6323 & 183.7894 & 0.0773 & 0.9304 & 1127.8305 & 3.3 \\
+Student-t & -0.0004 & -8.1570 & 498.0895 & 0.1136 & 0.9248 & 2837.5882 & 0.0 \\
+Student-t-Ridge & -0.0004 & -8.1574 & 498.1654 & 0.1124 & 0.9248 & 2838.9060 & 0.1 \\
+TabICL Quantiles & -0.0021 & -6.7132 & 183.4901 & 0.0981 & 0.9432 & 1191.6753 & 24.9 \\
+TabPFN 2.5 & \textbf{-0.0022} & \textbf{-6.6218} & \textbf{181.9742} & 0.0836 & 0.9304 & 1097.5036 & 3.3 \\
+TabPFN Native & \underline{-0.0022} & \underline{-6.6218} & \underline{181.9742} & 0.0836 & 0.9304 & 1097.5036 & 3.3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- Diamonds-20000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for Diamonds-20000 ($\pm$SE across repetitions).}
+\label{tab:diamonds-20000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0001 & -9.4417 & 2057.2520 & 0.1286 & \textbf{0.9170} & 10869.4033 & 73.2 \\
+CatMLP & -0.0011 & -7.1853 & 229.1190 & 0.1228 & 0.9662 & 1726.3731 & 15.5 \\
+FlexCode-RF & -0.0006 & -7.8530 & 500.5251 & 0.2316 & 0.9956 & 11474.3626 & 12.2 \\
+Flow-Spline & -0.0016 & -6.9381 & 218.6537 & 0.0456 & 0.9258 & 1356.5747 & 114.1 \\
+Gamma-GLM & -0.0008 & -7.6607 & 434.8472 & 0.0921 & 0.9754 & 2960.9744 & 0.2 \\
+Gamma-GLM-Ridge & -0.0005 & -8.1540 & 704.3478 & \textbf{0.0334} & 0.9256 & 3770.7387 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0001 & -8.8146 & 540.3566 & 0.1982 & 0.6586 & 1563.3325 & 0.2 \\
+LinGauss-Homo-Ridge & -0.0003 & -8.3296 & 516.8534 & 0.1781 & 0.9360 & 3468.4838 & 0.1 \\
+LinearGauss-Hetero & -0.0001 & -8.7896 & 534.0011 & 0.1961 & 0.6646 & 1553.7022 & \textbf{0.0} \\
+LinearGauss-Homo & -0.0003 & -8.3293 & 515.1254 & 0.1775 & 0.9368 & 3482.6442 & \underline{0.0} \\
+LogNormal-Hetero & -0.0007 & -7.7252 & 334.8759 & 0.1216 & 0.7072 & \textbf{950.4853} & 0.2 \\
+LogNormal-Hetero-Ridge & -0.0007 & -7.7586 & 364.2662 & 0.1429 & 0.7072 & \underline{1053.8042} & 0.3 \\
+LogNormal-Homo & -0.0012 & -7.3661 & 320.3520 & 0.1220 & 0.9844 & 2535.1851 & 0.2 \\
+LogNormal-Homo-Ridge & -0.0011 & -7.4287 & 342.0132 & 0.1136 & 0.9800 & 2587.8307 & 0.3 \\
+MDN & -0.0016 & -6.9523 & 234.9166 & \underline{0.0443} & \underline{0.9172} & 1341.4551 & 16.3 \\
+RealTabPFN 2.5 & -0.0022 & -6.6538 & 187.8513 & 0.0872 & 0.9296 & 1130.1213 & 9.3 \\
+Student-t & -0.0004 & -8.1690 & 504.6685 & 0.1128 & 0.9208 & 2838.6095 & 0.1 \\
+Student-t-Ridge & -0.0004 & -8.1800 & 508.0699 & 0.1144 & 0.9220 & 2868.9987 & 0.2 \\
+TabICL Quantiles & -0.0021 & -6.7462 & 190.4585 & 0.0827 & 0.9416 & 1203.7499 & 60.1 \\
+TabPFN 2.5 & \textbf{-0.0022} & \textbf{-6.6410} & \textbf{187.5030} & 0.0737 & 0.9270 & 1103.8798 & 9.3 \\
+TabPFN Native & \underline{-0.0022} & \underline{-6.6410} & \underline{187.5030} & 0.0737 & 0.9270 & 1103.8798 & 9.3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ---- Diamonds-50 ----
 \begin{table}[ht]
 \centering
@@ -2036,6 +2456,41 @@ TabPFN Native & -274.3914 & \underline{5.1902} & \underline{0.0011} & 0.0711 & 0
 \end{tabular}
 \end{table}
 
+% ---- Elevators-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for Elevators-10000 ($\pm$SE across repetitions).}
+\label{tab:elevators-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -29.4776 & 3.1918 & 0.0063 & 0.4689 & 1.0000 & 0.0503 & 17.0 \\
+CatMLP & -160.1293 & 4.8653 & 0.0011 & 0.0663 & 0.9308 & 0.0072 & 8.0 \\
+FlexCode-RF & -126.4040 & 4.1051 & 0.0019 & 0.1336 & 0.9840 & 0.0323 & 8.0 \\
+Flow-Spline & -160.2044 & 4.7988 & 0.0011 & 0.0245 & 0.8784 & 0.0062 & 44.8 \\
+Gamma-GLM & -128.2459 & 4.5403 & 0.0016 & 0.0529 & 0.9192 & 0.0088 & 0.1 \\
+Gamma-GLM-Ridge & -90.8033 & 4.1445 & 0.0023 & 0.1250 & 0.9116 & 0.0129 & 0.1 \\
+LinGauss-Hetero-Ridge & -77.0337 & 3.8732 & 0.0015 & 0.1700 & 0.6140 & \textbf{0.0043} & 0.0 \\
+LinGauss-Homo-Ridge & -115.7254 & 4.4456 & 0.0015 & 0.0815 & 0.9332 & 0.0095 & 0.0 \\
+LinearGauss-Hetero & -77.4769 & 3.8780 & 0.0015 & 0.1684 & 0.6172 & \underline{0.0043} & \underline{0.0} \\
+LinearGauss-Homo & -115.7131 & 4.4456 & 0.0015 & 0.0820 & 0.9336 & 0.0095 & \textbf{0.0} \\
+LogNormal-Hetero & -89.2239 & 3.9976 & 0.0016 & 0.1478 & 0.6352 & 0.0046 & 0.1 \\
+LogNormal-Hetero-Ridge & -89.2290 & 3.9959 & 0.0016 & 0.1482 & 0.6344 & 0.0046 & 0.1 \\
+LogNormal-Homo & -129.6239 & 4.5504 & 0.0015 & 0.0526 & 0.9172 & 0.0087 & 0.1 \\
+LogNormal-Homo-Ridge & -129.6397 & 4.5504 & 0.0015 & 0.0529 & 0.9168 & 0.0087 & 0.1 \\
+MDN & -170.9773 & 4.9105 & 0.0011 & 0.0225 & \underline{0.8936} & 0.0062 & 6.8 \\
+RealTabPFN 2.5 & \textbf{-217.2950} & \textbf{5.0945} & \underline{0.0010} & \textbf{0.0107} & 0.8868 & 0.0056 & 2.6 \\
+Student-t & -120.9847 & 4.5478 & 0.0015 & 0.0526 & 0.9108 & 0.0083 & 0.0 \\
+Student-t-Ridge & -121.0019 & 4.5479 & 0.0015 & 0.0527 & 0.9112 & 0.0083 & 0.1 \\
+TabICL Quantiles & -185.4490 & 4.9441 & \textbf{0.0010} & 0.0190 & \textbf{0.9000} & 0.0057 & 21.6 \\
+TabPFN 2.5 & \underline{-210.2907} & \underline{5.0742} & 0.0010 & \underline{0.0174} & 0.8788 & 0.0055 & 2.6 \\
+TabPFN Native & -210.2907 & 5.0742 & 0.0010 & 0.0174 & 0.8788 & 0.0055 & 2.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ---- Elevators-50 ----
 \begin{table}[ht]
 \centering
@@ -2180,6 +2635,41 @@ Student-t-Ridge & -0.2600 & -1.4139 & 0.6109 & 0.1075 & 0.8840 & 3.2920 & 0.0 \\
 TabICL Quantiles & -1.3990 & -0.7443 & 0.3590 & 0.0615 & 0.9120 & 2.4397 & 1.2 \\
 TabPFN 2.5 & \underline{-2.5067} & \textbf{-0.1051} & \underline{0.3569} & 0.0990 & \underline{0.8960} & 2.3519 & 0.2 \\
 TabPFN Native & -2.5067 & \underline{-0.1051} & 0.3569 & 0.0990 & 0.8960 & 2.3519 & 0.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- FIFA-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for FIFA-10000 ($\pm$SE across repetitions).}
+\label{tab:fifa-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.4170 & -1.1358 & 0.4203 & 0.0454 & 0.9104 & 2.3706 & 13.1 \\
+CatMLP & -0.7013 & -0.6392 & 0.4180 & \underline{0.0316} & 0.8864 & 2.4854 & 8.3 \\
+FlexCode-RF & -0.5264 & -1.1728 & 0.4215 & 0.0737 & 0.9664 & 4.1342 & 3.7 \\
+Flow-Spline & -1.3124 & -0.4561 & 0.4272 & 0.0473 & \textbf{0.8976} & 2.5720 & 76.2 \\
+Gamma-GLM & -0.2541 & -1.4490 & 0.6205 & 0.0699 & 0.8892 & 3.3959 & 0.1 \\
+Gamma-GLM-Ridge & -0.2290 & -1.5251 & 0.6755 & 0.0713 & 0.8560 & 3.6052 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.1394 & -1.9315 & 0.6595 & 0.1638 & 0.5872 & \textbf{2.0212} & 0.0 \\
+LinGauss-Homo-Ridge & -0.2533 & -1.4486 & 0.6227 & 0.0765 & 0.8748 & 3.3332 & 0.0 \\
+LinearGauss-Hetero & -0.1400 & -1.9301 & 0.6587 & 0.1622 & 0.5892 & \underline{2.0214} & \underline{0.0} \\
+LinearGauss-Homo & -0.2537 & -1.4475 & 0.6219 & 0.0762 & 0.8752 & 3.3319 & \textbf{0.0} \\
+LogNormal-Hetero & -0.1439 & -1.8815 & 0.6657 & 0.1667 & 0.6004 & 2.1074 & 0.1 \\
+LogNormal-Hetero-Ridge & -0.1436 & -1.8794 & 0.6664 & 0.1667 & 0.6008 & 2.1100 & 0.1 \\
+LogNormal-Homo & -0.2514 & -1.4611 & 0.6258 & 0.0680 & 0.8936 & 3.4640 & 0.1 \\
+LogNormal-Homo-Ridge & -0.2509 & -1.4621 & 0.6265 & 0.0684 & 0.8948 & 3.4652 & 0.1 \\
+MDN & -0.9960 & -0.7378 & 0.4168 & 0.0612 & 0.9112 & 2.5238 & 10.2 \\
+RealTabPFN 2.5 & -1.8689 & -0.2406 & \textbf{0.3934} & 0.0365 & 0.8880 & 2.3198 & 1.4 \\
+Student-t & -0.2532 & -1.4493 & 0.6220 & 0.0773 & 0.8736 & 3.3248 & 0.0 \\
+Student-t-Ridge & -0.2529 & -1.4500 & 0.6227 & 0.0771 & 0.8728 & 3.3282 & 0.0 \\
+TabICL Quantiles & -0.9833 & -0.8082 & \underline{0.3946} & \textbf{0.0291} & \underline{0.9048} & 2.3579 & 18.1 \\
+TabPFN 2.5 & \textbf{-1.9105} & \textbf{-0.2166} & 0.3962 & 0.0561 & 0.8900 & 2.2775 & 1.4 \\
+TabPFN Native & \underline{-1.9105} & \underline{-0.2166} & 0.3962 & 0.0561 & 0.8900 & 2.2775 & 1.4 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -2480,6 +2970,41 @@ TabPFN Native & -0.4119 & \underline{-2.2766} & \underline{6.6286} & 0.1298 & 0.
 \end{tabular}
 \end{table}
 
+% ---- HealthInsurance-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for HealthInsurance-10000 ($\pm$SE across repetitions).}
+\label{tab:healthinsurance-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0157 & -4.1471 & 9.3926 & 0.2246 & 0.7536 & 45.8136 & 42.4 \\
+CatMLP & -0.1247 & -2.7869 & 7.2197 & 0.1327 & \textbf{0.8992} & 37.4850 & 6.2 \\
+FlexCode-RF & -0.0721 & -4.2875 & 7.3971 & 0.1041 & 0.9844 & 58.7594 & 4.3 \\
+Flow-Spline & \textbf{-0.4828} & \textbf{-2.1194} & 7.5708 & 0.1101 & 0.8724 & 32.3594 & 72.8 \\
+Gamma-GLM & -0.0361 & -4.0699 & 10.7932 & 0.2665 & 0.9292 & 58.1604 & 0.1 \\
+Gamma-GLM-Ridge & -0.0312 & -4.0984 & 11.2075 & 0.2915 & 0.9672 & 61.3117 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0160 & -4.6310 & 8.9997 & 0.2395 & 0.6316 & \textbf{28.1130} & 0.0 \\
+LinGauss-Homo-Ridge & -0.0179 & -4.0823 & 8.9046 & 0.1787 & 0.8368 & 44.0817 & 0.0 \\
+LinearGauss-Hetero & -0.0160 & -4.6349 & 8.9964 & 0.2397 & 0.6324 & \underline{28.2037} & \textbf{0.0} \\
+LinearGauss-Homo & -0.0179 & -4.0821 & 8.9037 & 0.1783 & 0.8368 & 44.0737 & \underline{0.0} \\
+LogNormal-Hetero & -0.0579 & -4.3598 & 11.2014 & 0.2285 & 0.7776 & 40.1605 & 0.1 \\
+LogNormal-Hetero-Ridge & -0.0577 & -4.3591 & 11.1926 & 0.2290 & 0.7764 & 40.0964 & 0.1 \\
+LogNormal-Homo & -0.0618 & -4.0687 & 11.2828 & 0.2622 & 0.8932 & 53.3430 & 0.1 \\
+LogNormal-Homo-Ridge & -0.0618 & -4.0690 & 11.2852 & 0.2626 & \underline{0.8940} & 53.3640 & 0.1 \\
+MDN & -0.4280 & -2.3654 & 7.6116 & 0.1092 & 0.9292 & 41.3372 & 7.0 \\
+RealTabPFN 2.5 & -0.4234 & -2.3155 & 7.0341 & \underline{0.0918} & 0.8932 & 34.1488 & 3.2 \\
+Student-t & -0.0179 & -4.0827 & 8.9037 & 0.1789 & 0.8360 & 44.0388 & 0.0 \\
+Student-t-Ridge & -0.0179 & -4.0828 & 8.9046 & 0.1786 & 0.8364 & 44.0468 & 0.1 \\
+TabICL Quantiles & -0.3375 & -2.5880 & \textbf{7.0100} & \textbf{0.0750} & 0.9228 & 37.6149 & 25.1 \\
+TabPFN 2.5 & \underline{-0.4490} & \underline{-2.2865} & \underline{7.0271} & 0.1106 & 0.8864 & 33.6389 & 3.2 \\
+TabPFN Native & -0.4490 & -2.2865 & 7.0271 & 0.1106 & 0.8864 & 33.6389 & 3.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ---- HealthInsurance-50 ----
 \begin{table}[ht]
 \centering
@@ -2624,6 +3149,76 @@ Student-t-Ridge & -0.0000 & -11.8057 & 20141.5147 & 0.2651 & \underline{0.9000} 
 TabICL Quantiles & \textbf{-0.0000} & \textbf{-10.8020} & \textbf{10992.3477} & \underline{0.0702} & 0.9080 & 74771.9121 & 1.6 \\
 TabPFN 2.5 & \underline{-0.0000} & -10.8462 & 11206.7281 & 0.1017 & 0.8680 & 61565.1550 & 0.2 \\
 TabPFN Native & -0.0000 & -10.8462 & 11206.7281 & 0.1017 & 0.8680 & 61565.1550 & 0.3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- House16H-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for House16H-10000 ($\pm$SE across repetitions).}
+\label{tab:house16h-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0000 & -12.1576 & 25213.9011 & 0.3435 & 0.9312 & 151049.8483 & 28.6 \\
+CatMLP & -0.0000 & -10.9481 & 12404.1174 & 0.0787 & 0.9308 & 70801.0339 & 7.4 \\
+FlexCode-RF & -0.0000 & -11.3426 & 15491.4613 & 0.1699 & 0.9932 & 280499.1013 & 16.1 \\
+Flow-Spline & -0.0000 & -10.8711 & 12279.3971 & \underline{0.0408} & 0.8804 & 57390.8477 & 58.0 \\
+Gamma-GLM & -0.0000 & -11.4797 & 19018.9204 & 0.0839 & \textbf{0.8996} & 87012.3959 & 0.1 \\
+Gamma-GLM-Ridge & -0.0000 & -11.6104 & 20309.1567 & 0.1087 & 0.9156 & 93435.7994 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0000 & -12.3327 & 20882.1919 & 0.2254 & 0.6432 & 50460.4636 & 0.0 \\
+LinGauss-Homo-Ridge & -0.0000 & -11.9904 & 21667.2302 & 0.2441 & 0.9352 & 128710.0214 & 0.0 \\
+LinearGauss-Hetero & -0.0000 & -12.3371 & 20894.3154 & 0.2270 & 0.6428 & 50491.5912 & \underline{0.0} \\
+LinearGauss-Homo & -0.0000 & -11.9904 & 21667.6132 & 0.2441 & 0.9352 & 128696.5046 & \textbf{0.0} \\
+LogNormal-Hetero & -0.0000 & -12.0673 & 19367.1200 & 0.1651 & 0.6136 & \textbf{40612.5881} & 0.1 \\
+LogNormal-Hetero-Ridge & -0.0000 & -12.0599 & 19381.2137 & 0.1646 & 0.6160 & \underline{40615.8418} & 0.1 \\
+LogNormal-Homo & -0.0000 & -11.4479 & 19069.8809 & 0.0669 & \underline{0.8984} & 85373.0694 & 0.1 \\
+LogNormal-Homo-Ridge & -0.0000 & -11.4480 & 19076.4645 & 0.0661 & 0.8972 & 85344.3559 & 0.1 \\
+MDN & -0.0000 & -10.9214 & 12833.7952 & \textbf{0.0338} & 0.8984 & 70757.6000 & 5.8 \\
+RealTabPFN 2.5 & \underline{-0.0000} & -10.6232 & 9757.3747 & 0.0480 & 0.9196 & 57095.7613 & 2.4 \\
+Student-t & -0.0000 & -11.7727 & 20786.9319 & 0.1595 & 0.8704 & 88444.9764 & 0.0 \\
+Student-t-Ridge & -0.0000 & -11.7721 & 20781.2942 & 0.1603 & 0.8704 & 88410.3507 & 0.1 \\
+TabICL Quantiles & \textbf{-0.0000} & -10.6350 & \textbf{9359.0214} & 0.0552 & 0.9292 & 57490.2755 & 21.5 \\
+TabPFN 2.5 & -0.0000 & \textbf{-10.6102} & \underline{9680.7535} & 0.0435 & 0.9168 & 55824.3120 & 2.4 \\
+TabPFN Native & -0.0000 & \underline{-10.6102} & 9680.7535 & 0.0435 & 0.9168 & 55824.3120 & 2.4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- House16H-20000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for House16H-20000 ($\pm$SE across repetitions).}
+\label{tab:house16h-20000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0000 & -12.1215 & 24163.3450 & 0.3378 & 0.9374 & 154288.1240 & 54.0 \\
+CatMLP & -0.0000 & -10.8892 & 11373.5481 & 0.0805 & 0.9362 & 71105.1730 & 16.6 \\
+FlexCode-RF & -0.0000 & -11.3545 & 14818.5910 & 0.1822 & 0.9962 & 276955.3028 & 35.8 \\
+Flow-Spline & -0.0000 & -10.8049 & 11318.7924 & 0.0506 & 0.8832 & 53453.2368 & 154.2 \\
+Gamma-GLM & -0.0000 & -11.4441 & 18131.7256 & 0.1032 & 0.9090 & 89705.4683 & 0.2 \\
+Gamma-GLM-Ridge & -0.0000 & -11.5832 & 19345.1947 & 0.1324 & 0.9234 & 96356.6483 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0000 & -12.2427 & 19741.2248 & 0.2376 & 0.6682 & 50759.1774 & 0.1 \\
+LinGauss-Homo-Ridge & -0.0000 & -11.9584 & 20796.6082 & 0.2633 & 0.9378 & 132915.5480 & 0.1 \\
+LinearGauss-Hetero & -0.0000 & -12.2406 & 19745.6406 & 0.2374 & 0.6680 & 50880.3129 & \underline{0.0} \\
+LinearGauss-Homo & -0.0000 & -11.9585 & 20797.5953 & 0.2628 & 0.9374 & 132905.1468 & \textbf{0.0} \\
+LogNormal-Hetero & -0.0000 & -11.9514 & 18323.0143 & 0.1714 & 0.6264 & \underline{40772.7168} & 0.2 \\
+LogNormal-Hetero-Ridge & -0.0000 & -11.9494 & 18326.9716 & 0.1713 & 0.6264 & \textbf{40764.6952} & 0.2 \\
+LogNormal-Homo & -0.0000 & -11.4060 & 17902.8641 & 0.0881 & \textbf{0.9046} & 88504.1449 & 0.2 \\
+LogNormal-Homo-Ridge & -0.0000 & -11.4061 & 17905.2802 & 0.0877 & \underline{0.9046} & 88485.8326 & 0.2 \\
+MDN & -0.0000 & -10.8565 & 12367.3702 & \textbf{0.0410} & 0.9234 & 73218.4945 & 15.6 \\
+RealTabPFN 2.5 & -0.0000 & -10.6093 & 9344.9873 & 0.0571 & 0.9190 & 54166.7204 & 6.5 \\
+Student-t & -0.0000 & -11.7463 & 19668.2803 & 0.1817 & 0.8738 & 90236.1983 & 0.1 \\
+Student-t-Ridge & -0.0000 & -11.7459 & 19663.7866 & 0.1818 & 0.8744 & 90202.8090 & 0.1 \\
+TabICL Quantiles & \textbf{-0.0000} & -10.6153 & \textbf{9078.8770} & \underline{0.0425} & 0.9304 & 54928.1981 & 61.4 \\
+TabPFN 2.5 & \underline{-0.0000} & \textbf{-10.5883} & \underline{9250.2839} & 0.0537 & 0.9172 & 53443.9010 & 6.5 \\
+TabPFN Native & -0.0000 & \underline{-10.5883} & 9250.2839 & 0.0537 & 0.9172 & 53443.9010 & 6.5 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -2776,6 +3371,41 @@ TabPFN Native & -0.0568 & \underline{-3.0107} & \underline{3.0442} & 0.0596 & 0.
 \end{tabular}
 \end{table}
 
+% ---- IndoorLoc-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for IndoorLoc-10000 ($\pm$SE across repetitions).}
+\label{tab:indoorloc-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0034 & -5.6972 & 40.2478 & 0.1265 & 0.9964 & 268.2334 & 562.1 \\
+CatMLP & -0.0793 & -2.9072 & 2.8780 & 0.0535 & 0.9308 & 17.1745 & 6.9 \\
+FlexCode-RF & -0.0376 & -3.6951 & 8.7545 & 0.2122 & 0.9988 & 201.6985 & 55.0 \\
+Flow-Spline & -0.0697 & -2.9643 & 2.9862 & 0.1221 & 0.8400 & 15.8848 & 39.7 \\
+Gamma-GLM & -0.0034 & -5.6972 & 40.2477 & 0.1265 & 0.9964 & 268.2333 & 1.2 \\
+Gamma-GLM-Ridge & -0.0034 & -5.6972 & 40.2477 & 0.1265 & 0.9964 & 268.2333 & \textbf{0.6} \\
+LinGauss-Hetero-Ridge & -0.0125 & -4.7840 & 10.2194 & 0.1443 & 0.6512 & 31.9779 & 1.9 \\
+LinGauss-Homo-Ridge & -0.0162 & -4.3222 & 9.9759 & 0.0539 & \underline{0.9160} & 62.9845 & 1.7 \\
+LinearGauss-Hetero & -0.0103 & -4.9030 & 10.3315 & 0.1398 & 0.6524 & 34.0126 & 1.2 \\
+LinearGauss-Homo & -0.0046 & -5.5090 & 31.2094 & 0.1578 & 0.9996 & 257.7951 & 1.0 \\
+LogNormal-Hetero & -0.0164 & -4.3847 & 9.9686 & 0.0882 & 0.7720 & 40.7842 & 1.3 \\
+LogNormal-Hetero-Ridge & -0.0172 & -4.3408 & 9.8815 & 0.0884 & 0.7632 & 39.2104 & 1.6 \\
+LogNormal-Homo & -0.0046 & -5.5090 & 31.2095 & 0.1578 & 0.9996 & 257.7954 & \underline{1.0} \\
+LogNormal-Homo-Ridge & -0.0162 & -4.3222 & 9.9759 & 0.0539 & 0.9160 & 62.9845 & 1.4 \\
+MDN & -0.0366 & -3.5300 & 4.7586 & 0.0893 & 0.8816 & 26.9147 & 6.6 \\
+RealTabPFN 2.5 & -0.1375 & -2.0426 & 1.1578 & 0.2063 & 0.9844 & 10.3098 & 36.4 \\
+Student-t & -0.0164 & -4.3239 & 10.0029 & \underline{0.0269} & 0.9372 & 69.5247 & 1.2 \\
+Student-t-Ridge & -0.0166 & -4.2986 & 9.9451 & \textbf{0.0201} & \textbf{0.9076} & 60.1390 & 1.3 \\
+TabICL Quantiles & \textbf{-0.2069} & -1.9914 & 1.2920 & 0.1434 & 0.9652 & 9.7918 & 191.0 \\
+TabPFN 2.5 & \underline{-0.1462} & \textbf{-1.9364} & \textbf{1.0470} & 0.2141 & 0.9844 & \textbf{9.4440} & 36.4 \\
+TabPFN Native & -0.1462 & \underline{-1.9364} & \underline{1.0470} & 0.2141 & 0.9844 & \underline{9.4440} & 36.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ---- IndoorLoc-50 ----
 \begin{table}[ht]
 \centering
@@ -2786,29 +3416,29 @@ TabPFN Native & -0.0568 & \underline{-3.0107} & \underline{3.0442} & 0.0596 & 0.
 \toprule
 \textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
 \midrule
-BART-Hetero & -0.0038 $\pm$ 0.0001 & -5.7504 $\pm$ 0.1831 & 39.5260 $\pm$ 1.8624 & \textbf{0.1897 $\pm$ 0.0162} & 0.9670 $\pm$ 0.0155 & 233.3895 $\pm$ 2.1818 & 149.3 $\pm$ 7.6 \\
-BART-Homo & -0.0038 $\pm$ 0.0001 & -5.7504 $\pm$ 0.1831 & 39.5260 $\pm$ 1.8624 & \underline{0.1897 $\pm$ 0.0162} & 0.9670 $\pm$ 0.0155 & 233.3895 $\pm$ 2.1818 & 26.9 $\pm$ 1.3 \\
-CatMLP & 0.0260 $\pm$ 0.0076 & -8.5903 $\pm$ 0.7517 & 37.5175 $\pm$ 5.3738 & 0.2783 $\pm$ 0.0257 & 0.6813 $\pm$ 0.0391 & 126.1146 $\pm$ 14.4501 & 0.4 $\pm$ 0.0 \\
-FlexCode-RF & \underline{-0.0103 $\pm$ 0.0007} & -6.5500 $\pm$ 0.5225 & 19.3234 $\pm$ 1.2998 & 0.2429 $\pm$ 0.0164 & 0.9423 $\pm$ 0.0192 & 158.7417 $\pm$ 3.3172 & 0.4 $\pm$ 0.0 \\
-Flow-Spline & 0.0914 $\pm$ 0.0250 & -6.9511 $\pm$ 0.4915 & 44.6277 $\pm$ 6.8191 & 0.4161 $\pm$ 0.0539 & 0.5481 $\pm$ 0.0704 & 93.1323 $\pm$ 20.3625 & 5.9 $\pm$ 0.5 \\
-Gamma-GLM & -0.0038 $\pm$ 0.0000 & -5.7278 $\pm$ 0.1602 & 38.9209 $\pm$ 1.7226 & 0.1901 $\pm$ 0.0140 & 0.9712 $\pm$ 0.0141 & 233.7218 $\pm$ 1.9185 & \textbf{0.0 $\pm$ 0.0} \\
-Gamma-GLM-Ridge & -0.0038 $\pm$ 0.0000 & -5.7278 $\pm$ 0.1602 & 38.9209 $\pm$ 1.7226 & 0.1901 $\pm$ 0.0140 & 0.9712 $\pm$ 0.0141 & 233.7218 $\pm$ 1.9185 & 0.1 $\pm$ 0.0 \\
-LinGauss-Hetero-Ridge & -0.0083 $\pm$ 0.0023 & -5.4260 $\pm$ 0.3913 & 16.5961 $\pm$ 2.2643 & 0.2878 $\pm$ 0.0339 & 0.7212 $\pm$ 0.0649 & \textbf{61.8833 $\pm$ 3.2200} & 0.0 $\pm$ 0.0 \\
-LinGauss-Homo-Ridge & -0.0097 $\pm$ 0.0007 & -4.9994 $\pm$ 0.1723 & 16.2681 $\pm$ 1.7827 & 0.2599 $\pm$ 0.0287 & 0.9327 $\pm$ 0.0270 & 110.8782 $\pm$ 2.6355 & 0.0 $\pm$ 0.0 \\
-LinearGauss-Hetero & -0.0058 $\pm$ 0.0027 & -6.0658 $\pm$ 0.4668 & 17.0454 $\pm$ 2.1415 & 0.2764 $\pm$ 0.0364 & 0.7404 $\pm$ 0.0458 & 70.3051 $\pm$ 3.8888 & 0.0 $\pm$ 0.0 \\
-LinearGauss-Homo & -0.0098 $\pm$ 0.0007 & -4.9951 $\pm$ 0.1736 & 16.1566 $\pm$ 1.7634 & 0.2630 $\pm$ 0.0259 & 0.9231 $\pm$ 0.0356 & 109.9366 $\pm$ 2.5092 & 0.1 $\pm$ 0.0 \\
-LogNormal-Hetero & -0.0095 $\pm$ 0.0027 & -5.5139 $\pm$ 0.3049 & 16.7963 $\pm$ 2.0979 & 0.2714 $\pm$ 0.0377 & 0.7788 $\pm$ 0.0447 & 74.4972 $\pm$ 3.7981 & 0.0 $\pm$ 0.0 \\
-LogNormal-Hetero-Ridge & -0.0095 $\pm$ 0.0020 & -5.2260 $\pm$ 0.2892 & 16.5092 $\pm$ 2.1203 & 0.2741 $\pm$ 0.0337 & 0.7500 $\pm$ 0.0577 & 69.3229 $\pm$ 3.2083 & 0.0 $\pm$ 0.0 \\
-LogNormal-Homo & -0.0098 $\pm$ 0.0007 & -4.9951 $\pm$ 0.1736 & 16.1566 $\pm$ 1.7634 & 0.2630 $\pm$ 0.0259 & 0.9231 $\pm$ 0.0356 & 109.9364 $\pm$ 2.5092 & 0.0 $\pm$ 0.0 \\
-LogNormal-Homo-Ridge & -0.0097 $\pm$ 0.0007 & -4.9994 $\pm$ 0.1723 & 16.2682 $\pm$ 1.7827 & 0.2599 $\pm$ 0.0287 & 0.9327 $\pm$ 0.0270 & 110.8779 $\pm$ 2.6355 & \underline{0.0 $\pm$ 0.0} \\
-MDN & 0.1551 $\pm$ 0.0535 & -10.2938 $\pm$ 1.4325 & 44.4882 $\pm$ 2.7540 & 0.3167 $\pm$ 0.0518 & 0.5769 $\pm$ 0.0975 & 92.7443 $\pm$ 21.2368 & 0.6 $\pm$ 0.0 \\
-Quantile-Tree & -0.0083 $\pm$ 0.0027 & -5.9079 $\pm$ 0.5063 & 22.1042 $\pm$ 2.2592 & 0.2260 $\pm$ 0.0208 & \textbf{0.8846 $\pm$ 0.0356} & 185.3734 $\pm$ 3.6746 & 1.3 $\pm$ 0.0 \\
-RealTabPFN 2.5 & -0.0079 $\pm$ 0.0016 & -4.9506 $\pm$ 0.1587 & 14.6851 $\pm$ 1.2258 & 0.2159 $\pm$ 0.0218 & 0.8462 $\pm$ 0.0385 & 72.1182 $\pm$ 2.0993 & 0.3 $\pm$ 0.0 \\
-Student-t & -0.0101 $\pm$ 0.0008 & -4.9502 $\pm$ 0.1710 & 16.0281 $\pm$ 1.8516 & 0.2661 $\pm$ 0.0325 & 0.9231 $\pm$ 0.0356 & 101.7583 $\pm$ 2.4628 & 0.0 $\pm$ 0.0 \\
-Student-t-Ridge & -0.0099 $\pm$ 0.0009 & -4.9597 $\pm$ 0.1722 & 16.1618 $\pm$ 1.8799 & 0.2676 $\pm$ 0.0329 & 0.9231 $\pm$ 0.0356 & 102.3694 $\pm$ 2.5052 & 0.0 $\pm$ 0.0 \\
-TabICL Quantiles & \textbf{-0.0247 $\pm$ 0.0038} & \textbf{-4.6636 $\pm$ 0.2764} & \textbf{12.1796 $\pm$ 0.7136} & 0.2317 $\pm$ 0.0219 & 0.8462 $\pm$ 0.0356 & \underline{66.2926 $\pm$ 4.2662} & 1.7 $\pm$ 0.0 \\
-TabPFN 2.5 & -0.0073 $\pm$ 0.0012 & \underline{-4.9487 $\pm$ 0.1625} & \underline{14.5969 $\pm$ 0.9693} & 0.2106 $\pm$ 0.0154 & \underline{0.8846 $\pm$ 0.0356} & 80.5565 $\pm$ 2.7786 & 0.3 $\pm$ 0.0 \\
-TabPFN Native & -0.0073 $\pm$ 0.0012 & -4.9487 $\pm$ 0.1625 & 14.5969 $\pm$ 0.9693 & 0.2106 $\pm$ 0.0154 & 0.8846 $\pm$ 0.0356 & 80.5565 $\pm$ 2.7786 & 0.3 $\pm$ 0.0 \\
+BART-Hetero & -0.0037 $\pm$ 0.0000 & -5.8234 $\pm$ 0.1709 & 39.5223 $\pm$ 1.4278 & \underline{0.1902 $\pm$ 0.0111} & 0.9615 $\pm$ 0.0128 & 232.4738 $\pm$ 2.0245 & 150.8 $\pm$ 6.5 \\
+BART-Homo & -0.0037 $\pm$ 0.0000 & -5.8234 $\pm$ 0.1709 & 39.5223 $\pm$ 1.4278 & \textbf{0.1902 $\pm$ 0.0111} & 0.9615 $\pm$ 0.0128 & 232.4738 $\pm$ 2.0245 & 27.3 $\pm$ 1.1 \\
+CatMLP & 0.0211 $\pm$ 0.0059 & -8.2996 $\pm$ 0.5629 & 36.0358 $\pm$ 4.2828 & 0.2934 $\pm$ 0.0196 & 0.6923 $\pm$ 0.0303 & 122.4250 $\pm$ 12.3178 & 0.4 $\pm$ 0.0 \\
+FlexCode-RF & \underline{-0.0103 $\pm$ 0.0006} & -6.3307 $\pm$ 0.4485 & 19.0075 $\pm$ 1.0480 & 0.2416 $\pm$ 0.0131 & 0.9308 $\pm$ 0.0179 & 159.5642 $\pm$ 2.9504 & 0.4 $\pm$ 0.0 \\
+Flow-Spline & 0.0839 $\pm$ 0.0235 & -6.8023 $\pm$ 0.4048 & 41.7318 $\pm$ 5.9649 & 0.4127 $\pm$ 0.0429 & 0.5692 $\pm$ 0.0576 & 88.6290 $\pm$ 16.3546 & 5.9 $\pm$ 0.4 \\
+Gamma-GLM & -0.0037 $\pm$ 0.0000 & -5.8234 $\pm$ 0.1709 & 39.5222 $\pm$ 1.4278 & 0.1902 $\pm$ 0.0111 & 0.9615 $\pm$ 0.0128 & 232.4737 $\pm$ 2.0245 & \textbf{0.0 $\pm$ 0.0} \\
+Gamma-GLM-Ridge & -0.0037 $\pm$ 0.0000 & -5.8234 $\pm$ 0.1709 & 39.5222 $\pm$ 1.4278 & 0.1902 $\pm$ 0.0111 & 0.9615 $\pm$ 0.0128 & 232.4737 $\pm$ 2.0245 & 0.1 $\pm$ 0.0 \\
+LinGauss-Hetero-Ridge & -0.0089 $\pm$ 0.0019 & -5.4586 $\pm$ 0.3296 & 16.9146 $\pm$ 1.8179 & 0.2831 $\pm$ 0.0273 & 0.7308 $\pm$ 0.0529 & \textbf{64.8299 $\pm$ 3.5694} & 0.0 $\pm$ 0.0 \\
+LinGauss-Homo-Ridge & -0.0098 $\pm$ 0.0006 & -5.1037 $\pm$ 0.1848 & 16.5981 $\pm$ 1.4518 & 0.2671 $\pm$ 0.0234 & 0.9231 $\pm$ 0.0229 & 109.7170 $\pm$ 2.2683 & 0.0 $\pm$ 0.0 \\
+LinearGauss-Hetero & -0.0057 $\pm$ 0.0023 & -6.1016 $\pm$ 0.4122 & 17.2631 $\pm$ 1.7060 & 0.2864 $\pm$ 0.0329 & 0.7462 $\pm$ 0.0381 & 72.8783 $\pm$ 3.6210 & 0.0 $\pm$ 0.0 \\
+LinearGauss-Homo & -0.0099 $\pm$ 0.0006 & -5.0950 $\pm$ 0.1825 & 16.3508 $\pm$ 1.4090 & 0.2707 $\pm$ 0.0220 & \textbf{0.9154 $\pm$ 0.0291} & 108.6406 $\pm$ 2.1875 & 0.0 $\pm$ 0.0 \\
+LogNormal-Hetero & -0.0095 $\pm$ 0.0021 & -5.5138 $\pm$ 0.2518 & 16.9030 $\pm$ 1.6578 & 0.2824 $\pm$ 0.0339 & 0.7846 $\pm$ 0.0359 & 75.9362 $\pm$ 3.3299 & 0.0 $\pm$ 0.0 \\
+LogNormal-Hetero-Ridge & -0.0099 $\pm$ 0.0016 & -5.2978 $\pm$ 0.2590 & 16.8424 $\pm$ 1.7073 & 0.2722 $\pm$ 0.0270 & 0.7538 $\pm$ 0.0470 & 70.8308 $\pm$ 3.1197 & 0.0 $\pm$ 0.0 \\
+LogNormal-Homo & -0.0099 $\pm$ 0.0006 & -5.0950 $\pm$ 0.1825 & 16.3508 $\pm$ 1.4090 & 0.2707 $\pm$ 0.0220 & \underline{0.9154 $\pm$ 0.0291} & 108.6404 $\pm$ 2.1875 & 0.0 $\pm$ 0.0 \\
+LogNormal-Homo-Ridge & -0.0098 $\pm$ 0.0006 & -5.1037 $\pm$ 0.1848 & 16.5981 $\pm$ 1.4518 & 0.2671 $\pm$ 0.0234 & 0.9231 $\pm$ 0.0229 & 109.7168 $\pm$ 2.2683 & \underline{0.0 $\pm$ 0.0} \\
+MDN & 0.1396 $\pm$ 0.0449 & -10.3696 $\pm$ 1.1428 & 45.7625 $\pm$ 2.5213 & 0.3243 $\pm$ 0.0451 & 0.5538 $\pm$ 0.0817 & 89.6337 $\pm$ 16.9358 & 0.6 $\pm$ 0.0 \\
+Quantile-Tree & -0.0067 $\pm$ 0.0024 & -6.1663 $\pm$ 0.4448 & 22.4905 $\pm$ 1.8022 & 0.2152 $\pm$ 0.0180 & 0.8692 $\pm$ 0.0304 & 184.6781 $\pm$ 3.2618 & 1.3 $\pm$ 0.0 \\
+RealTabPFN 2.5 & -0.0087 $\pm$ 0.0014 & -5.0661 $\pm$ 0.1672 & \underline{15.2560 $\pm$ 1.0517} & 0.2315 $\pm$ 0.0205 & 0.8231 $\pm$ 0.0345 & 72.1010 $\pm$ 1.9727 & 0.3 $\pm$ 0.0 \\
+Student-t & -0.0101 $\pm$ 0.0007 & \underline{-5.0555 $\pm$ 0.1830} & 16.2506 $\pm$ 1.4798 & 0.2742 $\pm$ 0.0273 & 0.9154 $\pm$ 0.0291 & 101.7710 $\pm$ 1.9431 & 0.0 $\pm$ 0.0 \\
+Student-t-Ridge & -0.0100 $\pm$ 0.0007 & -5.0684 $\pm$ 0.1860 & 16.5124 $\pm$ 1.5281 & 0.2726 $\pm$ 0.0263 & 0.9154 $\pm$ 0.0291 & 102.6823 $\pm$ 1.9954 & 0.0 $\pm$ 0.0 \\
+TabICL Quantiles & \textbf{-0.0248 $\pm$ 0.0031} & \textbf{-4.7070 $\pm$ 0.2549} & \textbf{12.1564 $\pm$ 0.7844} & 0.2323 $\pm$ 0.0221 & 0.8462 $\pm$ 0.0303 & \underline{65.2113 $\pm$ 3.4438} & 1.7 $\pm$ 0.0 \\
+TabPFN 2.5 & -0.0082 $\pm$ 0.0012 & -5.0780 $\pm$ 0.1766 & 15.3813 $\pm$ 0.9263 & 0.2206 $\pm$ 0.0154 & 0.8538 $\pm$ 0.0353 & 80.1265 $\pm$ 2.3635 & 0.3 $\pm$ 0.0 \\
+TabPFN Native & -0.0082 $\pm$ 0.0012 & -5.0780 $\pm$ 0.1766 & 15.3813 $\pm$ 0.9263 & 0.2206 $\pm$ 0.0154 & 0.8538 $\pm$ 0.0353 & 80.1265 $\pm$ 2.3635 & 0.3 $\pm$ 0.0 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -3183,6 +3813,41 @@ TabPFN Native & -0.0000 & \underline{-12.2124} & 41720.6223 & 0.0613 & 0.9040 & 
 \end{tabular}
 \end{table}
 
+% ---- MiamiHousing-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for MiamiHousing-10000 ($\pm$SE across repetitions).}
+\label{tab:miamihousing-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0000 & -13.9439 & 149400.0954 & 0.2316 & 0.9420 & 1016312.9317 & 25.2 \\
+CatMLP & -0.0000 & -12.1837 & 36159.2932 & 0.1045 & 0.9468 & 230563.5804 & 8.4 \\
+FlexCode-RF & -0.0000 & -12.7428 & 64929.1915 & 0.2504 & 0.9976 & 1576937.5083 & 13.7 \\
+Flow-Spline & -0.0000 & -12.1047 & 37619.2002 & 0.0458 & 0.8800 & 181501.7289 & 58.3 \\
+Gamma-GLM & -0.0000 & -12.8497 & 66265.5518 & 0.0527 & \textbf{0.9012} & 357274.9690 & 0.1 \\
+Gamma-GLM-Ridge & -0.0000 & -13.0373 & 78843.3310 & 0.0781 & \underline{0.8980} & 405480.4738 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0000 & -13.7312 & 86760.0107 & 0.1620 & 0.6380 & 256282.1959 & 0.0 \\
+LinGauss-Homo-Ridge & -0.0000 & -13.3787 & 84002.9841 & 0.1565 & 0.9436 & 547861.8668 & 0.0 \\
+LinearGauss-Hetero & -0.0000 & -13.7344 & 86842.8762 & 0.1619 & 0.6384 & 256112.3440 & \underline{0.0} \\
+LinearGauss-Homo & -0.0000 & -13.3789 & 84029.7308 & 0.1561 & 0.9436 & 547792.9872 & \textbf{0.0} \\
+LogNormal-Hetero & -0.0000 & -13.2944 & 67879.7392 & 0.1489 & 0.6372 & 197836.5287 & 0.1 \\
+LogNormal-Hetero-Ridge & -0.0000 & -13.2960 & 67805.3329 & 0.1488 & 0.6384 & 198263.4213 & 0.1 \\
+LogNormal-Homo & -0.0000 & -12.8412 & 66676.9096 & 0.0473 & 0.9036 & 357361.8695 & 0.1 \\
+LogNormal-Homo-Ridge & -0.0000 & -12.8410 & 66679.6352 & 0.0479 & 0.9036 & 357192.1617 & 0.1 \\
+MDN & -0.0000 & -12.1375 & 38918.1432 & 0.0303 & 0.9068 & 222509.4715 & 8.0 \\
+RealTabPFN 2.5 & \textbf{-0.0000} & \textbf{-11.8507} & \textbf{27989.1754} & 0.0318 & 0.9132 & 161711.7998 & 2.4 \\
+Student-t & -0.0000 & -13.2853 & 83735.2297 & 0.0635 & 0.9100 & 456808.0167 & 0.0 \\
+Student-t-Ridge & -0.0000 & -13.2847 & 83698.1389 & 0.0641 & 0.9100 & 456452.8165 & 0.0 \\
+TabICL Quantiles & -0.0000 & -11.8865 & \underline{28020.7371} & 0.0350 & 0.9200 & 167231.7502 & 21.5 \\
+TabPFN 2.5 & \underline{-0.0000} & \underline{-11.8520} & 28069.9726 & \textbf{0.0252} & 0.9040 & \textbf{158359.1628} & 2.4 \\
+TabPFN Native & -0.0000 & -11.8520 & 28069.9726 & \underline{0.0252} & 0.9040 & \underline{158359.1628} & 2.4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ---- MiamiHousing-50 ----
 \begin{table}[ht]
 \centering
@@ -3327,6 +3992,41 @@ Student-t-Ridge & -54.3841 & 3.8185 & 0.0030 & \textbf{0.0741} & 0.9120 & 0.0187
 TabICL Quantiles & \textbf{-1650.7139} & \textbf{7.2644} & \textbf{0.0001} & 0.2959 & 0.9960 & \textbf{0.0010} & 1.5 \\
 TabPFN 2.5 & -1105.6963 & 6.7383 & 0.0002 & 0.2154 & 1.0000 & 0.0018 & 0.3 \\
 TabPFN Native & -1105.6963 & 6.7383 & 0.0002 & 0.2154 & 1.0000 & 0.0018 & 0.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- NavalPropulsion-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for NavalPropulsion-10000 ($\pm$SE across repetitions).}
+\label{tab:navalpropulsion-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -28.1418 & 3.1805 & 0.0058 & 0.0943 & 0.9952 & 0.0458 & 19.1 \\
+CatMLP & -145.0315 & 4.7543 & 0.0009 & 0.2299 & 0.9956 & 0.0103 & 26.0 \\
+FlexCode-RF & -61.4528 & 3.7252 & 0.0038 & 0.1693 & 0.9828 & 0.0346 & 12.3 \\
+Flow-Spline & -208.3050 & 5.1729 & 0.0007 & 0.3127 & 0.9864 & 0.0065 & 91.7 \\
+Gamma-GLM & -46.6210 & 3.6530 & 0.0034 & 0.1311 & 0.9788 & 0.0281 & 0.3 \\
+Gamma-GLM-Ridge & -16.7995 & 2.8689 & 0.0086 & 0.0928 & 0.8196 & 0.0417 & 0.1 \\
+LinGauss-Hetero-Ridge & -31.3822 & 3.4831 & 0.0032 & 0.1636 & 0.6800 & 0.0105 & 0.0 \\
+LinGauss-Homo-Ridge & -53.8626 & 3.8097 & 0.0031 & 0.0539 & 0.9060 & 0.0182 & 0.0 \\
+LinearGauss-Hetero & -31.3630 & 3.4805 & 0.0032 & 0.1639 & 0.6800 & 0.0105 & \underline{0.0} \\
+LinearGauss-Homo & -53.8688 & 3.8097 & 0.0031 & 0.0540 & 0.9060 & 0.0182 & \textbf{0.0} \\
+LogNormal-Hetero & -31.5865 & 3.4866 & 0.0032 & 0.1657 & 0.6796 & 0.0106 & 0.1 \\
+LogNormal-Hetero-Ridge & -31.5851 & 3.4898 & 0.0032 & 0.1650 & 0.6796 & 0.0106 & 0.1 \\
+LogNormal-Homo & -53.8651 & 3.8097 & 0.0031 & 0.0552 & 0.9068 & 0.0182 & 0.1 \\
+LogNormal-Homo-Ridge & -53.8589 & 3.8096 & 0.0031 & 0.0553 & 0.9068 & 0.0182 & 0.1 \\
+MDN & -153.8714 & 4.7403 & 0.0013 & 0.0479 & 0.9256 & 0.0090 & 11.8 \\
+RealTabPFN 2.5 & -1684.8179 & 7.2903 & \underline{0.0001} & 0.2742 & 0.9992 & 0.0010 & 2.2 \\
+Student-t & -53.8671 & 3.8130 & 0.0031 & \underline{0.0468} & \textbf{0.9028} & 0.0180 & 0.0 \\
+Student-t-Ridge & -53.8604 & 3.8129 & 0.0031 & \textbf{0.0468} & \underline{0.9028} & 0.0180 & 0.0 \\
+TabICL Quantiles & \textbf{-1761.9498} & \textbf{7.3931} & \textbf{0.0001} & 0.2948 & 0.9988 & \textbf{0.0008} & 21.5 \\
+TabPFN 2.5 & \underline{-1689.0822} & \underline{7.3146} & 0.0001 & 0.2456 & 0.9988 & \underline{0.0010} & 2.2 \\
+TabPFN Native & -1689.0822 & 7.3146 & 0.0001 & 0.2456 & 0.9988 & 0.0010 & 2.2 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -3479,6 +4179,41 @@ TabPFN Native & \underline{-1.2943} & \underline{-0.2009} & \underline{1.1680} &
 \end{tabular}
 \end{table}
 
+% ---- Pol-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for Pol-10000 ($\pm$SE across repetitions).}
+\label{tab:pol-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0474 & -3.4555 & 4.9919 & 0.3102 & \textbf{0.9080} & 24.5791 & 167.6 \\
+CatMLP & -0.3438 & -1.2863 & 0.9388 & 0.3730 & 0.9820 & 6.6189 & 11.7 \\
+FlexCode-RF & -0.1133 & -3.2249 & 4.5531 & 0.3402 & 1.0000 & 83.4397 & 6.4 \\
+Flow-Spline & -1.1792 & -0.5962 & 2.1705 & 0.3022 & 0.9880 & 20.4840 & 85.2 \\
+Gamma-GLM & -0.1090 & -3.3171 & 17.5553 & 0.2198 & 0.7412 & 50.3953 & 0.2 \\
+Gamma-GLM-Ridge & -0.1121 & -3.4638 & 19.5908 & 0.3208 & 0.7584 & 58.0026 & 0.1 \\
+LinGauss-Hetero-Ridge & 0.0022 & -4.5920 & 17.7659 & 0.3169 & 0.4572 & 56.7301 & 0.2 \\
+LinGauss-Homo-Ridge & -0.0138 & -4.5056 & 19.4293 & 0.4164 & 0.5556 & 73.7560 & 0.2 \\
+LinearGauss-Hetero & 0.0020 & -4.5947 & 17.7439 & 0.3168 & 0.4584 & 56.5428 & \underline{0.0} \\
+LinearGauss-Homo & -0.0138 & -4.5034 & 19.4029 & 0.4161 & 0.5536 & 73.7181 & \textbf{0.0} \\
+LogNormal-Hetero & -0.0576 & -3.6291 & 18.6370 & 0.2827 & 0.5072 & 37.9600 & 0.1 \\
+LogNormal-Hetero-Ridge & -0.0569 & -3.6339 & 18.6000 & 0.2832 & 0.5056 & 37.9423 & 0.4 \\
+LogNormal-Homo & -0.1217 & -3.2708 & 18.4675 & 0.2153 & 0.7072 & 48.2012 & 0.1 \\
+LogNormal-Homo-Ridge & -0.1219 & -3.2710 & 18.4720 & \underline{0.2145} & 0.7068 & 48.2004 & 0.3 \\
+MDN & -0.8625 & -1.2934 & 2.9493 & \textbf{0.1986} & \underline{0.9696} & 22.5402 & 7.9 \\
+RealTabPFN 2.5 & \textbf{-1.2675} & -0.1908 & 0.7772 & 0.3654 & 0.9864 & 5.3509 & 3.3 \\
+Student-t & -0.0138 & -4.5051 & 19.3930 & 0.4155 & 0.5532 & 73.6666 & 0.0 \\
+Student-t-Ridge & -0.0138 & -4.5073 & 19.4195 & 0.4157 & 0.5544 & 73.7039 & 0.3 \\
+TabICL Quantiles & -0.8136 & -0.7700 & 0.9309 & 0.2175 & 0.9788 & 6.3782 & 25.0 \\
+TabPFN 2.5 & \underline{-1.2504} & \textbf{-0.1744} & \textbf{0.7554} & 0.3581 & 0.9864 & \textbf{5.1030} & 3.3 \\
+TabPFN Native & -1.2504 & \underline{-0.1744} & \underline{0.7554} & 0.3581 & 0.9864 & \underline{5.1030} & 3.3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ---- Pol-50 ----
 \begin{table}[ht]
 \centering
@@ -3623,6 +4358,41 @@ Student-t-Ridge & -0.0571 & -2.9607 & 2.9672 & 0.1520 & 0.8960 & 15.1040 & 0.0 \
 TabICL Quantiles & \textbf{-0.2065} & -2.6540 & \textbf{2.1127} & 0.0581 & 0.9400 & 12.9703 & 1.3 \\
 TabPFN 2.5 & -0.1824 & \underline{-2.3762} & 2.2238 & 0.0633 & \underline{0.9000} & 12.9513 & 0.2 \\
 TabPFN Native & -0.1824 & -2.3762 & 2.2238 & 0.0633 & 0.9000 & 12.9513 & 0.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- Protein-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for Protein-10000 ($\pm$SE across repetitions).}
+\label{tab:protein-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0597 & -2.9285 & 2.8367 & 0.1530 & 0.8896 & 14.0866 & 21.9 \\
+CatMLP & -0.1917 & -2.3190 & 2.2283 & 0.0410 & 0.9188 & 12.4114 & 8.6 \\
+FlexCode-RF & -0.1872 & -2.7912 & 2.2098 & 0.0862 & 0.9564 & 16.4331 & 12.0 \\
+Flow-Spline & -0.2329 & -2.2047 & 2.0926 & \textbf{0.0216} & 0.8828 & 11.4443 & 97.9 \\
+Gamma-GLM & -0.0772 & -2.8343 & 2.9972 & 0.1154 & 0.8972 & 14.3447 & 0.1 \\
+Gamma-GLM-Ridge & -0.0650 & -2.9439 & 3.3557 & 0.1318 & 0.8888 & 15.6765 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0171 & -3.3851 & 3.1140 & 0.2047 & 0.6828 & 10.5580 & 0.0 \\
+LinGauss-Homo-Ridge & -0.0545 & -2.9779 & 3.0228 & 0.1631 & 0.9008 & 14.8923 & 0.0 \\
+LinearGauss-Hetero & -0.0167 & -3.3875 & 3.1130 & 0.2048 & 0.6816 & 10.5417 & \underline{0.0} \\
+LinearGauss-Homo & -0.0545 & -2.9775 & 3.0212 & 0.1637 & \underline{0.8996} & 14.8879 & \textbf{0.0} \\
+LogNormal-Hetero & -0.0520 & -3.1864 & 3.1259 & 0.2042 & 0.6504 & 9.7555 & 0.1 \\
+LogNormal-Hetero-Ridge & -0.0521 & -3.1866 & 3.1260 & 0.2041 & 0.6496 & 9.7573 & 0.1 \\
+LogNormal-Homo & -0.0812 & -2.8280 & 3.0547 & 0.1491 & 0.8812 & 14.0284 & 0.1 \\
+LogNormal-Homo-Ridge & -0.0812 & -2.8281 & 3.0549 & 0.1494 & 0.8808 & 14.0297 & 0.1 \\
+MDN & -0.1635 & -2.4053 & 2.2892 & 0.0341 & 0.9068 & 13.1525 & 9.8 \\
+RealTabPFN 2.5 & -0.4715 & -1.7250 & 1.5244 & 0.0395 & 0.9072 & 8.7621 & 1.8 \\
+Student-t & -0.0544 & -2.9781 & 3.0214 & 0.1638 & 0.8996 & 14.8703 & 0.0 \\
+Student-t-Ridge & -0.0544 & -2.9785 & 3.0230 & 0.1634 & \textbf{0.9004} & 14.8747 & 0.0 \\
+TabICL Quantiles & \textbf{-0.5308} & -1.7719 & \textbf{1.4604} & 0.0366 & 0.9216 & 8.7242 & 19.1 \\
+TabPFN 2.5 & \underline{-0.4799} & \textbf{-1.7184} & \underline{1.5060} & \underline{0.0289} & 0.8944 & \textbf{8.4339} & 1.9 \\
+TabPFN Native & -0.4799 & \underline{-1.7184} & 1.5060 & 0.0289 & 0.8944 & \underline{8.4339} & 1.8 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -4071,6 +4841,41 @@ TabPFN Native & -0.1071 & -2.5615 & 2.0449 & 0.0469 & 0.8960 & 11.0797 & 0.3 \\
 \end{tabular}
 \end{table}
 
+% ---- SARCOS-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for SARCOS-10000 ($\pm$SE across repetitions).}
+\label{tab:sarcos-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0523 & -3.3115 & 3.3760 & 0.1006 & 0.9352 & 22.3840 & 62.4 \\
+CatMLP & -0.0896 & -2.6828 & 1.9900 & 0.0896 & 0.9364 & 13.8110 & 8.5 \\
+FlexCode-RF & -0.0462 & -3.4054 & 4.0475 & 0.1791 & 0.9972 & 84.6282 & 25.0 \\
+Flow-Spline & -0.1270 & -2.3657 & 1.5403 & 0.1417 & 0.8620 & 7.6168 & 64.3 \\
+Gamma-GLM & -0.0437 & -3.4176 & 3.6710 & 0.1475 & 0.9572 & 29.2979 & 0.2 \\
+Gamma-GLM-Ridge & -0.0264 & -3.9303 & 6.2690 & 0.1061 & 0.9520 & 45.6136 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0392 & -4.0606 & 3.1195 & 0.1397 & 0.6352 & 8.2799 & 0.1 \\
+LinGauss-Homo-Ridge & -0.0575 & -3.1398 & 2.9890 & 0.0617 & 0.9136 & 18.6209 & 0.0 \\
+LinearGauss-Hetero & -0.0387 & -4.0660 & 3.1173 & 0.1386 & 0.6360 & 8.3025 & \underline{0.0} \\
+LinearGauss-Homo & -0.0575 & -3.1397 & 2.9888 & 0.0622 & 0.9136 & 18.6209 & \textbf{0.0} \\
+LogNormal-Hetero & -0.0354 & -4.1295 & 3.7927 & 0.1622 & 0.6572 & 10.3482 & 0.1 \\
+LogNormal-Hetero-Ridge & -0.0354 & -4.1336 & 3.7925 & 0.1631 & 0.6572 & 10.3230 & 0.1 \\
+LogNormal-Homo & -0.0398 & -3.4972 & 3.9081 & 0.1604 & 0.9620 & 33.2518 & 0.1 \\
+LogNormal-Homo-Ridge & -0.0398 & -3.4971 & 3.9071 & 0.1610 & 0.9620 & 33.2491 & 0.1 \\
+MDN & -0.1115 & -2.5357 & 1.8972 & 0.0725 & 0.8920 & 11.2891 & 7.3 \\
+RealTabPFN 2.5 & -0.1970 & -1.9431 & 1.1366 & 0.0787 & 0.9468 & 7.7343 & 2.9 \\
+Student-t & -0.0607 & -3.0743 & 2.9606 & \textbf{0.0139} & \textbf{0.8972} & 16.9750 & 0.0 \\
+Student-t-Ridge & -0.0607 & -3.0743 & 2.9608 & \underline{0.0140} & \underline{0.8972} & 16.9764 & 0.1 \\
+TabICL Quantiles & -0.1967 & -1.9835 & \textbf{1.1071} & 0.0732 & 0.9384 & \textbf{7.1662} & 24.1 \\
+TabPFN 2.5 & \textbf{-0.1973} & \textbf{-1.9332} & \underline{1.1268} & 0.0791 & 0.9360 & \underline{7.3367} & 2.9 \\
+TabPFN Native & \underline{-0.1973} & \underline{-1.9332} & 1.1268 & 0.0791 & 0.9360 & 7.3367 & 2.9 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ---- SARCOS-50 ----
 \begin{table}[ht]
 \centering
@@ -4219,6 +5024,76 @@ TabPFN Native & -9.6186 & \underline{1.9008} & 0.0286 & \underline{0.0440} & 0.9
 \end{tabular}
 \end{table}
 
+% ---- SDSS-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for SDSS-10000 ($\pm$SE across repetitions).}
+\label{tab:sdss-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -5.8746 & 1.3002 & 0.0324 & 0.0809 & 0.9132 & 0.1874 & 14.3 \\
+CatMLP & -8.2031 & 1.7912 & 0.0260 & 0.0536 & 0.9428 & 0.1670 & 13.1 \\
+FlexCode-RF & -6.6226 & 1.3971 & 0.0328 & 0.0969 & 0.9740 & 0.4375 & 7.5 \\
+Flow-Spline & -8.9009 & 1.8427 & 0.0265 & 0.0238 & \underline{0.8976} & 0.1515 & 96.0 \\
+Gamma-GLM & -3.9195 & 0.9742 & 0.0518 & 0.0922 & 0.9324 & 0.3637 & 0.1 \\
+Gamma-GLM-Ridge & -3.1127 & 0.7917 & 0.0616 & 0.1429 & 0.9220 & 0.4197 & 0.1 \\
+LinGauss-Hetero-Ridge & -2.5353 & 0.4394 & 0.0411 & 0.1593 & 0.6044 & \textbf{0.1075} & 0.0 \\
+LinGauss-Homo-Ridge & -4.4461 & 1.1396 & 0.0397 & 0.0883 & 0.9236 & 0.2449 & 0.0 \\
+LinearGauss-Hetero & -2.5232 & 0.4441 & 0.0410 & 0.1585 & 0.6048 & \underline{0.1079} & \underline{0.0} \\
+LinearGauss-Homo & -4.4461 & 1.1396 & 0.0397 & 0.0881 & 0.9236 & 0.2449 & \textbf{0.0} \\
+LogNormal-Hetero & -2.1839 & 0.2971 & 0.0613 & 0.1724 & 0.6228 & 0.1665 & 0.1 \\
+LogNormal-Hetero-Ridge & -2.1880 & 0.2999 & 0.0612 & 0.1727 & 0.6224 & 0.1664 & 0.1 \\
+LogNormal-Homo & -3.8966 & 0.9342 & 0.0531 & 0.1102 & 0.9380 & 0.3777 & 0.1 \\
+LogNormal-Homo-Ridge & -3.8980 & 0.9342 & 0.0531 & 0.1105 & 0.9380 & 0.3778 & 0.1 \\
+MDN & -8.5507 & 1.8043 & 0.0274 & 0.0311 & 0.9088 & 0.1613 & 12.7 \\
+RealTabPFN 2.5 & -10.3068 & 1.9678 & 0.0244 & \textbf{0.0171} & 0.8928 & 0.1365 & 1.4 \\
+Student-t & -4.6638 & 1.2693 & 0.0394 & 0.0426 & 0.8936 & 0.2081 & 0.0 \\
+Student-t-Ridge & -4.6639 & 1.2693 & 0.0394 & 0.0425 & 0.8936 & 0.2081 & 0.0 \\
+TabICL Quantiles & -10.3234 & 1.8749 & 0.0243 & 0.0228 & \textbf{0.9020} & 0.1421 & 17.6 \\
+TabPFN 2.5 & \textbf{-10.3979} & \textbf{1.9682} & \textbf{0.0243} & \underline{0.0212} & 0.8924 & 0.1342 & 1.4 \\
+TabPFN Native & \underline{-10.3979} & \underline{1.9682} & \underline{0.0243} & 0.0212 & 0.8924 & 0.1342 & 1.5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- SDSS-20000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for SDSS-20000 ($\pm$SE across repetitions).}
+\label{tab:sdss-20000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -6.3868 & 1.4005 & 0.0295 & 0.0900 & 0.9150 & 0.1749 & 30.9 \\
+CatMLP & -9.3714 & 1.8657 & 0.0247 & 0.0443 & 0.9218 & 0.1498 & 32.0 \\
+FlexCode-RF & -6.8380 & 1.4407 & 0.0321 & 0.1134 & 0.9766 & 0.4571 & 14.4 \\
+Flow-Spline & -9.6002 & 1.8985 & 0.0253 & 0.0234 & 0.9088 & 0.1524 & 172.7 \\
+Gamma-GLM & -4.0983 & 0.9955 & 0.0501 & 0.0916 & 0.9304 & 0.3603 & 0.1 \\
+Gamma-GLM-Ridge & -3.1608 & 0.8016 & 0.0605 & 0.1375 & 0.9238 & 0.4155 & 0.1 \\
+LinGauss-Hetero-Ridge & -3.1346 & 0.5615 & 0.0390 & 0.1423 & 0.6360 & \textbf{0.1071} & 0.1 \\
+LinGauss-Homo-Ridge & -4.5824 & 1.1788 & 0.0382 & 0.1053 & 0.9328 & 0.2470 & 0.0 \\
+LinearGauss-Hetero & -3.1280 & 0.5678 & 0.0390 & 0.1415 & 0.6362 & \underline{0.1074} & \underline{0.0} \\
+LinearGauss-Homo & -4.5836 & 1.1793 & 0.0382 & 0.1052 & 0.9330 & 0.2469 & \textbf{0.0} \\
+LogNormal-Hetero & -2.5876 & 0.4390 & 0.0582 & 0.1542 & 0.6402 & 0.1638 & 0.1 \\
+LogNormal-Hetero-Ridge & -2.5848 & 0.4374 & 0.0582 & 0.1546 & 0.6402 & 0.1635 & 0.2 \\
+LogNormal-Homo & -4.0848 & 0.9564 & 0.0514 & 0.1123 & 0.9366 & 0.3740 & 0.1 \\
+LogNormal-Homo-Ridge & -4.0851 & 0.9564 & 0.0514 & 0.1123 & 0.9368 & 0.3740 & 0.2 \\
+MDN & -4.2316 & 1.1719 & 0.0450 & 0.0931 & 0.9294 & 0.2921 & 23.8 \\
+RealTabPFN 2.5 & -10.9457 & 2.0001 & 0.0235 & \textbf{0.0095} & 0.8934 & 0.1313 & 3.6 \\
+Student-t & -4.9616 & 1.3239 & 0.0376 & 0.0360 & \textbf{0.9040} & 0.2104 & 0.0 \\
+Student-t-Ridge & -4.9634 & 1.3237 & 0.0376 & 0.0364 & \underline{0.9046} & 0.2104 & 0.1 \\
+TabICL Quantiles & \textbf{-11.0701} & 1.8795 & 0.0236 & 0.0137 & 0.9102 & 0.1392 & 53.5 \\
+TabPFN 2.5 & \underline{-11.0628} & \textbf{2.0038} & \textbf{0.0235} & \underline{0.0128} & 0.8904 & 0.1299 & 3.6 \\
+TabPFN Native & -11.0628 & \underline{2.0038} & \underline{0.0235} & 0.0128 & 0.8904 & 0.1299 & 3.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ---- SDSS-50 ----
 \begin{table}[ht]
 \centering
@@ -4363,6 +5238,41 @@ Student-t-Ridge & \textbf{-0.0344} & -3.2343 & 3.6861 & 0.3331 & 1.0000 & 35.900
 TabICL Quantiles & -0.0290 & -3.5918 & \textbf{3.1332} & 0.2739 & 1.0000 & 55.7018 & 1.6 \\
 TabPFN 2.5 & -0.0301 & -3.3554 & 8.7118 & 0.2951 & 1.0000 & 84.6158 & 0.2 \\
 TabPFN Native & -0.0301 & -3.3554 & 8.7118 & 0.2951 & 1.0000 & 84.6158 & 0.3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- SGEMM_GPU-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for SGEMM\_GPU-10000 ($\pm$SE across repetitions).}
+\label{tab:sgemm_gpu-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0014 & -6.9753 & 153.7575 & 0.2407 & \textbf{0.9348} & 887.9489 & 27.8 \\
+CatMLP & -0.0115 & -4.6492 & 12.4330 & 0.1641 & 0.9976 & 120.9023 & 10.1 \\
+FlexCode-RF & -0.0050 & -5.6228 & 76.5473 & 0.4544 & 1.0000 & 2234.2261 & 6.5 \\
+Flow-Spline & -0.0231 & -3.7786 & 7.6393 & 0.2527 & 0.9908 & 60.1137 & 105.8 \\
+Gamma-GLM & -0.0075 & -5.3023 & 42.0267 & \textbf{0.0594} & 0.9756 & 296.7891 & 0.1 \\
+Gamma-GLM-Ridge & -0.0063 & -5.5041 & 56.3936 & 0.0928 & 0.9812 & 290.7581 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0247 & -3.3832 & 5.9885 & 0.2187 & 0.9892 & \textbf{32.3319} & 0.0 \\
+LinGauss-Homo-Ridge & -0.0294 & -3.3382 & 4.2025 & 0.2877 & 0.9924 & 34.7591 & 0.0 \\
+LinearGauss-Hetero & -0.0247 & -3.3896 & 7.3230 & 0.2183 & 0.9892 & \underline{32.3373} & \underline{0.0} \\
+LinearGauss-Homo & -0.0294 & -3.3382 & 4.1987 & 0.2858 & 0.9920 & 34.7673 & \textbf{0.0} \\
+LogNormal-Hetero & -0.0042 & -5.5530 & 45.4364 & 0.1620 & 0.7824 & 211.8257 & 0.1 \\
+LogNormal-Hetero-Ridge & -0.0042 & -5.5533 & 45.5856 & 0.1613 & 0.7848 & 211.0543 & 0.1 \\
+LogNormal-Homo & -0.0071 & -5.3679 & 44.3219 & 0.0734 & \underline{0.9676} & 309.8883 & 0.1 \\
+LogNormal-Homo-Ridge & -0.0071 & -5.3678 & 44.4102 & \underline{0.0730} & 0.9680 & 308.7027 & 0.1 \\
+MDN & -0.0281 & \textbf{-3.3099} & 4.6068 & 0.2560 & 0.9948 & 37.6868 & 8.3 \\
+RealTabPFN 2.5 & -0.0275 & -3.4626 & 9.8870 & 0.2767 & 0.9948 & 107.8090 & 2.5 \\
+Student-t & \underline{-0.0320} & \underline{-3.3250} & \underline{3.9931} & 0.3240 & 0.9932 & 37.5570 & 0.0 \\
+Student-t-Ridge & \textbf{-0.0320} & -3.3253 & 3.9950 & 0.3252 & 0.9928 & 37.5669 & 0.1 \\
+TabICL Quantiles & -0.0280 & -3.6222 & \textbf{3.1087} & 0.2612 & 0.9996 & 51.7109 & 21.6 \\
+TabPFN 2.5 & -0.0276 & -3.4411 & 10.2236 & 0.2695 & 0.9976 & 113.7961 & 2.5 \\
+TabPFN Native & -0.0276 & -3.4411 & 10.2236 & 0.2695 & 0.9976 & 113.7961 & 2.6 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -4626,6 +5536,41 @@ TabPFN Native & -25.4506 & 3.0082 & 0.0087 & 0.0453 & 0.9120 & 0.0465 & 0.2 \\
 \end{tabular}
 \end{table}
 
+% ---- Sulfur-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for Sulfur-10000 ($\pm$SE across repetitions).}
+\label{tab:sulfur-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -15.1235 & 2.4159 & 0.0102 & 0.1794 & 0.9808 & 0.0934 & 11.7 \\
+CatMLP & -22.7108 & 2.8408 & 0.0081 & 0.1034 & 0.9720 & 0.0613 & 12.2 \\
+FlexCode-RF & -14.1669 & 2.2710 & 0.0192 & 0.2978 & 1.0000 & 0.6184 & 7.5 \\
+Flow-Spline & -28.8595 & 3.0168 & 0.0078 & \textbf{0.0151} & \textbf{0.8928} & 0.0367 & 98.1 \\
+Gamma-GLM & -16.2790 & 2.4145 & 0.0133 & 0.1274 & 0.9548 & 0.0799 & 0.1 \\
+Gamma-GLM-Ridge & -14.2567 & 2.2319 & 0.0156 & 0.1310 & 0.9428 & 0.0890 & 0.1 \\
+LinGauss-Hetero-Ridge & -10.1852 & 1.4704 & 0.0150 & 0.2018 & 0.6716 & 0.0356 & 0.0 \\
+LinGauss-Homo-Ridge & -10.0084 & 1.9031 & 0.0167 & 0.2373 & 0.9708 & 0.1389 & 0.0 \\
+LinearGauss-Hetero & -10.1887 & 1.4701 & 0.0150 & 0.2013 & 0.6704 & 0.0356 & \underline{0.0} \\
+LinearGauss-Homo & -10.0025 & 1.9030 & 0.0167 & 0.2365 & 0.9708 & 0.1389 & \textbf{0.0} \\
+LogNormal-Hetero & -12.5246 & 1.7808 & 0.0129 & 0.1435 & 0.6716 & \textbf{0.0297} & 0.1 \\
+LogNormal-Hetero-Ridge & -12.5416 & 1.7810 & 0.0129 & 0.1435 & 0.6728 & \underline{0.0297} & 0.1 \\
+LogNormal-Homo & -17.3990 & 2.5181 & 0.0125 & 0.1003 & 0.9456 & 0.0714 & 0.1 \\
+LogNormal-Homo-Ridge & -17.4026 & 2.5181 & 0.0125 & 0.1003 & 0.9456 & 0.0714 & 0.1 \\
+MDN & -23.8590 & 2.9605 & 0.0084 & \underline{0.0244} & \underline{0.9160} & 0.0492 & 8.3 \\
+RealTabPFN 2.5 & \textbf{-57.9407} & 3.8095 & 0.0046 & 0.1139 & 0.9468 & 0.0323 & 1.5 \\
+Student-t & -15.0604 & 2.4004 & 0.0144 & 0.1304 & 0.9356 & 0.0768 & 0.0 \\
+Student-t-Ridge & -15.0867 & 2.4022 & 0.0144 & 0.1302 & 0.9360 & 0.0767 & 0.0 \\
+TabICL Quantiles & -54.2225 & 3.6682 & 0.0047 & 0.1267 & 0.9608 & 0.0358 & 18.1 \\
+TabPFN 2.5 & \underline{-57.3895} & \textbf{3.8150} & \textbf{0.0045} & 0.1023 & 0.9484 & 0.0317 & 1.5 \\
+TabPFN Native & -57.3895 & \underline{3.8150} & \underline{0.0045} & 0.1023 & 0.9484 & 0.0317 & 1.5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ---- Sulfur-50 ----
 \begin{table}[ht]
 \centering
@@ -4770,6 +5715,66 @@ Student-t-Ridge & -0.0197 & -4.1805 & 9.9520 & 0.1893 & 0.8680 & 52.3715 & 0.0 \
 TabICL Quantiles & \textbf{-0.0752} & -3.2854 & \textbf{5.4026} & 0.0862 & 0.9160 & 31.7848 & 4.2 \\
 TabPFN 2.5 & -0.0722 & \underline{-3.2626} & 5.5371 & 0.0763 & 0.8920 & 30.6568 & 0.6 \\
 TabPFN Native & -0.0722 & -3.2626 & 5.5371 & 0.0763 & 0.8920 & 30.6568 & 0.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- Superconductivity-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for Superconductivity-10000 ($\pm$SE across repetitions).}
+\label{tab:superconductivity-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0189 & -4.2638 & 10.2011 & 0.1117 & 0.8940 & 54.0573 & 143.5 \\
+CatMLP & -0.0658 & -3.3321 & 5.7571 & 0.0529 & 0.9308 & 34.7331 & 7.8 \\
+FlexCode-RF & -0.0490 & -3.6209 & 6.5268 & 0.1924 & 0.9856 & 112.1885 & 71.0 \\
+Flow-Spline & -0.0726 & -3.2402 & 5.5697 & 0.0503 & 0.8912 & 30.6689 & 72.7 \\
+Gamma-GLM & -0.0313 & -3.8653 & 9.0746 & 0.0959 & 0.9160 & 66.6573 & 192.2 \\
+Gamma-GLM-Ridge & -0.0301 & -4.0099 & 10.9787 & 0.0691 & 0.9220 & 71.4864 & 5.0 \\
+LinGauss-Hetero-Ridge & -0.0115 & -4.5534 & 9.5978 & 0.1587 & 0.6508 & 31.0098 & 0.2 \\
+LinGauss-Homo-Ridge & -0.0193 & -4.1677 & 9.3595 & 0.1003 & 0.9020 & 51.9342 & 0.2 \\
+LinearGauss-Hetero & -0.0115 & -4.5533 & 9.6016 & 0.1592 & 0.6512 & 30.9976 & \underline{0.1} \\
+LinearGauss-Homo & -0.0193 & -4.1680 & 9.3617 & 0.0996 & 0.9020 & 51.9351 & \textbf{0.1} \\
+LogNormal-Hetero & -0.0156 & -4.3354 & 9.1881 & 0.2063 & 0.6900 & 30.7404 & 0.2 \\
+LogNormal-Hetero-Ridge & -0.0157 & -4.3385 & 9.1858 & 0.2074 & 0.6884 & 30.6757 & 0.3 \\
+LogNormal-Homo & -0.0257 & -3.9230 & 9.3601 & 0.1251 & 0.9352 & 76.5982 & 0.1 \\
+LogNormal-Homo-Ridge & -0.0258 & -3.9227 & 9.3574 & 0.1259 & 0.9340 & 76.5454 & 0.4 \\
+MDN & -0.0564 & -3.4809 & 6.4504 & 0.0412 & 0.8964 & 38.7495 & 7.5 \\
+RealTabPFN 2.5 & \underline{-0.1287} & \textbf{-2.8077} & \underline{3.9905} & 0.0350 & 0.9096 & 23.2068 & 9.1 \\
+Student-t & -0.0194 & -4.1664 & 9.3453 & 0.0797 & 0.8868 & 50.6939 & 0.1 \\
+Student-t-Ridge & -0.0194 & -4.1662 & 9.3430 & 0.0809 & 0.8872 & 50.6909 & 0.2 \\
+TabICL Quantiles & \textbf{-0.1291} & -2.8635 & \textbf{3.8034} & 0.0516 & 0.9284 & 23.7982 & 43.4 \\
+TabPFN 2.5 & -0.1265 & \underline{-2.8162} & 4.0016 & \textbf{0.0332} & \textbf{0.9012} & \textbf{22.4685} & 9.0 \\
+TabPFN Native & -0.1265 & -2.8162 & 4.0016 & \underline{0.0332} & \underline{0.9012} & \underline{22.4685} & 9.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- Superconductivity-20000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for Superconductivity-20000 ($\pm$SE across repetitions).}
+\label{tab:superconductivity-20000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+FlexCode-RF & -0.0579 & -3.5013 & 6.1684 & 0.1870 & 0.9832 & 93.3175 & 141.1 \\
+LinearGauss-Hetero & -0.0084 & -4.6268 & 9.7719 & 0.1510 & 0.6490 & 30.3379 & \underline{0.1} \\
+LinearGauss-Homo & -0.0201 & -4.1715 & 9.5503 & 0.1278 & 0.8882 & 50.3791 & \textbf{0.1} \\
+LogNormal-Hetero & -0.0206 & -4.4563 & 9.0777 & 0.1910 & 0.6748 & 28.9538 & 0.2 \\
+LogNormal-Homo & -0.0307 & -3.8747 & 9.3297 & 0.1150 & 0.9274 & 65.4262 & 0.2 \\
+MDN & -0.0685 & -3.4039 & 6.4382 & \textbf{0.0320} & \textbf{0.8980} & 36.1329 & 14.1 \\
+RealTabPFN 2.5 & -0.1685 & -2.6312 & 3.6281 & 0.0548 & 0.9090 & 20.3799 & 28.0 \\
+Student-t & -0.0202 & -4.1650 & 9.5226 & 0.1095 & 0.8710 & 49.1466 & 0.1 \\
+TabICL Quantiles & \textbf{-0.1756} & -2.6748 & \textbf{3.4286} & 0.0631 & 0.9208 & 20.3489 & 106.5 \\
+TabPFN 2.5 & \underline{-0.1707} & \textbf{-2.6202} & \underline{3.6032} & \underline{0.0403} & \underline{0.9032} & \textbf{19.6673} & 28.3 \\
+TabPFN Native & -0.1707 & \underline{-2.6202} & 3.6032 & 0.0403 & 0.9032 & \underline{19.6673} & 26.8 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -4922,6 +5927,43 @@ TabPFN Native & -14.9394 & 2.3724 & 0.0154 & 0.0594 & 0.8640 & 0.0841 & 2.0 \\
 \end{tabular}
 \end{table}
 
+% ---- Topo-50 ----
+\begin{table}[ht]
+\centering
+\caption{Results for Topo-50 ($\pm$SE across repetitions).}
+\label{tab:topo-50}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Hetero & -7.3300 $\pm$ 0.7003 & 1.8409 $\pm$ 0.2190 & 0.0172 $\pm$ 0.0012 & \underline{0.2389 $\pm$ 0.0261} & 0.9077 $\pm$ 0.0340 & 0.0978 $\pm$ 0.0022 & 82.0 $\pm$ 3.4 \\
+BART-Homo & -7.0308 $\pm$ 0.0680 & 1.7648 $\pm$ 0.1859 & 0.0172 $\pm$ 0.0006 & 0.3822 $\pm$ 0.0305 & 0.9923 $\pm$ 0.0077 & 0.1281 $\pm$ 0.0008 & 13.6 $\pm$ 0.6 \\
+CatMLP & 1.8797 $\pm$ 4.3528 & 1.3379 $\pm$ 0.3321 & 0.0142 $\pm$ 0.0007 & 0.2992 $\pm$ 0.0388 & \textbf{0.9000 $\pm$ 0.0381} & 0.0988 $\pm$ 0.0086 & 0.3 $\pm$ 0.0 \\
+FlexCode-RF & -12.1672 $\pm$ 0.7217 & 1.0450 $\pm$ 0.4030 & 0.0138 $\pm$ 0.0008 & 0.2444 $\pm$ 0.0120 & 0.9462 $\pm$ 0.0164 & 0.1018 $\pm$ 0.0019 & 0.6 $\pm$ 0.0 \\
+Flow-Spline & -7.0276 $\pm$ 5.4687 & 2.1453 $\pm$ 0.1982 & 0.0140 $\pm$ 0.0010 & 0.2412 $\pm$ 0.0338 & 0.8846 $\pm$ 0.0385 & 0.0770 $\pm$ 0.0033 & 4.0 $\pm$ 0.1 \\
+Gamma-GLM & -4.5017 $\pm$ 1.1615 & 0.9819 $\pm$ 0.2982 & 0.0218 $\pm$ 0.0016 & 0.2716 $\pm$ 0.0333 & 0.8615 $\pm$ 0.0224 & 0.0973 $\pm$ 0.0032 & 0.0 $\pm$ 0.0 \\
+Gamma-GLM-Ridge & -2.2721 $\pm$ 5.5435 & 1.1361 $\pm$ 0.4465 & 0.0177 $\pm$ 0.0017 & 0.2920 $\pm$ 0.0161 & 0.8692 $\pm$ 0.0345 & 0.0904 $\pm$ 0.0028 & 0.1 $\pm$ 0.0 \\
+LinGauss-Hetero-Ridge & -6.2468 $\pm$ 5.0153 & 0.5403 $\pm$ 0.7354 & 0.0161 $\pm$ 0.0024 & 0.3128 $\pm$ 0.0376 & 0.6615 $\pm$ 0.0620 & \underline{0.0429 $\pm$ 0.0023} & 0.0 $\pm$ 0.0 \\
+LinGauss-Homo-Ridge & -7.5842 $\pm$ 2.9386 & 1.7020 $\pm$ 0.4049 & 0.0156 $\pm$ 0.0017 & 0.3180 $\pm$ 0.0240 & 0.9077 $\pm$ 0.0320 & 0.0951 $\pm$ 0.0024 & 0.1 $\pm$ 0.0 \\
+LinearGauss-Hetero & 31.3548 $\pm$ 8.3193 & -3.5374 $\pm$ 0.6111 & 0.0228 $\pm$ 0.0016 & 0.3066 $\pm$ 0.0408 & 0.6000 $\pm$ 0.0299 & 0.0711 $\pm$ 0.0036 & 0.0 $\pm$ 0.0 \\
+LinearGauss-Homo & -0.7135 $\pm$ 4.0891 & 0.9527 $\pm$ 0.2982 & 0.0211 $\pm$ 0.0015 & 0.2650 $\pm$ 0.0312 & 0.8769 $\pm$ 0.0235 & 0.0990 $\pm$ 0.0033 & 0.0 $\pm$ 0.0 \\
+LogNormal-Hetero & 29.1072 $\pm$ 9.3180 & -3.2848 $\pm$ 0.7490 & 0.0228 $\pm$ 0.0016 & 0.2993 $\pm$ 0.0398 & 0.6000 $\pm$ 0.0320 & 0.0718 $\pm$ 0.0036 & 0.0 $\pm$ 0.0 \\
+LogNormal-Hetero-Ridge & 3.1077 $\pm$ 11.6566 & 0.4280 $\pm$ 0.8249 & 0.0164 $\pm$ 0.0027 & 0.3101 $\pm$ 0.0361 & 0.6615 $\pm$ 0.0699 & \textbf{0.0417 $\pm$ 0.0025} & 0.0 $\pm$ 0.0 \\
+LogNormal-Homo & -0.4525 $\pm$ 4.2012 & 0.9547 $\pm$ 0.2992 & 0.0213 $\pm$ 0.0014 & 0.2654 $\pm$ 0.0307 & 0.8692 $\pm$ 0.0231 & 0.0990 $\pm$ 0.0033 & \textbf{0.0 $\pm$ 0.0} \\
+LogNormal-Homo-Ridge & -7.6842 $\pm$ 2.9973 & 1.7063 $\pm$ 0.4077 & 0.0156 $\pm$ 0.0017 & 0.3151 $\pm$ 0.0234 & \underline{0.9000 $\pm$ 0.0345} & 0.0946 $\pm$ 0.0024 & 0.0 $\pm$ 0.0 \\
+MDN & 4.6165 $\pm$ 9.5860 & 1.3668 $\pm$ 0.3178 & 0.0167 $\pm$ 0.0016 & 0.3407 $\pm$ 0.0475 & 0.8000 $\pm$ 0.0366 & 0.0794 $\pm$ 0.0062 & 0.6 $\pm$ 0.0 \\
+Quantile-Tree & -4.3823 $\pm$ 4.1547 & 2.0352 $\pm$ 0.2772 & \textbf{0.0130 $\pm$ 0.0010} & 0.2910 $\pm$ 0.0243 & 0.8538 $\pm$ 0.0313 & 0.0777 $\pm$ 0.0040 & 2.6 $\pm$ 0.1 \\
+RealTabPFN 2.5 & \underline{-13.4471 $\pm$ 0.8319} & \textbf{2.1807 $\pm$ 0.2139} & \underline{0.0131 $\pm$ 0.0010} & 0.2811 $\pm$ 0.0228 & 0.9154 $\pm$ 0.0242 & 0.0878 $\pm$ 0.0016 & 0.3 $\pm$ 0.0 \\
+Student-t & -5.0423 $\pm$ 1.0820 & 1.6162 $\pm$ 0.1964 & 0.0197 $\pm$ 0.0015 & 0.2767 $\pm$ 0.0297 & 0.9000 $\pm$ 0.0282 & 0.1003 $\pm$ 0.0029 & \underline{0.0 $\pm$ 0.0} \\
+Student-t-Ridge & -11.4971 $\pm$ 1.2717 & 2.0406 $\pm$ 0.2325 & 0.0150 $\pm$ 0.0015 & 0.3048 $\pm$ 0.0268 & 0.8692 $\pm$ 0.0381 & 0.0883 $\pm$ 0.0026 & 0.0 $\pm$ 0.0 \\
+TabICL Quantiles & \textbf{-13.6814 $\pm$ 2.0838} & 2.0557 $\pm$ 0.2604 & 0.0133 $\pm$ 0.0009 & \textbf{0.2222 $\pm$ 0.0200} & 0.8692 $\pm$ 0.0364 & 0.0746 $\pm$ 0.0029 & 1.6 $\pm$ 0.0 \\
+TabPFN 2.5 & -12.7682 $\pm$ 0.7842 & \underline{2.1543 $\pm$ 0.2111} & 0.0131 $\pm$ 0.0010 & 0.2733 $\pm$ 0.0258 & 0.9077 $\pm$ 0.0251 & 0.0880 $\pm$ 0.0016 & 0.3 $\pm$ 0.0 \\
+TabPFN Native & -12.7682 $\pm$ 0.7842 & 2.1543 $\pm$ 0.2111 & 0.0131 $\pm$ 0.0010 & 0.2733 $\pm$ 0.0258 & 0.9077 $\pm$ 0.0251 & 0.0880 $\pm$ 0.0016 & 0.3 $\pm$ 0.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ---- Topo-500 ----
 \begin{table}[ht]
 \centering
@@ -4959,6 +6001,43 @@ TabPFN Native & \underline{-14.5500} & \underline{2.3658} & 0.0155 & \underline{
 \end{tabular}
 \end{table}
 
+% ---- Topo-5000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for Topo-5000 ($\pm$SE across repetitions).}
+\label{tab:topo-5000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Hetero & -10.2904 & 0.8594 & 0.0161 & 0.1828 & 0.6728 & 0.0412 & 655.8 \\
+BART-Homo & -8.9619 & 1.9755 & 0.0170 & 0.1937 & 0.9592 & 0.1476 & 100.5 \\
+CatMLP & -15.1449 & 2.4135 & 0.0148 & 0.0694 & 0.9080 & 0.0966 & 3.1 \\
+FlexCode-RF & -10.9391 & 0.7262 & 0.0174 & 0.1924 & 0.9160 & 0.2872 & 103.2 \\
+Flow-Spline & -15.4849 & 2.4286 & 0.0148 & 0.0678 & \underline{0.8928} & 0.0940 & 17.9 \\
+Gamma-GLM & -8.6314 & 1.9378 & 0.0174 & 0.1899 & 0.9792 & 0.1522 & 192.5 \\
+Gamma-GLM-Ridge & -8.9556 & 1.9728 & 0.0171 & 0.1984 & 0.9656 & 0.1491 & 5.5 \\
+LinGauss-Hetero-Ridge & -9.9465 & 0.7696 & 0.0162 & 0.1718 & 0.6552 & \underline{0.0408} & 0.3 \\
+LinGauss-Homo-Ridge & -10.8630 & 2.1146 & 0.0158 & 0.1569 & 0.8888 & 0.1032 & 0.3 \\
+LinearGauss-Hetero & -7.6923 & 0.9015 & 0.0168 & 0.1461 & 0.6544 & 0.0491 & 0.2 \\
+LinearGauss-Homo & -9.3703 & 1.9986 & 0.0169 & 0.1490 & 0.9440 & 0.1330 & \textbf{0.1} \\
+LogNormal-Hetero & -6.7338 & 0.9149 & 0.0177 & 0.1437 & 0.6504 & 0.0506 & 0.2 \\
+LogNormal-Hetero-Ridge & -10.2310 & 0.6772 & 0.0164 & 0.1531 & 0.6496 & \textbf{0.0398} & 0.4 \\
+LogNormal-Homo & -5.5284 & 1.5155 & 0.0235 & 0.3270 & 0.9984 & 0.2432 & 0.2 \\
+LogNormal-Homo-Ridge & -7.0543 & 1.7454 & 0.0197 & 0.2791 & 1.0000 & 0.1988 & 0.3 \\
+MDN & -14.5249 & 2.3368 & 0.0150 & 0.0433 & 0.8800 & 0.0892 & 2.8 \\
+Quantile-Tree & -15.8243 & 2.3685 & 0.0147 & \underline{0.0350} & 0.8752 & 0.0980 & 110.5 \\
+RealTabPFN 2.5 & -16.0181 & \textbf{2.4742} & \underline{0.0146} & \textbf{0.0330} & 0.8824 & 0.0871 & 8.7 \\
+Student-t & -11.6465 & 2.1507 & 0.0160 & 0.0874 & 0.8784 & 0.0972 & \underline{0.1} \\
+Student-t-Ridge & -12.5184 & 2.1881 & 0.0154 & 0.1235 & 0.8688 & 0.0857 & 0.3 \\
+TabICL Quantiles & \textbf{-16.1374} & 2.4528 & \textbf{0.0144} & 0.0425 & \textbf{0.9032} & 0.0936 & 51.3 \\
+TabPFN 2.5 & \underline{-16.0334} & \underline{2.4687} & 0.0146 & 0.0448 & 0.8744 & 0.0831 & 8.5 \\
+TabPFN Native & -16.0334 & 2.4687 & 0.0146 & 0.0448 & 0.8744 & 0.0831 & 8.8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ---- VideoTranscoding-1000 ----
 \begin{table}[ht]
 \centering
@@ -4992,6 +6071,41 @@ Student-t-Ridge & -0.0401 & -3.4074 & 4.3628 & 0.1356 & 0.9360 & 24.9829 & 0.0 \
 TabICL Quantiles & -0.3516 & -1.3672 & \textbf{0.7225} & 0.2055 & 0.9920 & 6.8514 & 1.9 \\
 TabPFN 2.5 & \textbf{-0.3659} & \textbf{-1.2144} & 0.7390 & 0.1725 & 0.9840 & \underline{6.2564} & 0.3 \\
 TabPFN Native & \underline{-0.3659} & \underline{-1.2144} & 0.7390 & 0.1725 & 0.9840 & 6.2564 & 0.3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- VideoTranscoding-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for VideoTranscoding-10000 ($\pm$SE across repetitions).}
+\label{tab:videotranscoding-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0470 & -3.5506 & 4.1482 & 0.4496 & \textbf{0.8700} & 19.8302 & 59.7 \\
+CatMLP & -0.1721 & -2.1035 & 1.4188 & 0.1507 & 0.9828 & 11.3061 & 8.5 \\
+FlexCode-RF & -0.0779 & -2.9388 & 4.6660 & 0.3504 & 0.9988 & 123.1864 & 8.8 \\
+Flow-Spline & -0.3160 & -1.4271 & 1.1266 & 0.1747 & 0.9572 & 6.7802 & 84.3 \\
+Gamma-GLM & -0.2009 & -2.1544 & 2.5523 & 0.0850 & 0.9396 & 14.1636 & 0.2 \\
+Gamma-GLM-Ridge & -0.1443 & -2.4902 & 3.4166 & \textbf{0.0749} & 0.9428 & 14.0117 & 0.1 \\
+LinGauss-Hetero-Ridge & -0.0252 & -3.7248 & 4.6981 & 0.1684 & 0.6952 & 15.2939 & 0.1 \\
+LinGauss-Homo-Ridge & -0.0389 & -3.5807 & 4.5742 & 0.2671 & 0.9668 & 30.9695 & 0.0 \\
+LinearGauss-Hetero & -0.0255 & -3.7161 & 4.6981 & 0.1694 & 0.6992 & 15.3402 & \textbf{0.0} \\
+LinearGauss-Homo & -0.0388 & -3.5811 & 4.5771 & 0.2684 & 0.9668 & 31.0237 & \underline{0.0} \\
+LogNormal-Hetero & -0.1303 & -2.3793 & 2.6071 & 0.0797 & 0.7768 & 8.4004 & 0.1 \\
+LogNormal-Hetero-Ridge & -0.1306 & -2.3804 & 2.6086 & 0.0793 & 0.7780 & 8.3869 & 0.1 \\
+LogNormal-Homo & -0.2003 & -2.1266 & 2.5235 & 0.0865 & 0.9308 & 13.7835 & 0.1 \\
+LogNormal-Homo-Ridge & -0.2003 & -2.1265 & 2.5240 & 0.0862 & \underline{0.9304} & 13.7560 & 0.1 \\
+MDN & -0.2694 & -1.6276 & 1.6290 & \underline{0.0785} & 0.9332 & 9.8648 & 7.7 \\
+RealTabPFN 2.5 & -0.4331 & -0.8153 & 0.5393 & 0.1935 & 0.9848 & 4.3314 & 3.2 \\
+Student-t & -0.0377 & -3.4366 & 4.5459 & 0.1275 & 0.9384 & 25.2951 & 0.0 \\
+Student-t-Ridge & -0.0377 & -3.4361 & 4.5444 & 0.1269 & 0.9388 & 25.2416 & 0.1 \\
+TabICL Quantiles & -0.4329 & -1.0241 & \textbf{0.4057} & 0.2214 & 0.9892 & \textbf{4.1249} & 25.1 \\
+TabPFN 2.5 & \textbf{-0.4352} & \textbf{-0.8075} & \underline{0.5131} & 0.1905 & 0.9872 & \underline{4.1286} & 3.3 \\
+TabPFN Native & \underline{-0.4352} & \underline{-0.8075} & 0.5131 & 0.1905 & 0.9872 & 4.1286 & 3.8 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -5292,6 +6406,32 @@ TabPFN Native & -0.0001 & -9.6470 & 1799.9732 & 0.2066 & 1.0000 & 19864.4760 & 0
 \end{tabular}
 \end{table}
 
+% ---- WaveEnergy-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for WaveEnergy-10000 ($\pm$SE across repetitions).}
+\label{tab:waveenergy-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+FlexCode-RF & -0.0000 & -12.5671 & 38339.3028 & \textbf{0.1093} & 0.9820 & 410624.5561 & 56.5 \\
+Flow-Spline & -0.0001 & -9.4645 & 1748.5759 & 0.1280 & \underline{0.9712} & 13838.1469 & 58.7 \\
+LinearGauss-Hetero & -0.0000 & -22.8523 & 498071.7759 & 0.9880 & 0.0120 & \textbf{113.0794} & \underline{0.0} \\
+LinearGauss-Homo & -0.0001 & \textbf{-8.8718} & \underline{1308.0369} & 0.2512 & 1.0000 & \underline{9427.2802} & \textbf{0.0} \\
+LogNormal-Hetero & -0.0001 & -9.3974 & 1531.3845 & 0.1781 & \textbf{0.9568} & 10198.0271 & 0.1 \\
+LogNormal-Homo & \underline{-0.0001} & -9.3095 & 1368.2448 & 0.2725 & 0.9748 & 12625.9893 & 0.1 \\
+MDN & -0.0001 & -9.0677 & 1324.8082 & 0.2350 & 0.9968 & 11750.0624 & 7.6 \\
+RealTabPFN 2.5 & -0.0001 & -9.4939 & 1499.5761 & 0.2879 & 0.9996 & 18240.9477 & 5.7 \\
+Student-t & \textbf{-0.0001} & \underline{-8.9212} & \textbf{1128.0109} & 0.3832 & 1.0000 & 10914.1126 & 0.0 \\
+TabICL Quantiles & -0.0001 & -10.0323 & 3065.6125 & \underline{0.1169} & 0.9748 & 24001.8048 & 32.0 \\
+TabPFN 2.5 & -0.0001 & -9.4945 & 1518.1268 & 0.2918 & 1.0000 & 18043.8620 & 5.7 \\
+TabPFN Native & -0.0001 & -9.4945 & 1518.1268 & 0.2918 & 1.0000 & 18043.8620 & 5.8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ---- WaveEnergy-50 ----
 \begin{table}[ht]
 \centering
@@ -5547,6 +6687,41 @@ Student-t-Ridge & -0.0350 & -3.5514 & 5.1352 & 0.1828 & 0.8960 & 26.0224 & 0.0 \
 TabICL Quantiles & -0.0548 & \textbf{-3.2045} & \textbf{4.4140} & \textbf{0.0426} & 0.9400 & 25.7315 & 4.5 \\
 TabPFN 2.5 & \textbf{-0.0549} & \underline{-3.2161} & \underline{4.5081} & \underline{0.0481} & 0.9160 & 24.3490 & 0.6 \\
 TabPFN Native & \underline{-0.0549} & -3.2161 & 4.5081 & 0.0481 & 0.9160 & 24.3490 & 0.7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- Year-10000 ----
+\begin{table}[ht]
+\centering
+\caption{Results for Year-10000 ($\pm$SE across repetitions).}
+\label{tab:year-10000}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{CDE loss} & \textbf{Log-lik} & \textbf{CRPS} & \textbf{PIT KS} & \textbf{90\% Cov} & \textbf{Width} & \textbf{Time (s)} \\
+\midrule
+BART-Homo & -0.0109 & -4.5042 & 18.4546 & 0.5785 & 0.9816 & 80.1863 & 143.3 \\
+CatMLP & -0.0494 & -3.3110 & 4.6507 & 0.0279 & 0.9020 & 26.9011 & 5.5 \\
+FlexCode-RF & -0.0505 & -3.4506 & 4.8306 & 0.0639 & 0.9664 & 44.0603 & 104.1 \\
+Flow-Spline & -0.0485 & -3.3098 & 4.5900 & 0.0374 & 0.8768 & 25.1650 & 27.1 \\
+Gamma-GLM & -0.0276 & -3.7690 & 6.7033 & 0.3247 & 0.9928 & 48.0002 & 8.1 \\
+Gamma-GLM-Ridge & -0.0266 & -3.7900 & 6.9023 & 0.3069 & 0.9904 & 48.0044 & 2.7 \\
+LinGauss-Hetero-Ridge & -0.0239 & -4.2522 & 5.1873 & 0.2070 & 0.6352 & \textbf{14.7813} & 0.2 \\
+LinGauss-Homo-Ridge & -0.0361 & -3.6015 & 5.1114 & 0.1619 & \textbf{0.9012} & 27.7211 & 0.2 \\
+LinearGauss-Hetero & -0.0223 & -4.2731 & 5.1668 & 0.2016 & 0.6268 & 14.8981 & \textbf{0.1} \\
+LinearGauss-Homo & -0.0363 & -3.5991 & 5.0958 & 0.1599 & \underline{0.9012} & 27.6876 & \underline{0.1} \\
+LogNormal-Hetero & -0.0226 & -4.2678 & 5.1684 & 0.2017 & 0.6296 & 14.9222 & 0.2 \\
+LogNormal-Hetero-Ridge & -0.0239 & -4.2531 & 5.1886 & 0.2075 & 0.6384 & \underline{14.8274} & 0.3 \\
+LogNormal-Homo & -0.0361 & -3.6026 & 5.1038 & 0.1615 & 0.9012 & 27.7393 & 0.1 \\
+LogNormal-Homo-Ridge & -0.0360 & -3.6050 & 5.1194 & 0.1636 & 0.9016 & 27.7736 & 0.3 \\
+MDN & -0.0449 & -3.4159 & 4.5900 & 0.0754 & 0.8648 & 23.5956 & 4.7 \\
+RealTabPFN 2.5 & -0.0571 & -3.1701 & 4.2680 & \underline{0.0254} & 0.8932 & 23.4859 & 10.1 \\
+Student-t & -0.0372 & -3.5398 & 5.0493 & 0.1490 & 0.8712 & 25.0905 & 0.1 \\
+Student-t-Ridge & -0.0370 & -3.5429 & 5.0636 & 0.1532 & 0.8716 & 25.1564 & 0.2 \\
+TabICL Quantiles & -0.0570 & -3.2748 & 4.2799 & \textbf{0.0225} & 0.8884 & 24.5692 & 46.3 \\
+TabPFN 2.5 & \textbf{-0.0573} & \textbf{-3.1656} & \textbf{4.2575} & 0.0260 & 0.8952 & 23.7809 & 10.0 \\
+TabPFN Native & \underline{-0.0573} & \underline{-3.1656} & \underline{4.2575} & 0.0260 & 0.8952 & 23.7809 & 10.0 \\
 \bottomrule
 \end{tabular}
 \end{table}

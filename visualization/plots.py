@@ -589,7 +589,6 @@ METRICS_INFO = [
     ('CRPS',      'CRPS',      'lower'),
     ('PIT_KS',    'PIT KS',    'lower'),
     ('coverage_90', '90% Cov', 'target_0.90'),
-    ('interval_width', 'Width', 'lower'),
     ('fit_time',  'Fit Time',  'lower'),
 ]
 
@@ -910,11 +909,10 @@ def _plot_rankings_grid(sub_results, methods, colors, n_size, kind_label,
         cbar.set_label('Rank', fontsize=axis_fs)
 
         fig.subplots_adjust(top=0.90, bottom=0.14)
-        for ext in ('pdf', 'png'):
-            fname = f"{fname_prefix}_{metric.lower()}_n{n_size}.{ext}"
-            fig.savefig(output_dir / fname, dpi=300, bbox_inches='tight')
+        fname = f"{fname_prefix}_{metric.lower()}_n{n_size}.png"
+        fig.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
         plt.close(fig)
-        print(f"  saved {fname_prefix}_{metric.lower()}_n{n_size}.{{pdf,png}}")
+        print(f"  saved {fname}")
 
 
 def plot_sdss_rankings_by_n(all_results, output_dir, all_data=None):
@@ -932,21 +930,22 @@ def plot_sdss_rankings_by_n(all_results, output_dir, all_data=None):
 
 def plot_rankings_by_n(all_results, output_dir, all_data=None):
     """Ranking heatmaps for each sample size, split into real and simulated."""
-    output_dirs = _resolve_output_dirs(output_dir)
-    groups = _group_by_n_and_type(all_results)
-    if not groups:
-        return
-
-    methods = sorted(_visible_methods(
-        m for ds in all_results.values() for m in ds.keys()
-    ))
-    colors = _method_colors_map(methods)
-
-    for n_size in sorted(groups):
-        for kind, label, prefix in [('sim', 'Simulated', 'rankings_sim'),
-                                     ('real', 'Real', 'rankings_real')]:
-            _plot_rankings_grid(groups[n_size][kind], methods, colors,
-                                n_size, label, prefix, output_dirs[kind], all_data)
+    # Disabled — uncomment to regenerate ranking heatmaps
+    # output_dirs = _resolve_output_dirs(output_dir)
+    # groups = _group_by_n_and_type(all_results)
+    # if not groups:
+    #     return
+    #
+    # methods = sorted(_visible_methods(
+    #     m for ds in all_results.values() for m in ds.keys()
+    # ))
+    # colors = _method_colors_map(methods)
+    #
+    # for n_size in sorted(groups):
+    #     for kind, label, prefix in [('sim', 'Simulated', 'rankings_sim'),
+    #                                  ('real', 'Real', 'rankings_real')]:
+    #         _plot_rankings_grid(groups[n_size][kind], methods, colors,
+    #                             n_size, label, prefix, output_dirs[kind], all_data)
 
 
 def plot_critical_difference(all_results, output_dir, all_data=None):
@@ -1176,11 +1175,10 @@ def _plot_cd_single(sub_results, datasets, methods, metric, label, direction,
                  fontsize=10, fontweight='bold', pad=8)
 
     fig.tight_layout()
-    for ext in ('pdf', 'png'):
-        fname = f"{prefix}_{metric.lower()}_n{n_size}.{ext}"
-        fig.savefig(output_dir / fname, dpi=300, bbox_inches='tight')
+    fname = f"{prefix}_{metric.lower()}_n{n_size}.png"
+    fig.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
     plt.close(fig)
-    print(f"  saved {prefix}_{metric.lower()}_n{n_size}.{{pdf,png}}")
+    print(f"  saved {fname}")
 
 
 def _format_table_number(val):
@@ -1331,7 +1329,7 @@ def _plot_sdss_raw_combined(groups, methods, output_dir):
 
 def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
                    fname_prefix, output_dir, all_data,
-                   summary_mode='score'):
+                   summary_mode='score', show_values=False):
     """Transposed raw-value heatmap: methods=columns, datasets=rows."""
     datasets = _ordered_dataset_names(sub_results.keys(), all_data)
     if not datasets:
@@ -1347,6 +1345,9 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
     method_index = {m: i for i, m in enumerate(methods)}
     # +1 row for avg score summary
     fig_w, fig_h = _heatmap_layout(n_methods, n_ds + 1)
+    if show_values:
+        fig_w = n_methods * 0.72 + 0.5
+        fig_h = max(HEATMAP_MIN_FIG_HEIGHT, (n_ds + 1) * 0.34 + 2.0)
     fonts = _scaled_heatmap_font_sizes(n_methods, n_ds, scale=1.25)
     method_fs = fonts['method']
     ds_fs = fonts['dataset']
@@ -1399,6 +1400,7 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
         col_order = [method_index[m] for m in ordered_methods]
         # Transposed: rows=datasets, columns=methods
         data_norm = norm_matrix[col_order, :].T  # (n_ds, n_methods)
+        data_raw = matrix[col_order, :].T         # (n_ds, n_methods) raw values
 
         if summary_mode == 'rank':
             rank_matrix = np.full((n_methods, n_ds), np.nan)
@@ -1435,6 +1437,29 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
         fig, ax1 = plt.subplots(figsize=(fig_w, fig_h))
 
         ax1.imshow(plot_norm, cmap=cmap, aspect='auto', vmin=0, vmax=1)
+
+        if show_values:
+            _VALUE_FMTS = {
+                'CDE_loss': lambda v: f'{v:.2f}' if 0.01 <= abs(v) < 1000 else f'{v:.1e}',
+                'log_lik': lambda v: f'{v:.1f}',
+                'CRPS': lambda v: f'{v:.2f}' if 0.01 <= abs(v) < 1000 else f'{v:.1e}',
+                'PIT_KS': lambda v: f'{v:.2f}',
+                'coverage_90': lambda v: f'{v:.2f}',
+            }
+            fmt = _VALUE_FMTS.get(metric, lambda v: f'{v:.2g}')
+            cmap_obj = plt.get_cmap(cmap)
+            val_fs = max(5.0, min(7.0, 150 / max(n_methods, n_ds)))
+            for i in range(n_ds):
+                for j in range(n_methods):
+                    v = data_raw[i, j]
+                    if np.isnan(v):
+                        continue
+                    nv = data_norm[i, j]
+                    bg = cmap_obj(nv) if not np.isnan(nv) else (0.9, 0.9, 0.9, 1.0)
+                    ax1.text(j, i, fmt(v), ha='center', va='center',
+                             fontsize=val_fs, fontweight='bold',
+                             color=_text_color_for_bg(bg), zorder=5)
+
         if summary_mode == 'rank':
             rank_cmap = plt.get_cmap('RdYlGn_r')
             rank_norm = matplotlib.colors.Normalize(vmin=1, vmax=n_methods)
@@ -1481,12 +1506,10 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
                       fontsize=title_fs, fontweight='bold', pad=20)
 
         fig.subplots_adjust(top=0.90, bottom=0.14)
-        for ext in ('pdf', 'png'):
-            fname = f"{fname_prefix}_{metric.lower()}_n{n_size}.{ext}"
-            dpi = 150 if ext == 'png' else 300
-            fig.savefig(output_dir / fname, dpi=dpi, bbox_inches='tight')
+        fname = f"{fname_prefix}_{metric.lower()}_n{n_size}.png"
+        fig.savefig(output_dir / fname, dpi=150, bbox_inches='tight')
         plt.close(fig)
-        print(f"  saved {fname_prefix}_{metric.lower()}_n{n_size}.{{pdf,png}}")
+        print(f"  saved {fname}")
 
 
 def plot_sdss_raw_metrics_by_n(all_results, output_dir, all_data=None):
@@ -1521,6 +1544,24 @@ def plot_raw_metrics_by_n(all_results, output_dir, all_data=None):
             _plot_raw_grid(groups[n_size][kind], methods, colors, n_size, label,
                            prefix, output_dirs[kind], all_data,
                            summary_mode=summary_mode)
+
+
+def plot_raw_metrics_with_values_by_n(all_results, output_dir, all_data=None):
+    """Raw-value heatmaps for real data with metric values printed in each cell."""
+    output_dirs = _resolve_output_dirs(output_dir)
+    groups = _group_by_n_and_type(all_results)
+    if not groups:
+        return
+
+    methods = sorted(_visible_methods(
+        m for ds in all_results.values() for m in ds.keys()
+    ))
+    colors = _method_colors_map(methods)
+
+    for n_size in sorted(groups):
+        _plot_raw_grid(groups[n_size]['real'], methods, colors, n_size, 'Real',
+                       'raw_real_values', output_dirs['real'], all_data,
+                       summary_mode='rank', show_values=True)
 
 
 def plot_pit_histograms(all_data, output_dir):
@@ -1599,7 +1640,6 @@ def _save_html_table_single(all_results, output_dir,
         ('CRPS',           'CRPS',        'lower'),
         ('PIT_KS',         'PIT KS',      'lower'),
         ('coverage_90',    '90% Cov',     'target_0.90'),
-        ('interval_width', 'Width',       'lower'),
     ]
 
     methods = sorted(_visible_methods(
@@ -1704,7 +1744,6 @@ def save_appendix_metric_tables(all_results, output_dir):
         ('CRPS',           'CRPS',      'lower'),
         ('PIT_KS',         'PIT KS',   'lower'),
         ('coverage_90',    '90\\% Cov', 'target_0.90'),
-        ('interval_width', 'Width',     'lower'),
         ('fit_time',       'Fit Time',  'lower'),
     ]
 
@@ -1854,6 +1893,175 @@ def save_appendix_metric_tables(all_results, output_dir):
     print(f'  saved {out}')
 
 
+def save_appendix_metric_tables_html(all_results, output_dir):
+    """HTML version of the appendix tables: one table per (metric, n_size).
+
+    Rows = datasets, columns = methods grouped by type.
+    Cells show mean +/- SE; green = best, yellow = second-best per row.
+    """
+    import html as html_mod
+
+    _APPENDIX_METRICS = [
+        ('CDE_loss',       'CDE Loss',  'lower'),
+        ('log_lik',        'Log-Lik',   'higher'),
+        ('CRPS',           'CRPS',      'lower'),
+        ('PIT_KS',         'PIT KS',    'lower'),
+        ('coverage_90',    '90% Cov',   'target_0.90'),
+        ('fit_time',       'Fit Time',  'lower'),
+    ]
+
+    output_dirs = _resolve_output_dirs(output_dir)
+    real_out = output_dirs['real']
+
+    real_results = {ds: res for ds, res in all_results.items()
+                    if not _is_synthetic(ds)}
+    groups = _group_by_n(real_results)
+    if not groups:
+        return
+
+    all_methods = sorted(_visible_methods(
+        m for ds in real_results.values() for m in ds.keys()
+    ))
+    methods = _ordered_methods(all_methods)
+
+    group_spans = _method_group_spans(methods)
+
+    css = """\
+    <style>
+      body { font-family: 'Segoe UI', Arial, sans-serif; margin: 24px;
+             background: #f8f9fa; }
+      h1 { color: #333; }
+      h2 { color: #444; margin-top: 2.5em; border-bottom: 2px solid #aaa;
+           padding-bottom: 6px; }
+      .caption { color: #666; font-size: 12px; margin-bottom: 6px; }
+      .tbl-wrap { overflow-x: auto; margin-bottom: 2em; }
+      table { border-collapse: collapse; background: white;
+              box-shadow: 0 1px 4px rgba(0,0,0,.12); font-size: 12px; }
+      th, td { padding: 5px 8px; white-space: nowrap; text-align: right; }
+      th { color: white; font-size: 11px; }
+      th.grp-param  { background: #2c3e50; }
+      th.grp-nonpar { background: #8e44ad; }
+      th.grp-found  { background: #e67e22; }
+      th.method { font-size: 10px; }
+      td.ds { text-align: left; font-weight: 600; color: #2c3e50;
+              position: sticky; left: 0; background: white; z-index: 1; }
+      tr:hover td { background: #f0f4f8; }
+      tr:hover td.ds { background: #f0f4f8; }
+      .best { background: #d4edda !important; font-weight: bold; color: #155724; }
+      .second { background: #fff3cd !important; font-weight: bold; color: #856404; }
+      .se { color: #999; font-size: 10px; }
+      .missing { color: #ccc; }
+      nav { position: sticky; top: 0; background: #f8f9fa; z-index: 10;
+            padding: 8px 0; border-bottom: 1px solid #ddd; }
+      nav a { margin-right: 12px; font-size: 13px; }
+    </style>
+"""
+
+    _GROUP_CSS = {
+        'parametric':    'grp-param',
+        'nonparametric': 'grp-nonpar',
+        'foundation':    'grp-found',
+    }
+
+    sections = []
+    toc_links = []
+
+    for n_size in sorted(groups):
+        sub = groups[n_size]
+        datasets = _ordered_dataset_names(sub.keys())
+
+        for metric_key, metric_label, direction in _APPENDIX_METRICS:
+            anchor = f'{metric_key}_n{n_size}'
+            title = f'{metric_label} &mdash; n={n_size}'
+            note = html_mod.escape(_metric_better_note(direction))
+            toc_links.append(f'<a href="#{anchor}">{metric_label} n={n_size}</a>')
+
+            best_m, second_m = {}, {}
+            for ds in datasets:
+                res = sub[ds]
+                vals = {}
+                for m in methods:
+                    r = _lookup_method(res, m)
+                    v = r.get(metric_key) if r is not None else None
+                    if v is not None:
+                        vals[m] = v
+                if vals:
+                    ranked = sorted(
+                        vals,
+                        key=lambda m, v=vals: (
+                            _metric_sort_score(v[m], direction), m))
+                    best_m[ds] = ranked[0]
+                    if len(ranked) > 1:
+                        second_m[ds] = ranked[1]
+
+            # Group header row
+            grp_cells = '<th class="grp-param" rowspan="2" style="text-align:left">Dataset</th>'
+            for group, start, end in group_spans:
+                css_cls = _GROUP_CSS.get(group, 'grp-param')
+                span = end - start + 1
+                lbl = METHOD_GROUP_META[group]['label']
+                grp_cells += f'<th class="{css_cls}" colspan="{span}">{lbl}</th>'
+
+            method_cells = ''
+            for m in methods:
+                css_cls = _GROUP_CSS.get(_method_group(m), 'grp-param')
+                disp = html_mod.escape(_display_method_name(m))
+                method_cells += f'<th class="method {css_cls}">{disp}</th>'
+
+            body_rows = []
+            for ds in datasets:
+                base, _ = _parse_base_and_n(ds)
+                ds_label = html_mod.escape(base if base is not None else ds)
+                res = sub[ds]
+                cells = f'<td class="ds">{ds_label}</td>'
+                for m in methods:
+                    r = _lookup_method(res, m)
+                    v = r.get(metric_key) if r is not None else None
+                    se = r.get(f'{metric_key}_se') if r is not None else None
+                    if v is None:
+                        cells += '<td class="missing">&mdash;</td>'
+                        continue
+                    if metric_key == 'fit_time':
+                        txt = f'{v:.1f}'
+                        se_txt = f' <span class="se">&pm;{se:.1f}</span>' if se is not None else ''
+                    else:
+                        txt = f'{v:.4f}'
+                        se_txt = f' <span class="se">&pm;{se:.4f}</span>' if se is not None else ''
+                    cls = ''
+                    if best_m.get(ds) == m:
+                        cls = ' class="best"'
+                    elif second_m.get(ds) == m:
+                        cls = ' class="second"'
+                    cells += f'<td{cls}>{txt}{se_txt}</td>'
+                body_rows.append(f'<tr>{cells}</tr>')
+
+            sections.append(
+                f'<h2 id="{anchor}">{title}</h2>\n'
+                f'<p class="caption">{note}. Bold/green = best, '
+                f'yellow = second-best per dataset.</p>\n'
+                f'<div class="tbl-wrap"><table>\n'
+                f'<tr>{grp_cells}</tr>\n'
+                f'<tr>{method_cells}</tr>\n'
+                + '\n'.join(body_rows)
+                + '\n</table></div>'
+            )
+
+    nav = '<nav>' + ' '.join(toc_links) + '</nav>'
+    page = (
+        '<!DOCTYPE html><html><head><meta charset="utf-8">\n'
+        '<title>Appendix — Metric Tables (Real Data)</title>\n'
+        f'{css}</head><body>\n'
+        '<h1>Appendix — Metric Tables (Real Data)</h1>\n'
+        f'{nav}\n'
+        + '\n'.join(sections)
+        + '\n</body></html>'
+    )
+
+    out = real_out / 'appendix_metric_tables.html'
+    out.write_text(page, encoding='utf-8')
+    print(f'  saved {out}')
+
+
 def save_latex_table(all_results, output_dir,
                      se_caption='$\\pm$SE across repetitions'):
     """Save LaTeX results tables (booktabs) suitable for a TMLR appendix.
@@ -1889,7 +2097,6 @@ def _save_latex_table_single(all_results, output_dir,
         ('CRPS',           'CRPS',           'lower'),
         ('PIT_KS',         'PIT KS',         'lower'),
         ('coverage_90',    '90\\% Cov',      'target_0.90'),
-        ('interval_width', 'Width',          'lower'),
         ('fit_time',       'Time (s)',       'lower'),
     ]
 

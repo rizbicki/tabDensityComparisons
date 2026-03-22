@@ -13,12 +13,12 @@ from pathlib import Path
 
 from utils import load_cache
 from visualization import (
-    plot_rankings_by_n, plot_raw_metrics_by_n,
-    plot_native_tab_subset,
+    plot_rankings_by_n, plot_raw_metrics_by_n, plot_raw_metrics_with_values_by_n,
+    plot_pit_histograms, plot_native_tab_subset,
     plot_performance_vs_n, plot_performance_vs_n_foundational,
     save_html_table,
     save_latex_table,
-    save_appendix_metric_tables,
+    save_appendix_metric_tables, save_appendix_metric_tables_html,
 )
 
 
@@ -70,7 +70,8 @@ def main():
                              '(default: results_real)')
     parser.add_argument('--metrics-only', action='store_true',
                         help='Regenerate only metrics-based tables/plots from '
-                             'results.json, skipping cache-dependent density plots')
+                             'results.json, skipping cache-dependent PIT and '
+                             'density plots')
     args = parser.parse_args()
 
     output_dirs = {
@@ -101,6 +102,7 @@ def main():
     save_latex_table(all_results, output_dirs)
     print("  ✓ LaTeX table")
     save_appendix_metric_tables(all_results, output_dirs)
+    save_appendix_metric_tables_html(all_results, output_dirs)
     print("  ✓ Appendix metric tables")
 
     if args.metrics_only:
@@ -109,12 +111,20 @@ def main():
         plot_native_tab_subset(all_data, output_dirs)
         print("  ✓ Native TabPFN subset plots")
 
-    plot_rankings_by_n(all_results, output_dirs, all_data=all_data)
-    print("  ✓ Rankings by n")
+    # plot_rankings_by_n(all_results, output_dirs, all_data=all_data)  # disabled
+    # print("  ✓ Rankings by n")
 
     plot_raw_metrics_by_n(all_results, output_dirs, all_data=all_data)
     print("  ✓ Raw metrics by n")
 
+    plot_raw_metrics_with_values_by_n(all_results, output_dirs, all_data=all_data)
+    print("  ✓ Raw metrics by n (with values)")
+
+    if args.metrics_only:
+        print("  - PIT histograms skipped (--metrics-only)")
+    else:
+        plot_pit_histograms(all_data, output_dirs)
+        print("  ✓ PIT histograms")
     plot_performance_vs_n(all_results, output_dirs, all_data=all_data)
     print("  ✓ Performance vs n")
 

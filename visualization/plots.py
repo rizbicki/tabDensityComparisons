@@ -3000,7 +3000,7 @@ def plot_perf_vs_n_cde_improved(all_results, output_dir, all_data=None):
     ]
     ax.legend(handles=legend_handles, loc='lower left', fontsize=9.5,
               framealpha=0.92, borderpad=0.7)
-    ax.set_title('CDE Loss vs Sample Size — SDSS  (lower is better, top = better)',
+    ax.set_title('CDE Loss vs Sample Size — SDSS  (top is better)',
                  fontsize=14, fontweight='bold', pad=10)
 
     fig.tight_layout()

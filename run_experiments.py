@@ -64,7 +64,7 @@ from datasets import load_all_datasets
 from evaluation import compute_all_metrics
 from visualization import (
     plot_rankings_by_n, plot_critical_difference, plot_raw_metrics_by_n,
-    plot_pit_histograms, plot_native_tab_subset,
+    plot_native_tab_subset,
     plot_performance_vs_n, plot_performance_vs_n_foundational,
     save_html_table,
     save_latex_table,
@@ -594,7 +594,6 @@ def main():
     plot_rankings_by_n(all_results, output_dirs, all_data=all_data)
     plot_critical_difference(all_results, output_dirs, all_data=all_data)
     plot_raw_metrics_by_n(all_results, output_dirs, all_data=all_data)
-    plot_pit_histograms(all_data, output_dirs)
     plot_performance_vs_n(all_results, output_dirs, all_data=all_data)
     plot_performance_vs_n_foundational(all_results, output_dirs, all_data=all_data)
 

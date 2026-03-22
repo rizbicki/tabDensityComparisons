@@ -14,7 +14,7 @@ from pathlib import Path
 from utils import load_cache
 from visualization import (
     plot_rankings_by_n, plot_raw_metrics_by_n,
-    plot_pit_histograms, plot_native_tab_subset,
+    plot_native_tab_subset,
     plot_performance_vs_n, plot_performance_vs_n_foundational,
     save_html_table,
     save_latex_table,
@@ -69,8 +69,7 @@ def main():
                              '(default: results_real)')
     parser.add_argument('--metrics-only', action='store_true',
                         help='Regenerate only metrics-based tables/plots from '
-                             'results.json, skipping cache-dependent PIT and '
-                             'density plots')
+                             'results.json, skipping cache-dependent density plots')
     args = parser.parse_args()
 
     output_dirs = {
@@ -112,12 +111,6 @@ def main():
 
     plot_raw_metrics_by_n(all_results, output_dirs, all_data=all_data)
     print("  ✓ Raw metrics by n")
-
-    if args.metrics_only:
-        print("  - PIT histograms skipped (--metrics-only)")
-    else:
-        plot_pit_histograms(all_data, output_dirs)
-        print("  ✓ PIT histograms")
 
     plot_performance_vs_n(all_results, output_dirs, all_data=all_data)
     print("  ✓ Performance vs n")

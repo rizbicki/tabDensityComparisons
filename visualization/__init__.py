@@ -5,7 +5,6 @@ from .plots import (
     plot_critical_difference,
     plot_raw_metrics_by_n,
     plot_sdss_raw_metrics_by_n,
-    plot_pit_histograms,
     plot_true_vs_estimated,
     plot_native_tab_subset,
     plot_performance_vs_n,

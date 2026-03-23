@@ -16,7 +16,6 @@ from visualization import (
     plot_rankings_by_n, plot_raw_metrics_by_n, plot_raw_metrics_with_values_by_n,
     plot_pit_histograms, plot_native_tab_subset,
     plot_performance_vs_n, plot_performance_vs_n_foundational,
-    plot_perf_vs_n_foundational_cde_subsets,
     save_html_table,
     save_latex_table,
     save_appendix_metric_tables, save_appendix_metric_tables_html,
@@ -130,7 +129,6 @@ def main():
     print("  ✓ Performance vs n")
 
     plot_performance_vs_n_foundational(all_results, output_dirs, all_data=all_data)
-    plot_perf_vs_n_foundational_cde_subsets(all_results, output_dirs, all_data=all_data)
     print("  ✓ Performance vs n (foundational models)")
 
     print("\nDone!")

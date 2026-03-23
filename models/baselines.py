@@ -6,7 +6,7 @@ Quantile methods, GLMs, and BART.
 import math
 import numpy as np
 from scipy import stats
-from scipy.optimize import minimize_scalar
+from scipy.optimize import minimize, minimize_scalar
 from sklearn.linear_model import LinearRegression, RidgeCV, GammaRegressor
 from sklearn.model_selection import KFold
 
@@ -206,27 +206,78 @@ def linear_gaussian_homo_density(X_train, z_train, X_test, n_grid=200,
     return _normalize_density_rows(cdes, z_grid), z_grid
 
 
+def _gaussian_hetero_mle(X1, z, alpha=0.0, maxiter=1000):
+    """Joint MLE for N(X'beta, exp(X'gamma)) with optional L2 penalty.
+
+    Parameters
+    ----------
+    X1 : (n, p) design matrix **with intercept column already prepended**.
+    z  : (n,) response.
+    alpha : L2 penalty on non-intercept coefficients (0 = plain MLE).
+
+    Returns (beta, gamma) each of length p.
+    """
+    n, p = X1.shape
+
+    # ── Initialise from two-step estimates ──
+    beta_init = np.linalg.lstsq(X1, z, rcond=None)[0]
+    resid = z - X1 @ beta_init
+    log_sq = np.log(np.maximum(resid ** 2, 1e-12))
+    gamma_init = np.linalg.lstsq(X1, log_sq, rcond=None)[0]
+
+    def neg_ll(params):
+        beta, gamma = params[:p], params[p:]
+        mu = X1 @ beta
+        log_var = np.clip(X1 @ gamma, -20, 20)
+        inv_var = np.exp(-log_var)
+        diff = z - mu
+        nll = 0.5 * np.sum(log_var + diff ** 2 * inv_var)
+        if alpha > 0:
+            nll += alpha * (np.dot(beta[1:], beta[1:])
+                            + np.dot(gamma[1:], gamma[1:]))
+        return nll / n
+
+    def grad(params):
+        beta, gamma = params[:p], params[p:]
+        mu = X1 @ beta
+        log_var = np.clip(X1 @ gamma, -20, 20)
+        inv_var = np.exp(-log_var)
+        diff = z - mu
+        sq_diff_iv = diff ** 2 * inv_var
+
+        g_beta = -X1.T @ (diff * inv_var) / n
+        g_gamma = 0.5 * X1.T @ (1.0 - sq_diff_iv) / n
+        if alpha > 0:
+            g_beta[1:] += 2 * alpha * beta[1:] / n
+            g_gamma[1:] += 2 * alpha * gamma[1:] / n
+        return np.concatenate([g_beta, g_gamma])
+
+    x0 = np.concatenate([beta_init, gamma_init])
+    res = minimize(neg_ll, x0, jac=grad, method='L-BFGS-B',
+                   options={'maxiter': maxiter, 'ftol': 1e-10})
+    return res.x[:p], res.x[p:]
+
+
 def linear_gaussian_hetero_density(X_train, z_train, X_test, n_grid=200,
                                     z_min=None, z_max=None, regularized=False):
-    """Linear Gaussian with input-dependent variance.
+    """Linear Gaussian with input-dependent variance (joint MLE).
 
-    Stage 1: fit E[Z|X] = X'beta.
-    Stage 2: fit log(residual^2) = X'gamma to model variance.
+    Model: Z | X ~ N(X'beta, exp(X'gamma)).
+    beta and gamma are estimated jointly by maximising the Gaussian
+    log-likelihood (with optional L2 penalty when regularized=True).
     """
-    reg_mean = _make_reg(regularized).fit(X_train, z_train)
-    mu_test = reg_mean.predict(X_test)
+    n, d = X_train.shape
+    X1_tr = np.column_stack([np.ones(n), X_train])
+    X1_te = np.column_stack([np.ones(X_test.shape[0]), X_test])
 
-    mu_train_oof = _oof_regression_predictions(
-        X_train,
-        z_train,
-        lambda X_tr, y_tr, X_val: _make_reg(regularized).fit(X_tr, y_tr).predict(X_val),
-    )
-    residuals = z_train - mu_train_oof
-    log_sq_res = np.log(np.maximum(residuals ** 2, 1e-12))
-    reg_var = _make_reg(regularized).fit(X_train, log_sq_res)
-    log_var_test = reg_var.predict(X_test)
-    sigma_test = np.sqrt(np.exp(log_var_test))
-    sigma_test = np.maximum(sigma_test, 1e-8)
+    alpha = 0.0
+    if regularized:
+        ridge = RidgeCV(alphas=np.logspace(-4, 4, 20), cv=None).fit(X_train, z_train)
+        alpha = float(ridge.alpha_)
+
+    beta, gamma = _gaussian_hetero_mle(X1_tr, z_train, alpha=alpha)
+    mu_test = X1_te @ beta
+    sigma_test = np.maximum(np.sqrt(np.exp(np.clip(X1_te @ gamma, -20, 20))), 1e-8)
 
     if z_min is None:
         z_min = z_train.min() - 0.1 * np.ptp(z_train)
@@ -778,10 +829,11 @@ def lognormal_homo_density(X_train, z_train, X_test, n_grid=200,
 
 def lognormal_hetero_density(X_train, z_train, X_test, n_grid=200,
                               z_min=None, z_max=None, regularized=False):
-    """Log-Normal regression with input-dependent variance.
+    """Log-Normal regression with input-dependent variance (joint MLE).
 
-    Stage 1: log(Z - shift) = X'beta + eps  (mean in log-space)
-    Stage 2: log(eps^2) = X'gamma           (log-variance)
+    Model: log(Z - shift) | X ~ N(X'beta, exp(X'gamma)).
+    beta and gamma are estimated jointly by maximising the Gaussian
+    log-likelihood in log-space (with optional L2 penalty).
     """
     shift = 0.0
     z_min_val = z_train.min()
@@ -789,23 +841,20 @@ def lognormal_hetero_density(X_train, z_train, X_test, n_grid=200,
         shift = -z_min_val + 1e-2 * (np.ptp(z_train) + 1.0)
     z_pos = z_train + shift
     z_pos = np.maximum(z_pos, 1e-10)
-
     log_z = np.log(z_pos)
 
-    reg_mean = _make_reg(regularized).fit(X_train, log_z)
-    mu_test = reg_mean.predict(X_test)
+    n, d = X_train.shape
+    X1_tr = np.column_stack([np.ones(n), X_train])
+    X1_te = np.column_stack([np.ones(X_test.shape[0]), X_test])
 
-    mu_train_oof = _oof_regression_predictions(
-        X_train,
-        log_z,
-        lambda X_tr, y_tr, X_val: _make_reg(regularized).fit(X_tr, y_tr).predict(X_val),
-    )
-    residuals = log_z - mu_train_oof
-    log_sq_res = np.log(np.maximum(residuals ** 2, 1e-12))
-    reg_var = _make_reg(regularized).fit(X_train, log_sq_res)
-    log_var_test = reg_var.predict(X_test)
-    sigma_test = np.sqrt(np.exp(log_var_test))
-    sigma_test = np.maximum(sigma_test, 1e-8)
+    alpha = 0.0
+    if regularized:
+        ridge = RidgeCV(alphas=np.logspace(-4, 4, 20), cv=None).fit(X_train, log_z)
+        alpha = float(ridge.alpha_)
+
+    beta, gamma = _gaussian_hetero_mle(X1_tr, log_z, alpha=alpha)
+    mu_test = X1_te @ beta
+    sigma_test = np.maximum(np.sqrt(np.exp(np.clip(X1_te @ gamma, -20, 20))), 1e-8)
 
     if z_min is None:
         z_min = z_train.min() - 0.1 * np.ptp(z_train)

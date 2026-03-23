@@ -64,6 +64,7 @@ DEFAULT_METHOD_ORDER = [
     "BART-Homo",
     "BART-Hetero",
     "FlexCode-RF",
+    "FlexZBoost",
     "CatMLP",
 ]
 
@@ -195,6 +196,9 @@ def _default_skip_reason(method, n_total, runtime_device):
 
     if method == "FlexCode-RF" and n_total > 500_000:
         return "5-fold CV over many random-forest basis regressions is conservatively capped at n=500,000"
+
+    if method == "FlexZBoost" and n_total > 500_000:
+        return "5-fold CV over many XGBoost basis regressions (plus sharpening tuning) is conservatively capped at n=500,000"
 
     if method in TABPFN_METHODS:
         limit = 1_000 if runtime_device == "cpu" else 50_000

@@ -1,4 +1,4 @@
-from .flexcode import FlexCodeEstimator, RFFlexRegressor
+from .flexcode import FlexCodeEstimator, RFFlexRegressor, XGBFlexRegressor
 from .native import tabpfn_native_density, tabicl_quantile_density
 from .baselines import (
     linear_gaussian_homo_density,

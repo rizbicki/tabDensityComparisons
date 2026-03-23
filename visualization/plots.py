@@ -16,6 +16,7 @@ from matplotlib.transforms import blended_transform_factory
 # Fixed per-method visual style
 METHOD_STYLES = {
     'FlexCode-RF':         {'color': '#984ea3', 'ls': '-',   'lw': 2.0, 'zorder': 4},
+    'FlexZBoost':          {'color': '#c44dbc', 'ls': '--',  'lw': 2.0, 'zorder': 4},
     'TabPFN-Native':       {'color': '#0072b2', 'ls': '--',  'lw': 2.0, 'zorder': 4},
     'TabPFN-2.5':          {'color': '#e69f00', 'ls': '-',   'lw': 2.4, 'zorder': 5},
     'RealTabPFN-2.5':      {'color': '#d55e00', 'ls': '-.',  'lw': 2.4, 'zorder': 5},
@@ -51,12 +52,12 @@ FOUNDATIONAL_MODELS = {
 NONPARAMETRIC_MODELS = {
     'MDN',
     'FlexCode-RF',
+    'FlexZBoost',
     'BART-Homo',
     'BART-Hetero',
     'Flow-Spline',
     'Quantile-Tree',
     'CatMLP',
-    'MDN',
 }
 
 METHOD_GROUP_ORDER = ('parametric', 'nonparametric', 'foundational')
@@ -144,6 +145,7 @@ METHOD_ORDER_HINTS = [
     'LogNormal-Hetero-Ridge',
     'Gamma-GLM-Ridge',
     'FlexCode-RF',
+    'FlexZBoost',
     'MDN',
     'BART-Homo',
     'BART-Hetero',
@@ -2854,7 +2856,7 @@ def plot_perf_vs_n_cde_improved(all_results, output_dir, all_data=None):
         'LogNormal-Homo', 'LogNormal-Hetero', 'Gamma-GLM',
     }
     NONPARAMETRIC = {'MDN', 'Flow-Spline', 'BART-Homo', 'BART-Hetero',
-                     'FlexCode-RF', 'CatMLP', 'Quantile-Tree'}
+                     'FlexCode-RF', 'FlexZBoost', 'CatMLP', 'Quantile-Tree'}
     FOUND_STYLES_LOCAL = {
         'TabPFN-Native':    {'ls': '-',  'marker': 'o'},
         'TabPFN-2.5':       {'ls': '-',  'marker': 'o'},

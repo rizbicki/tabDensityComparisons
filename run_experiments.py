@@ -54,7 +54,7 @@ except ImportError:
     print("- XBART not found -- install with: pip install xbart")
 
 from models import (
-    FlexCodeEstimator, RFFlexRegressor,
+    FlexCodeEstimator, RFFlexRegressor, XGBFlexRegressor,
     tabpfn_native_density, tabicl_quantile_density,
     linear_gaussian_homo_density, linear_gaussian_hetero_density,
     gamma_glm_density,
@@ -244,7 +244,7 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
         return None
 
     n_train = len(z_train)
-    max_basis = min(20, max(15, int(np.sqrt(n_train))))
+    max_basis = min(30, max(15, int(np.sqrt(n_train))))
 
     # ── Helper to run a FlexCode method ──────────────────────────────────
     def run_flexcode(name, factory, params):
@@ -281,6 +281,43 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
     # ── FlexCode + RandomForest ──────────────────────────────────────────
     if _want('FlexCode-RF'):
         run_flexcode('FlexCode-RF', lambda **kw: RFFlexRegressor(), {})
+
+    # ── FlexZBoost (FlexCode + XGBoost + sharpening) ────────────────────
+    if _want('FlexZBoost'):
+        hit = _cached('FlexZBoost')
+        if hit:
+            m_c, cdes, zg = hit
+            results['FlexZBoost'] = m_c
+            cdes_dict['FlexZBoost'] = cdes
+            zgrids_dict['FlexZBoost'] = zg
+            print(f"  FlexZBoost... [cached] CDE={m_c['CDE_loss']:.4f}, "
+                  f"LL={m_c['log_lik']:.3f}")
+        else:
+            print(f"  FlexZBoost...", end=" ", flush=True)
+            sharpen_grid = np.linspace(0.5, 2.0, 16)
+            t0 = time.time()
+            model = FlexCodeEstimator(
+                lambda **kw: XGBFlexRegressor(), max_basis=max_basis,
+                name='FlexZBoost', sharpen_grid=sharpen_grid,
+            )
+            model.fit_cv(X_tr, z_train, n_folds=5)
+            fit_t = time.time() - t0
+            t0 = time.time()
+            cdes, zg = model.predict(X_te, n_grid=n_grid)
+            pred_t = time.time() - t0
+            m = compute_all_metrics(cdes, zg, z_test)
+            m['fit_time'] = fit_t + pred_t
+            m['pred_time'] = pred_t
+            m['n_basis'] = model.best_basis_
+            m['sharpen_alpha'] = model.sharpen_alpha_
+            results['FlexZBoost'] = m
+            cdes_dict['FlexZBoost'] = cdes
+            zgrids_dict['FlexZBoost'] = zg
+            _save('FlexZBoost', m, cdes, zg)
+            alpha_str = f", α={model.sharpen_alpha_:.2f}" if model.sharpen_alpha_ else ""
+            print(f"I={model.best_basis_}{alpha_str}, CDE={m['CDE_loss']:.4f}, "
+                  f"LL={m['log_lik']:.3f}, CRPS={m['CRPS']:.4f}, "
+                  f"KS={m['PIT_KS']:.3f}, t={fit_t:.1f}s")
 
     # ── TabPFN Native Distribution ───────────────────────────────────────
     if HAS_TABPFN and _want('TabPFN-Native'):
@@ -388,15 +425,19 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
               f"CRPS={m_bl['CRPS']:.4f}, KS={m_bl['PIT_KS']:.3f}")
 
     # ── Baselines ────────────────────────────────────────────────────────
-    if _want('LinearGauss-Homo'):
+    # Skip unregularised linear models when d >= n_train (underdetermined)
+    n_train, d = X_tr.shape
+    _ols_ok = d < n_train
+
+    if _want('LinearGauss-Homo') and _ols_ok:
         _run_density_baseline('LinearGauss-Homo', linear_gaussian_homo_density)
-    if _want('LinearGauss-Hetero'):
+    if _want('LinearGauss-Hetero') and _ols_ok:
         _run_density_baseline('LinearGauss-Hetero', linear_gaussian_hetero_density)
-    if _want('Student-t'):
+    if _want('Student-t') and _ols_ok:
         _run_density_baseline('Student-t', student_t_density)
-    if _want('LogNormal-Homo'):
+    if _want('LogNormal-Homo') and _ols_ok:
         _run_density_baseline('LogNormal-Homo', lognormal_homo_density)
-    if _want('LogNormal-Hetero'):
+    if _want('LogNormal-Hetero') and _ols_ok:
         _run_density_baseline('LogNormal-Hetero', lognormal_hetero_density)
     if _want('MDN'):
         _run_density_baseline('MDN', mdn_density_tuned,
@@ -407,7 +448,7 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
     if _want('Quantile-Tree'):
         _run_density_baseline('Quantile-Tree', quantile_gbm_density_tuned,
                               random_state=random_state)
-    if _want('Gamma-GLM'):
+    if _want('Gamma-GLM') and _ols_ok:
         _run_density_baseline('Gamma-GLM', gamma_glm_density)
 
     # ── Penalized (Ridge) variants ────────────────────────────────────

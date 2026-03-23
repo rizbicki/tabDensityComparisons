@@ -41,7 +41,7 @@ PARAMETRIC_RIDGE = {
 PARAMETRIC = PARAMETRIC_BASE | PARAMETRIC_RIDGE
 
 NONPARAMETRIC = {"MDN", "Flow-Spline", "BART-Homo", "BART-Hetero",
-                 "FlexCode-RF", "CatMLP", "Quantile-Tree"}
+                 "FlexCode-RF", "FlexZBoost", "CatMLP", "Quantile-Tree"}
 
 # ── colors ────────────────────────────────────────────────────────────────────
 C_PARAM   = "#1b9e77"

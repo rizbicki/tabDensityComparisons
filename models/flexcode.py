@@ -8,6 +8,7 @@ import numpy as np
 from joblib import Parallel, delayed
 from sklearn.model_selection import KFold
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
+from xgboost import XGBRegressor
 
 
 class FlexCodeEstimator:
@@ -18,17 +19,20 @@ class FlexCodeEstimator:
     """
 
     def __init__(self, regressor_factory, max_basis=31, basis_system='cosine',
-                 regressor_params=None, name='FlexCode', n_jobs=-1):
+                 regressor_params=None, name='FlexCode', n_jobs=-1,
+                 sharpen_grid=None):
         self.regressor_factory = regressor_factory
         self.max_basis = max_basis
         self.basis_system = basis_system
         self.regressor_params = regressor_params or {}
         self.name = name
         self.n_jobs = n_jobs
+        self.sharpen_grid = sharpen_grid
         self.regressors_ = []
         self.z_min_ = None
         self.z_max_ = None
         self.best_basis_ = None
+        self.sharpen_alpha_ = None
 
     def _normalize_z(self, z):
         return (z - self.z_min_) / (self.z_max_ - self.z_min_)
@@ -37,6 +41,22 @@ class FlexCodeEstimator:
         if i == 0:
             return np.ones_like(z_norm)
         return np.sqrt(2) * np.cos(i * np.pi * z_norm)
+
+    @staticmethod
+    def _make_density(cdes, dz):
+        """Project to valid density: non-negative + normalize."""
+        cdes = np.maximum(cdes, 0)
+        row_sums = cdes.sum(axis=1) * dz
+        row_sums[row_sums == 0] = 1.0
+        return cdes / row_sums[:, None]
+
+    @staticmethod
+    def _apply_sharpen(cdes, alpha, dz):
+        """Raise density to power alpha and renormalize."""
+        cdes = np.power(np.maximum(cdes, 0), alpha)
+        row_sums = cdes.sum(axis=1) * dz
+        row_sums[row_sums == 0] = 1.0
+        return cdes / row_sums[:, None]
 
     def _fit_one_basis(self, X, z_norm, i):
         phi_values = self._cosine_basis(z_norm, i)
@@ -133,6 +153,55 @@ class FlexCodeEstimator:
         self.best_basis_ = int(np.argmin(oof_loss)) + 1
         self.best_loss_ = oof_loss[self.best_basis_ - 1]
 
+        # Tune sharpening if requested: re-run one CV pass to pick alpha
+        if self.sharpen_grid is not None and len(self.sharpen_grid) > 0:
+            from evaluation.metrics import eval_cde_loss as _cde_loss
+            n_grid_tune = 200
+            best_alpha = 1.0
+            best_sharp_loss = np.inf
+            for alpha in self.sharpen_grid:
+                oof_sharp_loss = 0.0
+                oof_sharp_n = 0
+                for train_idx, val_idx in kf.split(X):
+                    X_tr_fold = X[train_idx]
+                    X_va_fold = X[val_idx]
+                    z_norm_tr = z_norm[train_idx]
+                    n_va = len(val_idx)
+
+                    def _fit_and_predict_sharp(i):
+                        phi_tr = self._cosine_basis(z_norm_tr, i)
+                        reg = self.regressor_factory(**self.regressor_params)
+                        reg.fit(X_tr_fold, phi_tr)
+                        return i, reg.predict(X_va_fold)
+
+                    fold_beta = np.zeros((n_va, self.best_basis_))
+                    results_list = Parallel(n_jobs=self.n_jobs)(
+                        delayed(_fit_and_predict_sharp)(i)
+                        for i in range(self.best_basis_)
+                    )
+                    for i, preds in results_list:
+                        fold_beta[:, i] = preds
+
+                    z_grid = np.linspace(self.z_min_, self.z_max_, n_grid_tune)
+                    z_grid_norm = self._normalize_z(z_grid)
+                    phi_grid = np.zeros((self.best_basis_, n_grid_tune))
+                    for i in range(self.best_basis_):
+                        phi_grid[i, :] = self._cosine_basis(z_grid_norm, i)
+                    cdes_fold = (fold_beta @ phi_grid) * scale
+                    dz = z_grid[1] - z_grid[0]
+                    cdes_fold = self._make_density(cdes_fold, dz)
+                    if alpha != 1.0:
+                        cdes_fold = self._apply_sharpen(cdes_fold, alpha, dz)
+                    z_va_orig = z_norm[val_idx] * (self.z_max_ - self.z_min_) + self.z_min_
+                    oof_sharp_loss += _cde_loss(cdes_fold, z_grid, z_va_orig) * n_va
+                    oof_sharp_n += n_va
+
+                avg_loss = oof_sharp_loss / oof_sharp_n
+                if avg_loss < best_sharp_loss:
+                    best_sharp_loss = avg_loss
+                    best_alpha = alpha
+            self.sharpen_alpha_ = best_alpha
+
         # Refit all regressors on the full data
         self.regressors_ = Parallel(n_jobs=self.n_jobs)(
             delayed(self._fit_one_basis)(X, z_norm, i)
@@ -157,12 +226,11 @@ class FlexCodeEstimator:
         scale = 1.0 / (self.z_max_ - self.z_min_)
         cdes = (beta_hat @ phi_grid) * scale
 
-        # Project to valid density: non-negative + normalize
-        cdes = np.maximum(cdes, 0)
         dz = z_grid[1] - z_grid[0]
-        row_sums = cdes.sum(axis=1) * dz
-        row_sums[row_sums == 0] = 1.0
-        cdes = cdes / row_sums[:, None]
+        cdes = self._make_density(cdes, dz)
+
+        if self.sharpen_alpha_ is not None and self.sharpen_alpha_ != 1.0:
+            cdes = self._apply_sharpen(cdes, self.sharpen_alpha_, dz)
 
         return cdes, z_grid
 
@@ -190,6 +258,21 @@ class RFFlexRegressor:
     def fit(self, X, y):
         self.model_ = RandomForestRegressor(
             n_estimators=100, max_depth=8, random_state=42
+        )
+        self.model_.fit(X, y)
+        return self
+    def predict(self, X):
+        return self.model_.predict(X)
+
+
+class XGBFlexRegressor:
+    """XGBoost wrapper (FlexZBoost regression engine)."""
+    def __init__(self):
+        pass
+    def fit(self, X, y):
+        self.model_ = XGBRegressor(
+            n_estimators=100, max_depth=4, learning_rate=0.1,
+            random_state=42, verbosity=0,
         )
         self.model_.fit(X, y)
         return self

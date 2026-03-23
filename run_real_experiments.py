@@ -32,6 +32,7 @@ from visualization import (
     plot_raw_metrics_with_values_by_n,
     plot_pit_histograms, plot_native_tab_subset,
     plot_performance_vs_n, plot_performance_vs_n_foundational,
+    plot_perf_vs_n_foundational_cde_subsets,
     save_html_table,
     save_latex_table,
     save_appendix_metric_tables,
@@ -245,6 +246,7 @@ def main():
     plot_pit_histograms(all_data, output_dir)
     plot_performance_vs_n(all_results, output_dir, all_data=all_data)
     plot_performance_vs_n_foundational(all_results, output_dir, all_data=all_data)
+    plot_perf_vs_n_foundational_cde_subsets(all_results, output_dir, all_data=all_data)
 
     json_out = {}
     for ds, res in all_results.items():

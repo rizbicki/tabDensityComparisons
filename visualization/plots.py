@@ -11,6 +11,7 @@ from pathlib import Path
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch, Rectangle
 from matplotlib.transforms import blended_transform_factory
+from evaluation import eval_pit, eval_pit_ks
 
 
 # Fixed per-method visual style
@@ -3011,3 +3012,41 @@ def plot_perf_vs_n_cde_improved(all_results, output_dir, all_data=None):
                     dpi=180, bbox_inches='tight')
     plt.close(fig)
     print(f"  saved perf_vs_n_cde_loss_improved.{{pdf,png}}")
+
+
+def plot_perf_vs_n_foundational_cde_subsets(all_results, output_dir, all_data=None):
+    """CDE Loss vs n (foundational prominent), real datasets split into per-figure subsets."""
+    SUBSET_SIZE = 6
+    output_dirs = _resolve_output_dirs(output_dir)
+    base_groups = _build_base_groups(all_results, all_data=all_data)
+    if not base_groups:
+        return
+
+    methods = sorted(_visible_methods(
+        m for ds in all_results.values() for m in ds.keys()
+    ))
+    mc = _method_colors_map(methods)
+    real, sim_by_d = _split_real_sim(base_groups)
+
+    metric, label, direction = 'CDE_loss', 'CDE Loss', 'lower'
+
+    if real:
+        real_items = list(real.items())
+        n_subsets = (len(real_items) + SUBSET_SIZE - 1) // SUBSET_SIZE
+        for i in range(0, len(real_items), SUBSET_SIZE):
+            subset = dict(real_items[i:i + SUBSET_SIZE])
+            part = i // SUBSET_SIZE + 1
+            suffix = f'_p{part}' if n_subsets > 1 else ''
+            _plot_perf_grid(subset, all_results, methods, mc,
+                            metric, label, direction,
+                            f' — Real (Foundation){suffix}',
+                            f'perf_vs_n_foundational_cde_real{suffix}.png',
+                            output_dirs['real'], foundational_only=True,
+                            all_data=all_data)
+    for d in sorted(sim_by_d):
+        _plot_perf_grid(sim_by_d[d], all_results, methods, mc,
+                        metric, label, direction,
+                        f' — Simulated d={d} (Foundation)',
+                        f'perf_vs_n_foundational_cde_sim_d{d}.png',
+                        output_dirs['sim'], foundational_only=True,
+                        all_data=all_data)

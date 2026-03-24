@@ -3,6 +3,11 @@
 Benchmark comparing tabular foundation models (TabPFN, TabICL) against
 classical methods for conditional density estimation (CDE) on tabular data.
 
+## Requirements
+
+Python 3.10 or later (tested on 3.10–3.13). A CUDA-capable GPU is strongly
+recommended for TabPFN and TabICL; CPU-only runs are supported but slow.
+
 ## Quick Start
 
 ```bash
@@ -76,11 +81,14 @@ so pip doesn't overwrite your CUDA build with a CPU-only one.
 ## Project Structure
 
 ```
-run_experiments.py          Main benchmark entry point (simulated + real datasets)
-run_real_experiments.py     Real/semi-synthetic experiments entry point
+run_experiments.py              Main benchmark entry point (simulated + real datasets)
+run_real_experiments.py         Real/semi-synthetic experiments entry point
 run_sdss_scaling_experiment.py  SDSS-only scaling benchmark over multiple n
 consolidate_partial_results.py  Build results.json from partial checkpoints
-generate_plots.py           Regenerate all plots from cached results
+generate_plots.py               Regenerate all plots from cached results
+plot_bimodal_illustration.py    Standalone bimodal-DGP illustration figure (input-dependent weights/variances)
+plot_bimodal_correctly_specified.py  Same DGP but with a correctly-specified parametric model fitted by MLE
+plot_perf_improved.py           Draft improved perf-vs-n CDE-loss figure with SE bands and right-side labels
 models/
   flexcode.py               FlexCodeEstimator + RF regressor wrapper
   native.py                 TabPFN / RealTabPFN native density extraction
@@ -89,7 +97,7 @@ models/
 datasets/
   synthetic.py              Synthetic DGPs (with known true densities)
   real.py                   Semi-synthetic + real-world dataset loaders
-  sdss_galaxies.csv         SDSS DR18 photometric redshift data (500k galaxies)
+  sdss_galaxies.csv         SDSS DR18 photometric redshift data (500k galaxies, ~62 MB)
 evaluation/
   metrics.py                CDE loss, log-lik, CRPS, PIT, coverage
 visualization/

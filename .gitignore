@@ -9,6 +9,11 @@ results/*.html
 results/results.json
 results_real/cache/
 results_real/*/
+!results_real/sdss_scaling/
+results_real/sdss_scaling/cache/
+results_real/sdss_scaling/*.json
+results_real/sdss_scaling/*.html
+results_real/sdss_scaling/*.tex
 !results_real/*.png
 !results_real/*.pdf
 !results_real/*.html

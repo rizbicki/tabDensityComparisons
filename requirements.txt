@@ -15,6 +15,7 @@ xgboost>=2.0.0
 xbart>=0.1.8
 
 # PyTorch (needed by TabPFN and TabICLv2)
-# If you already have a CUDA-enabled torch, comment this out
-# to avoid overwriting it with a CPU-only version.
+# Uncomment the line below if you do NOT already have PyTorch installed.
+# If you have a CUDA-enabled torch, leave it commented out to avoid
+# overwriting it with a CPU-only build.
 # torch>=2.0.0

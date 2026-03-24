@@ -30,7 +30,7 @@ warnings.filterwarnings('ignore')
 sys.path.insert(0, str(Path(__file__).parent))
 
 from models import (
-    linear_gaussian_hetero_density,
+    FlexCodeEstimator, RFFlexRegressor,
     normalizing_flow_density_tuned,
 )
 from models.native import tabpfn_native_density
@@ -91,15 +91,15 @@ def make_bimodal_full(n=1000, d=5, seed=42):
 
 # ── colour / style ────────────────────────────────────────────────────────────
 GROUP_COLOR = {
-    'parametric':    '#1b9e77',
-    'nonparametric': '#377eb8',
+    'flexcode':      '#e41a1c',
+    'flow':          '#377eb8',
     'foundational':  '#e67e22',
 }
 
 # (key, display_name, group, linestyle, linewidth)
 METHOD_SPEC = [
-    ('LinearGauss-Hetero', 'LinGauss-Hetero', 'parametric',    '-',   2.2),
-    ('Flow-Spline',        'Flow-Spline',      'nonparametric', '-',   2.2),
+    ('FlexCode-RF',        'FlexCode-RF',      'flexcode',      '-',   2.2),
+    ('Flow-Spline',        'Flow-Spline',      'flow',          '-',   2.2),
     ('TabPFN-2.5',         'TabPFN 2.5',       'foundational',  '-',   2.6),
 ]
 METHOD_MAP = {k: (d, g, ls, lw) for k, d, g, ls, lw in METHOD_SPEC}
@@ -111,13 +111,13 @@ METHOD_MAP = {k: (d, g, ls, lw) for k, d, g, ls, lw in METHOD_SPEC}
 TEST_POINTS = [
     np.array([[ 0.8,  0.5]]),   # w≈0.63, mu1=2.1, mu2=-0.55 — mild asymmetry
     np.array([[-0.5,  1.5]]),   # w≈0.22, mu1=0.5, mu2=1.25  — mode 2 dominant, close modes
-    np.array([[-1.2, -0.5]]),   # w≈0.21, mu1=-2.9, mu2=0.95 — mode 2 dominant, wide separation
+    np.array([[ 1.0,  2.0]]),   # w≈0.50, mu1=4.0,  mu2=0.0  — equal weights, well-separated modes
 ]
 
 D       = 2
 SEED    = 42
 N_GRID  = 300
-N_SIZES = [50, 200, 1000]
+N_SIZES = [50, 200, 2000]
 OUT_DIR = Path('results_simulated')
 OUT_DIR.mkdir(exist_ok=True)
 
@@ -126,14 +126,19 @@ OUT_DIR.mkdir(exist_ok=True)
 def _eval(key, X_tr, z_tr, X_demo, z_lo, z_hi):
     kw = dict(n_grid=N_GRID, z_min=z_lo, z_max=z_hi)
     try:
-        if key == 'LinearGauss-Hetero':
-            cdes, zg = linear_gaussian_hetero_density(X_tr, z_tr, X_demo, **kw)
+        if key == 'FlexCode-RF':
+            max_basis = min(30, max(15, int(np.sqrt(len(X_tr)))))
+            model = FlexCodeEstimator(RFFlexRegressor, max_basis=max_basis, name='FlexCode-RF')
+            model.fit_cv(X_tr, z_tr, n_folds=5)
+            cdes, zg = model.predict(X_demo, n_grid=kw.get('n_grid', N_GRID))
+            return zg, cdes[0]
         elif key == 'Flow-Spline':
             cdes, zg = normalizing_flow_density_tuned(
                 X_tr, z_tr, X_demo, device='cpu', random_state=SEED, **kw)
         elif key == 'TabPFN-2.5' and HAS_TABPFN:
             m = TabPFNRegressor.create_default_for_version(
-                    ModelVersion.V2_5, device='cpu')
+                    ModelVersion.V2_5, device='cuda',
+                    ignore_pretraining_limits=True)
             m.fit(X_tr, z_tr)
             cdes, zg = tabpfn_native_density(m, X_demo, **kw)
         else:
@@ -216,8 +221,7 @@ def _draw_panel(ax, panel):
         zg, dens = panel['curves'][key]
         ax.plot(zg, dens, color=GROUP_COLOR[group], ls=ls, lw=lw,
                 alpha=0.88,
-                zorder={'parametric': 3, 'nonparametric': 4,
-                        'foundational': 5}[group])
+                zorder={'flexcode': 3, 'flow': 4, 'foundational': 5}[group])
 
     ax.set_xlim(panel['z_lo'], panel['z_hi'])
     ax.set_ylim(0, max(panel['true_dens']) * 1.9)

@@ -25,3 +25,4 @@ results_simulated/*.html
 results_simulated/results.json
 !results_simulated/results.json
 .Rhistory
+paper/

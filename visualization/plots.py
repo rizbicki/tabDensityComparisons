@@ -602,13 +602,7 @@ def _ds_labels(datasets, all_data, max_chars=20):
         base, _ = _parse_base_and_n(ds)
         base = base if base is not None else ds
 
-        d_val = None
-        if all_data and ds in all_data:
-            X_test = all_data[ds].get('X_test')
-            if X_test is not None and getattr(X_test, 'ndim', None) == 2:
-                d_val = int(X_test.shape[1])
-        if d_val is None:
-            d_val = _parse_d(base)
+        d_val = _lookup_d(base, all_data=all_data, ds_name=ds)
 
         if d_val is not None:
             base = _re.sub(r'-d\d+$', '', base)
@@ -622,13 +616,7 @@ def _ds_labels(datasets, all_data, max_chars=20):
 def _dataset_d_value(ds_name, all_data=None):
     base, _ = _parse_base_and_n(ds_name)
     base = base if base is not None else ds_name
-
-    if all_data and ds_name in all_data:
-        X_test = all_data[ds_name].get('X_test')
-        if X_test is not None and getattr(X_test, 'ndim', None) == 2:
-            return int(X_test.shape[1])
-
-    return _parse_d(base)
+    return _lookup_d(base, all_data=all_data, ds_name=ds_name)
 
 
 def _dataset_sort_key(ds_name, all_data=None):
@@ -1353,10 +1341,102 @@ def _plot_sdss_raw_combined(groups, methods, output_dir):
     print(f"  saved {tex_path}")
 
 
+# ── Per-dataset significance testing ─────────────────────────────────────
+
+def _per_dataset_significance(sub_results, datasets, methods, metric,
+                              direction, n_reps=4, alpha=0.10):
+    """Test which foundation methods significantly beat all non-foundation.
+
+    For each (dataset, foundation_method) pair, runs one-sided Welch
+    t-tests against every parametric and nonparametric method on that
+    dataset, with Holm-Bonferroni correction.  Returns a dict
+    ``{(dataset, method): bool}`` (always False for non-foundation).
+
+    Metrics without per-rep SE (e.g. PIT_KS) are skipped (all False).
+    """
+    from scipy.stats import t as t_dist
+
+    se_key = f'{metric}_se'
+    sig = {(ds, m): False for ds in datasets for m in methods}
+
+    foundation_methods = [m for m in methods
+                          if _method_group(m) == 'foundational']
+    non_foundation = [m for m in methods
+                      if _method_group(m) != 'foundational']
+
+    if not foundation_methods or not non_foundation:
+        return sig
+
+    for ds in datasets:
+        # Gather values and SEs for every method on this dataset
+        info = {}
+        for m in methods:
+            mr = _lookup_method(sub_results[ds], m)
+            if mr is None:
+                continue
+            v = mr.get(metric)
+            s = mr.get(se_key)
+            if v is not None and s is not None:
+                info[m] = (v, s)
+
+        for fm in foundation_methods:
+            if fm not in info:
+                continue
+            c_val, c_se = info[fm]
+
+            # Test fm against each non-foundation competitor
+            pvals = []
+            for cm in non_foundation:
+                if cm not in info:
+                    continue
+                o_val, o_se = info[cm]
+
+                # Positive diff = foundation is better
+                if direction == 'lower':
+                    diff = o_val - c_val
+                elif direction == 'higher':
+                    diff = c_val - o_val
+                else:
+                    target = float(direction.split('_')[1])
+                    diff = abs(o_val - target) - abs(c_val - target)
+
+                se_diff = np.sqrt(c_se**2 + o_se**2)
+                if se_diff < 1e-15:
+                    pval = 0.0 if diff > 1e-15 else 1.0
+                else:
+                    if c_se > 0 and o_se > 0:
+                        df = (c_se**2 + o_se**2)**2 / (
+                            c_se**4 / (n_reps - 1) + o_se**4 / (n_reps - 1)
+                        )
+                    else:
+                        df = max(n_reps - 1, 1)
+                    t_stat = diff / se_diff
+                    pval = 1.0 - t_dist.cdf(t_stat, df)
+                pvals.append(pval)
+
+            if not pvals:
+                continue
+
+            # Holm-Bonferroni correction
+            n_comp = len(pvals)
+            sorted_p = sorted(pvals)
+            all_sig = True
+            for i, p in enumerate(sorted_p):
+                if p * (n_comp - i) >= alpha:
+                    all_sig = False
+                    break
+            sig[(ds, fm)] = all_sig
+
+    return sig
+
+
 def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
                    fname_prefix, output_dir, all_data,
-                   summary_mode='score', show_values=False):
+                   summary_mode='score', show_values=False,
+                   sig_alpha=0.10, n_reps=None):
     """Transposed raw-value heatmap: methods=columns, datasets=rows."""
+    if n_reps is None:
+        n_reps = 40 if n_size == 50 else 4
     datasets = _ordered_dataset_names(sub_results.keys(), all_data)
     if not datasets:
         return
@@ -1390,6 +1470,12 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
                 v = method_result.get(metric) if method_result is not None else None
                 if v is not None:
                     matrix[mi, di] = v
+
+        # Per-dataset significance (skip metrics without SE, e.g. PIT_KS)
+        sig_map = _per_dataset_significance(
+            sub_results, datasets, methods, metric, direction,
+            n_reps=n_reps, alpha=sig_alpha,
+        )
 
         cmap = _metric_cmap(direction)
 
@@ -1428,6 +1514,12 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
         data_norm = norm_matrix[col_order, :].T  # (n_ds, n_methods)
         data_raw = matrix[col_order, :].T         # (n_ds, n_methods) raw values
 
+        # Build significance matrix aligned with data_raw
+        sig_matrix = np.zeros((n_ds, n_methods), dtype=bool)
+        for i, ds in enumerate(datasets):
+            for j, m in enumerate(ordered_methods):
+                sig_matrix[i, j] = sig_map.get((ds, m), False)
+
         if summary_mode == 'rank':
             rank_matrix = np.full((n_methods, n_ds), np.nan)
             for di, ds in enumerate(datasets):
@@ -1464,6 +1556,8 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
 
         ax1.imshow(plot_norm, cmap=cmap, aspect='auto', vmin=0, vmax=1)
 
+        # Render cell contents and significance asterisks
+        cmap_obj = plt.get_cmap(cmap)
         if show_values:
             _VALUE_FMTS = {
                 'CDE_loss': lambda v: f'{v:.2f}' if 0.01 <= abs(v) < 1000 else f'{v:.1e}',
@@ -1473,7 +1567,6 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
                 'coverage_90': lambda v: f'{v:.2f}',
             }
             fmt = _VALUE_FMTS.get(metric, lambda v: f'{v:.2g}')
-            cmap_obj = plt.get_cmap(cmap)
             val_fs = max(5.0, min(7.0, 150 / max(n_methods, n_ds)))
             for i in range(n_ds):
                 for j in range(n_methods):
@@ -1482,9 +1575,23 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
                         continue
                     nv = data_norm[i, j]
                     bg = cmap_obj(nv) if not np.isnan(nv) else (0.9, 0.9, 0.9, 1.0)
-                    ax1.text(j, i, fmt(v), ha='center', va='center',
+                    txt = fmt(v)
+                    if sig_matrix[i, j]:
+                        txt += '*'
+                    ax1.text(j, i, txt, ha='center', va='center',
                              fontsize=val_fs, fontweight='bold',
                              color=_text_color_for_bg(bg), zorder=5)
+        else:
+            # No values shown — render a standalone asterisk for significant cells
+            star_fs = max(7.0, min(12.0, 200 / max(n_methods, n_ds)))
+            for i in range(n_ds):
+                for j in range(n_methods):
+                    if sig_matrix[i, j]:
+                        nv = data_norm[i, j]
+                        bg = cmap_obj(nv) if not np.isnan(nv) else (0.9, 0.9, 0.9, 1.0)
+                        ax1.text(j, i, '*', ha='center', va='center',
+                                 fontsize=star_fs, fontweight='bold',
+                                 color=_text_color_for_bg(bg), zorder=5)
 
         if summary_mode == 'rank':
             rank_cmap = plt.get_cmap('RdYlGn_r')
@@ -2384,10 +2491,38 @@ def _parse_base_and_n(ds_name):
     return None, None
 
 
+# Fallback dimension lookup for real datasets (post one-hot encoding).
+# Used when cache data is unavailable (e.g. --metrics-only regeneration).
+_REAL_DATASET_DIMS = {
+    'FIFA': 5, 'SDSS': 5, 'VisualizingSoil': 5, 'SpaceGA': 6, 'Sulfur': 6,
+    'Bank8FM': 8, 'CalHousing': 8, 'Kin8nm': 8, 'Puma8NH': 8, 'Protein': 9,
+    'Abalone': 10, 'WhiteWine': 11, 'CPS88Wages': 12, 'CpuSmall': 12,
+    'GridStability': 12, 'NavalPropulsion': 14, 'MiamiHousing': 15,
+    'House16H': 16, 'SGEMM_GPU': 17, 'Elevators': 18, 'BikeSharing': 20,
+    'CPUact': 21, 'SARCOS': 21, 'BlackFriday': 22, 'VideoTranscoding': 24,
+    'HealthInsurance': 25, 'Diamonds': 26, 'Puma32NH': 32, 'Ailerons': 40,
+    'Pol': 48, 'WaveEnergy': 48, 'BrazilianHouses': 52, 'Digits': 64,
+    'Superconductivity': 81, 'Year': 90, 'Topo': 266,
+    'AmesHousing': 352, 'CTSlices': 384, 'MercedesBenz': 563,
+}
+
+
 def _parse_d(base_name):
     """Extract d from base names like 'Heteroscedastic-d5'. Returns int or None."""
     m = _re.search(r'-d(\d+)$', base_name)
     return int(m.group(1)) if m else None
+
+
+def _lookup_d(base_name, all_data=None, ds_name=None):
+    """Look up dataset dimensionality from all sources."""
+    if all_data and ds_name and ds_name in all_data:
+        X_test = all_data[ds_name].get('X_test')
+        if X_test is not None and getattr(X_test, 'ndim', None) == 2:
+            return int(X_test.shape[1])
+    d = _parse_d(base_name)
+    if d is not None:
+        return d
+    return _REAL_DATASET_DIMS.get(base_name)
 
 
 def _build_base_groups(all_results, all_data=None):

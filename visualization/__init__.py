@@ -13,6 +13,7 @@ from .plots import (
     plot_performance_vs_n_foundational,
     plot_sdss_fit_time_vs_cde_loss,
     plot_perf_vs_n_cde_improved,
+    plot_perf_vs_n_foundational_cde_subsets,
     save_html_table,
     save_appendix_metric_tables,
     save_appendix_metric_tables_html,

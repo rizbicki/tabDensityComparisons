@@ -7948,4 +7948,142 @@ CDE=-0.0609, LL=-3.259, CRPS=1.9131, KS=0.030
     [tune] config 7: {'num_trees': 20, 'num_sweeps': 40} -> CDE=-0.0894
     [tune] best: {'num_trees': 20, 'num_sweeps': 40} -> CDE=-0.0894
 CDE=-0.0908, LL=-2.592, CRPS=1.8123, KS=0.035
-  BART-Hetero... 
+  BART-Hetero...     [tune] config 0: {'num_trees': 50, 'num_sweeps': 40} -> CDE=-0.0607
+    [tune] config 1: {'num_trees': 30, 'num_sweeps': 40} -> CDE=-0.0621
+    [tune] config 2: {'num_trees': 20, 'num_sweeps': 40} -> CDE=-0.0622
+    [tune] config 3: {'num_trees': 30, 'num_sweeps': 60} -> CDE=-0.0616
+    [tune] config 4: {'num_trees': 50, 'num_sweeps': 60} -> CDE=-0.0611
+    [tune] config 5: {'num_trees': 30, 'num_sweeps': 80} -> CDE=-0.0623
+    [tune] config 6: {'num_trees': 30, 'num_sweeps': 80} -> CDE=-0.0623
+    [tune] config 7: {'num_trees': 20, 'num_sweeps': 40} -> CDE=-0.0622
+    [tune] best: {'num_trees': 30, 'num_sweeps': 80} -> CDE=-0.0623
+CDE=-0.0600, LL=-3.222, CRPS=1.9070, KS=0.151
+  CatMLP...     [tune] config 0: {'n_bins': 100, 'n_hidden': 32, 'lr': 0.01, 'n_epochs': 300} -> CDE=-0.0746
+    [tune] config 1: {'n_bins': 30, 'n_hidden': 32, 'lr': 0.01, 'n_epochs': 500} -> CDE=-0.0912
+    [tune] config 2: {'n_bins': 100, 'n_hidden': 64, 'lr': 0.01, 'n_epochs': 800} -> CDE=-0.0759
+    [tune] config 3: {'n_bins': 50, 'n_hidden': 128, 'lr': 0.005, 'n_epochs': 300} -> CDE=-0.0807
+    [tune] config 4: {'n_bins': 30, 'n_hidden': 64, 'lr': 0.02, 'n_epochs': 300} -> CDE=-0.0856
+    [tune] config 5: {'n_bins': 100, 'n_hidden': 64, 'lr': 0.02, 'n_epochs': 800} -> CDE=-0.0735
+    [tune] config 6: {'n_bins': 100, 'n_hidden': 128, 'lr': 0.005, 'n_epochs': 500} -> CDE=-0.0747
+    [tune] config 7: {'n_bins': 100, 'n_hidden': 64, 'lr': 0.005, 'n_epochs': 800} -> CDE=-0.0760
+    [tune] best: {'n_bins': 30, 'n_hidden': 32, 'lr': 0.01, 'n_epochs': 500} -> CDE=-0.0912
+CDE=-0.0996, LL=-2.529, CRPS=1.7873, KS=0.020
+
+  [Bank8FM-5000] 3 rep(s) cached, running 1 more...
+
+  ── rep 1/4 (seed=0) ──
+
+======================================================================
+  Bank8FM-5000  (train=3750, test=1250, d=8)
+======================================================================
+  [resume] 23 method(s) already done: FlexCode-RF, TabPFN-Native, TabPFN-2.5, RealTabPFN-2.5, TabICL-Quantiles, LinearGauss-Homo, Student-t, LogNormal-Homo, MDN, Flow-Spline, Quantile-Tree, Gamma-GLM, LinGauss-Homo-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, Gamma-GLM-Ridge, BART-Homo, BART-Hetero, CatMLP, LinearGauss-Hetero, LogNormal-Hetero, LinGauss-Hetero-Ridge, LogNormal-Hetero-Ridge
+  FlexCode-RF... [cached] CDE=-0.0000, LL=-11.375
+  TabPFN-Native... [cached] CDE=-0.0000, LL=-10.720
+  TabPFN-2.5... [cached] CDE=-0.0000, LL=-10.720
+  RealTabPFN-2.5... [cached] CDE=-0.0000, LL=-10.733
+  TabICL-Quantiles... [cached] CDE=-0.0000, LL=-10.785
+  LinearGauss-Homo... [cached] CDE=-0.0000, LL=-11.871
+  LinearGauss-Hetero... [cached] CDE=-0.0000, LL=-11.993
+  Student-t... [cached] CDE=-0.0000, LL=-11.686
+  LogNormal-Homo... [cached] CDE=-0.0000, LL=-11.335
+  LogNormal-Hetero... [cached] CDE=-0.0000, LL=-11.210
+  MDN... [cached] CDE=-0.0000, LL=-11.019
+  Flow-Spline... [cached] CDE=-0.0000, LL=-10.997
+  Quantile-Tree... [cached] CDE=-0.0000, LL=-11.159
+  Gamma-GLM... [cached] CDE=-0.0000, LL=-11.375
+  LinGauss-Homo-Ridge... [cached] CDE=-0.0000, LL=-11.871
+  LinGauss-Hetero-Ridge... [cached] CDE=-0.0000, LL=-12.377
+  Student-t-Ridge... [cached] CDE=-0.0000, LL=-11.682
+  LogNormal-Homo-Ridge... [cached] CDE=-0.0000, LL=-11.338
+  LogNormal-Hetero-Ridge... [cached] CDE=-0.0000, LL=-11.231
+  Gamma-GLM-Ridge... [cached] CDE=-0.0000, LL=-11.479
+  BART-Homo... [cached] CDE=-0.0000, LL=-12.099
+  BART-Hetero... [cached] CDE=-0.0000, LL=-11.939
+  CatMLP... [cached] CDE=-0.0000, LL=-11.036
+
+  ── rep 2/4 (seed=1) ──
+
+======================================================================
+  Bank8FM-5000  (train=3750, test=1250, d=8)
+======================================================================
+  [resume] 23 method(s) already done: FlexCode-RF, TabPFN-Native, TabPFN-2.5, RealTabPFN-2.5, TabICL-Quantiles, LinearGauss-Homo, Student-t, LogNormal-Homo, MDN, Flow-Spline, Quantile-Tree, Gamma-GLM, LinGauss-Homo-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, Gamma-GLM-Ridge, BART-Homo, BART-Hetero, CatMLP, LinearGauss-Hetero, LogNormal-Hetero, LinGauss-Hetero-Ridge, LogNormal-Hetero-Ridge
+  FlexCode-RF... [cached] CDE=-0.0000, LL=-11.372
+  TabPFN-Native... [cached] CDE=-0.0000, LL=-10.690
+  TabPFN-2.5... [cached] CDE=-0.0000, LL=-10.690
+  RealTabPFN-2.5... [cached] CDE=-0.0000, LL=-10.703
+  TabICL-Quantiles... [cached] CDE=-0.0000, LL=-10.733
+  LinearGauss-Homo... [cached] CDE=-0.0000, LL=-11.878
+  LinearGauss-Hetero... [cached] CDE=-0.0000, LL=-11.970
+  Student-t... [cached] CDE=-0.0000, LL=-11.692
+  LogNormal-Homo... [cached] CDE=-0.0000, LL=-11.323
+  LogNormal-Hetero... [cached] CDE=-0.0000, LL=-11.179
+  MDN... [cached] CDE=-0.0000, LL=-10.916
+  Flow-Spline... [cached] CDE=-0.0000, LL=-10.954
+  Quantile-Tree... [cached] CDE=-0.0000, LL=-11.123
+  Gamma-GLM... [cached] CDE=-0.0000, LL=-11.356
+  LinGauss-Homo-Ridge... [cached] CDE=-0.0000, LL=-11.880
+  LinGauss-Hetero-Ridge... [cached] CDE=-0.0000, LL=-12.349
+  Student-t-Ridge... [cached] CDE=-0.0000, LL=-11.690
+  LogNormal-Homo-Ridge... [cached] CDE=-0.0000, LL=-11.323
+  LogNormal-Hetero-Ridge... [cached] CDE=-0.0000, LL=-11.190
+  Gamma-GLM-Ridge... [cached] CDE=-0.0000, LL=-11.447
+  BART-Homo... [cached] CDE=-0.0000, LL=-12.093
+  BART-Hetero... [cached] CDE=-0.0000, LL=-11.915
+  CatMLP... [cached] CDE=-0.0000, LL=-11.010
+
+  ── rep 3/4 (seed=2) ──
+
+======================================================================
+  Bank8FM-5000  (train=3750, test=1250, d=8)
+======================================================================
+  [resume] 23 method(s) already done: FlexCode-RF, TabPFN-Native, TabPFN-2.5, RealTabPFN-2.5, TabICL-Quantiles, LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, MDN, Flow-Spline, Quantile-Tree, Gamma-GLM, LinGauss-Homo-Ridge, LinGauss-Hetero-Ridge, Student-t-Ridge, LogNormal-Homo-Ridge, LogNormal-Hetero-Ridge, Gamma-GLM-Ridge, BART-Homo, BART-Hetero, CatMLP
+  FlexCode-RF... [cached] CDE=-0.0000, LL=-11.338
+  TabPFN-Native... [cached] CDE=-0.0000, LL=-10.763
+  TabPFN-2.5... [cached] CDE=-0.0000, LL=-10.763
+  RealTabPFN-2.5... [cached] CDE=-0.0000, LL=-10.774
+  TabICL-Quantiles... [cached] CDE=-0.0000, LL=-10.802
+  LinearGauss-Homo... [cached] CDE=-0.0000, LL=-11.867
+  LinearGauss-Hetero... [cached] CDE=-0.0000, LL=-11.956
+  Student-t... [cached] CDE=-0.0000, LL=-11.677
+  LogNormal-Homo... [cached] CDE=-0.0000, LL=-11.335
+  LogNormal-Hetero... [cached] CDE=-0.0000, LL=-11.226
+  MDN... [cached] CDE=-0.0000, LL=-11.017
+  Flow-Spline... [cached] CDE=-0.0000, LL=-10.963
+  Quantile-Tree... [cached] CDE=-0.0000, LL=-11.090
+  Gamma-GLM... [cached] CDE=-0.0000, LL=-11.378
+  LinGauss-Homo-Ridge... [cached] CDE=-0.0000, LL=-11.869
+  LinGauss-Hetero-Ridge... [cached] CDE=-0.0000, LL=-12.402
+  Student-t-Ridge... [cached] CDE=-0.0000, LL=-11.675
+  LogNormal-Homo-Ridge... [cached] CDE=-0.0000, LL=-11.338
+  LogNormal-Hetero-Ridge... [cached] CDE=-0.0000, LL=-11.238
+  Gamma-GLM-Ridge... [cached] CDE=-0.0000, LL=-11.493
+  BART-Homo... [cached] CDE=-0.0000, LL=-12.142
+  BART-Hetero... [cached] CDE=-0.0000, LL=-11.971
+  CatMLP... [cached] CDE=-0.0000, LL=-10.989
+
+  ── rep 4/4 (seed=3) ──
+
+======================================================================
+  Bank8FM-5000  (train=3750, test=1250, d=8)
+======================================================================
+  FlexCode-RF... I=30, CDE=-0.0000, LL=-11.305, CRPS=13928.0691, KS=0.162, t=4.5s
+  TabPFN-Native... [bar dist] CDE=-0.0000, LL=-10.663, CRPS=10002.7878, KS=0.072
+  TabPFN-2.5... [bar dist] CDE=-0.0000, LL=-10.663, CRPS=10002.7878, KS=0.072
+  RealTabPFN-2.5... [bar dist] CDE=-0.0000, LL=-10.682, CRPS=10086.3273, KS=0.070
+  TabICL-Quantiles... [199 quantiles] CDE=-0.0000, LL=-10.693, CRPS=9747.8292, KS=0.050
+  LinearGauss-Homo... CDE=-0.0000, LL=-11.860, CRPS=18585.4023, KS=0.257
+  LinearGauss-Hetero... CDE=-0.0000, LL=-11.917, CRPS=18018.7408, KS=0.190
+  Student-t... CDE=-0.0000, LL=-11.684, CRPS=17853.6569, KS=0.207
+  LogNormal-Homo... CDE=-0.0000, LL=-11.312, CRPS=15366.7784, KS=0.095
+  LogNormal-Hetero... CDE=-0.0000, LL=-11.183, CRPS=13923.5789, KS=0.073
+  MDN...     [tune] config 0: {'n_components': 5, 'n_hidden': 16, 'lr': 0.01, 'n_epochs': 300} -> CDE=-0.0000
+    [tune] config 1: {'n_components': 2, 'n_hidden': 16, 'lr': 0.01, 'n_epochs': 500} -> CDE=-0.0000
+    [tune] config 2: {'n_components': 5, 'n_hidden': 32, 'lr': 0.01, 'n_epochs': 800} -> CDE=-0.0000
+    [tune] config 3: {'n_components': 3, 'n_hidden': 64, 'lr': 0.005, 'n_epochs': 300} -> CDE=-0.0000
+    [tune] config 4: {'n_components': 2, 'n_hidden': 32, 'lr': 0.02, 'n_epochs': 300} -> CDE=-0.0000
+    [tune] config 5: {'n_components': 5, 'n_hidden': 32, 'lr': 0.02, 'n_epochs': 800} -> CDE=-0.0000
+    [tune] config 6: {'n_components': 5, 'n_hidden': 64, 'lr': 0.005, 'n_epochs': 500} -> CDE=-0.0000
+    [tune] config 7: {'n_components': 5, 'n_hidden': 32, 'lr': 0.005, 'n_epochs': 800} -> CDE=-0.0000
+    [tune] best: {'n_components': 2, 'n_hidden': 16, 'lr': 0.01, 'n_epochs': 500} -> CDE=-0.0000
+CDE=-0.0000, LL=-11.041, CRPS=12557.4710, KS=0.058
+  Flow-Spline... 

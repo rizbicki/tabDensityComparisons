@@ -186,12 +186,12 @@ All synthetic datasets have known true conditional densities. Tags follow
 | Friedman1 | Friedman #1 DGP; extra features (d>5) are irrelevant noise |
 | Friedman2 | Friedman #2 DGP; fixed d=4, tag `Friedman2-d4-{n}` |
 
-The benchmark `Bimodal` generator in [datasets/synthetic.py](/home/rizbicki/git/tabDensityComparisons/datasets/synthetic.py)
+The benchmark `Bimodal` generator in [datasets/synthetic.py](datasets/synthetic.py)
 uses fixed weights:
 `0.5 * N(z; x0 + x1, 0.5^2) + 0.5 * N(z; -x0 + x1, 0.5^2)`.
 
 For a concrete input-dependent mixture example, see
-[datasets/synthetic.py](/home/rizbicki/git/tabDensityComparisons/datasets/synthetic.py)
+[datasets/synthetic.py](datasets/synthetic.py)
 function `make_bimodal_input_weighted_example`, which uses
 `w(x) = Phi(1.5 * x0 - 0.75 * x1)` and
 `f(z|x) = w(x) p1(z|x) + (1 - w(x)) p2(z|x)`.

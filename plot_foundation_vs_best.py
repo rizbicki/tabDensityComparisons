@@ -1,104 +1,146 @@
 #!/usr/bin/env python3
 """
-Generate a 4×4 figure comparing the best foundation model vs the best
-non-foundation model on 4 test instances, for 4 dataset/n scenarios
-chosen to highlight when foundation models win or lose by CDE loss.
+Figure showing cases where foundation models underperform:
+estimated conditional densities for the best foundation model
+vs the best non-foundation model, on selected test instances.
+
+Each panel is zoomed to the region where the densities have mass.
 """
 
 import json
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 from pathlib import Path
 
 # ── configuration ────────────────────────────────────────────────────
-FOUNDATION = {"TabPFN-Native", "TabPFN-2.5", "RealTabPFN-2.5", "TabICL-Quantiles"}
-
-CASES = [
-    # (cache_file, best_foundation, best_nonfoundation, row_label)
-    ("Ailerons-50",        "TabPFN-2.5",       "Student-t-Ridge",
-     "Ailerons ($n$=50)\nFoundation better"),
-    ("Digits-50",          "TabPFN-2.5",       "CatMLP",
-     "Digits ($n$=50)\nFoundation worse"),
-    ("SDSS-20000",         "TabICL-Quantiles", "Flow-Spline",
-     "SDSS ($n$=20 000)\nFoundation better"),
-    ("HealthInsurance-20000", "TabPFN-2.5",    "Flow-Spline",
-     "HealthInsurance ($n$=20 000)\nFoundation worse"),
-]
-
 CACHE_DIR = Path("results_real/cache")
 OUT_DIR   = Path("results_real")
-N_INST    = 4          # number of test instances per case
+N_INST    = 4
 
-FOUNDATION_COLOR   = "#e67e22"
-NONFOUND_COLOR     = "#377eb8"
-OBS_COLOR          = "#222222"
+FOUNDATION_COLOR = "#e67e22"
+NONFOUND_COLOR   = "#377eb8"
+OBS_COLOR        = "#333333"
 
-# ── helpers ──────────────────────────────────────────────────────────
+ROWS = [
+    ("Digits-50",            "TabPFN-2.5",       "CatMLP"),
+    ("VideoTranscoding-50",  "RealTabPFN-2.5",   "LogNormal-Homo-Ridge"),
+    ("BlackFriday-20000",    "TabPFN-2.5",       "CatMLP"),
+]
+
+# ── load CDE-loss scores ─────────────────────────────────────────────
+with open("results_real/results.json") as f:
+    all_results = json.load(f)
+
+
+def _fmt_loss(ds_key, method):
+    r = all_results[ds_key][method]
+    v, se = r["CDE_loss"], r["CDE_loss_se"]
+    if abs(v) >= 100:
+        return f"{v:.1f} \u00b1 {se:.1f}"
+    if abs(v) >= 1:
+        return f"{v:.2f} \u00b1 {se:.2f}"
+    return f"{v:.4f} \u00b1 {se:.4f}"
+
 
 def _pick_instances(z_te, n=N_INST):
-    """Pick n instances spread across the z range."""
     order = np.argsort(z_te)
     positions = np.linspace(0, len(order) - 1, n, dtype=int)
     return order[positions]
 
 
 def _load(cache_name):
-    """Load cache npz; cache_name without .npz extension."""
-    # handle LaTeX escaping in CASES
-    raw = cache_name.replace("\\", "")
-    data = np.load(CACHE_DIR / f"{raw}.npz", allow_pickle=True)
-    return data
+    return np.load(CACHE_DIR / f"{cache_name}.npz", allow_pickle=True)
 
 
-# ── main ─────────────────────────────────────────────────────────────
+def _zoom_xlim(zg_f, cde_f_i, zg_nf, cde_nf_i, z_obs, pad_frac=0.15):
+    """Compute per-panel x-limits that cover the region with density mass."""
+    # find range where either density is above 1% of its max
+    thresh_f  = 0.01 * cde_f_i.max()  if cde_f_i.max()  > 0 else 0
+    thresh_nf = 0.01 * cde_nf_i.max() if cde_nf_i.max() > 0 else 0
 
+    mask_f  = cde_f_i  > thresh_f
+    mask_nf = cde_nf_i > thresh_nf
+
+    lo = min(
+        zg_f[mask_f][0]   if mask_f.any()  else z_obs,
+        zg_nf[mask_nf][0] if mask_nf.any() else z_obs,
+        z_obs,
+    )
+    hi = max(
+        zg_f[mask_f][-1]   if mask_f.any()  else z_obs,
+        zg_nf[mask_nf][-1] if mask_nf.any() else z_obs,
+        z_obs,
+    )
+    span = hi - lo if hi > lo else abs(z_obs) * 0.5 or 1.0
+    return lo - pad_frac * span, hi + pad_frac * span
+
+
+# ── build figure ─────────────────────────────────────────────────────
 fig, axes = plt.subplots(
-    len(CASES), N_INST,
-    figsize=(3.4 * N_INST, 3.0 * len(CASES)),
-    constrained_layout=True,
+    len(ROWS), N_INST,
+    figsize=(16, 3.8 * len(ROWS)),
+    gridspec_kw={"hspace": 0.40, "wspace": 0.18},
 )
 
-for row, (cache_name, found_m, nonfound_m, label) in enumerate(CASES):
-    data = _load(cache_name)
-    z_te = data["z_te"]
-    idxs = _pick_instances(z_te, N_INST)
-
+for ri, (cache_key, found_m, nonfound_m) in enumerate(ROWS):
+    data  = _load(cache_key)
+    z_te  = data["z_te"]
+    idxs  = _pick_instances(z_te, N_INST)
     cde_f  = data[f"cde_{found_m}"]
     zg_f   = data[f"zgrid_{found_m}"]
     cde_nf = data[f"cde_{nonfound_m}"]
     zg_nf  = data[f"zgrid_{nonfound_m}"]
 
-    for col, idx in enumerate(idxs):
-        ax = axes[row, col]
+    ds_display = cache_key.rsplit("-", 1)[0]
+    n_display  = cache_key.rsplit("-", 1)[1]
+    d_dim      = data["X_te"].shape[1]
+    loss_f     = _fmt_loss(cache_key, found_m)
+    loss_nf    = _fmt_loss(cache_key, nonfound_m)
 
-        # estimated densities
-        ax.plot(zg_f,  cde_f[idx],  color=FOUNDATION_COLOR, lw=2.0,
-                label=found_m    if col == 0 else None)
-        ax.plot(zg_nf, cde_nf[idx], color=NONFOUND_COLOR,   lw=2.0,
-                label=nonfound_m if col == 0 else None)
+    title_str = (
+        f"{ds_display}  ($n$={n_display},  $d$={d_dim})        "
+        f"{found_m}: {loss_f}     vs.     {nonfound_m}: {loss_nf}"
+    )
 
-        # observed y
-        ax.axvline(z_te[idx], color=OBS_COLOR, ls="--", lw=1.2, alpha=0.8,
-                   label="observed $y$" if col == 0 else None)
+    for col in range(N_INST):
+        ax = axes[ri, col]
+        idx = idxs[col]
+
+        ax.fill_between(zg_f,  cde_f[idx],  color=FOUNDATION_COLOR, alpha=0.25)
+        ax.fill_between(zg_nf, cde_nf[idx], color=NONFOUND_COLOR,   alpha=0.25)
+        ax.plot(zg_f,  cde_f[idx],  color=FOUNDATION_COLOR, lw=2.4)
+        ax.plot(zg_nf, cde_nf[idx], color=NONFOUND_COLOR,   lw=2.4)
+
+        ax.axvline(z_te[idx], color=OBS_COLOR, ls="--", lw=1.5, alpha=0.7)
+
+        # zoom x-axis to where the action is
+        xlo, xhi = _zoom_xlim(zg_f, cde_f[idx], zg_nf, cde_nf[idx], z_te[idx])
+        ax.set_xlim(xlo, xhi)
 
         ax.set_yticks([])
-        if row == len(CASES) - 1:
-            ax.set_xlabel("$y$", fontsize=11)
+        ax.tick_params(axis="x", labelsize=12)
+        ax.xaxis.set_major_locator(plt.MaxNLocator(nbins=4))
+
         if col == 0:
-            ax.set_ylabel(label, fontsize=10)
+            ax.set_title(title_str, fontsize=12, fontweight="bold",
+                         loc="left", pad=12)
 
-        # per-instance title
-        ax.set_title(f"instance {col + 1}", fontsize=9, color="grey")
+# ── shared legend ────────────────────────────────────────────────────
+legend_elements = [
+    Patch(facecolor=FOUNDATION_COLOR, alpha=0.45, edgecolor=FOUNDATION_COLOR,
+          linewidth=2, label="Foundation model (best)"),
+    Patch(facecolor=NONFOUND_COLOR, alpha=0.45, edgecolor=NONFOUND_COLOR,
+          linewidth=2, label="Non-foundation model (best)"),
+    Line2D([0], [0], color=OBS_COLOR, ls="--", lw=1.5, alpha=0.7,
+           label="Observed $y$"),
+]
+fig.legend(handles=legend_elements, loc="upper center",
+           ncol=3, fontsize=14, frameon=True, framealpha=0.9,
+           bbox_to_anchor=(0.52, 1.01))
 
-    # legend on first column only
-    axes[row, 0].legend(fontsize=7.5, loc="best", framealpha=0.85)
-
-fig.suptitle(
-    r"Best foundation model vs.\ best non-foundation model",
-    fontsize=13, fontweight="bold", y=1.01,
-)
-
-out_path = OUT_DIR / "foundation_vs_best_density_examples.png"
+out_path = OUT_DIR / "foundation_failure_modes.png"
 fig.savefig(out_path, dpi=200, bbox_inches="tight")
 plt.close(fig)
-print(f"Saved → {out_path}")
+print(f"Saved \u2192 {out_path}")

@@ -17,11 +17,16 @@ from pathlib import Path
 # ── configuration ────────────────────────────────────────────────────
 CACHE_DIR = Path("results_real/cache")
 OUT_DIR   = Path("results_real")
-N_INST    = 4
+N_INST    = 5
 
 FOUNDATION_COLOR = "#e67e22"
 NONFOUND_COLOR   = "#377eb8"
 OBS_COLOR        = "#333333"
+
+FONT_SCALE = 1.30
+TITLE_FONTSIZE = 12 * FONT_SCALE
+TICK_FONTSIZE = 12 * FONT_SCALE
+LEGEND_FONTSIZE = 14 * FONT_SCALE
 
 ROWS = [
     ("Digits-50",            "TabPFN-2.5",       "CatMLP"),
@@ -37,6 +42,8 @@ with open("results_real/results.json") as f:
 def _fmt_loss(ds_key, method):
     r = all_results[ds_key][method]
     v, se = r["CDE_loss"], r["CDE_loss_se"]
+    if ds_key.startswith("BlackFriday"):
+        return f"{v:.5f} \u00b1 {se:.5f}"
     if abs(v) >= 100:
         return f"{v:.1f} \u00b1 {se:.1f}"
     if abs(v) >= 1:
@@ -80,7 +87,7 @@ def _zoom_xlim(zg_f, cde_f_i, zg_nf, cde_nf_i, z_obs, pad_frac=0.15):
 # ── build figure ─────────────────────────────────────────────────────
 fig, axes = plt.subplots(
     len(ROWS), N_INST,
-    figsize=(16, 3.8 * len(ROWS)),
+    figsize=(20, 3.8 * len(ROWS)),
     gridspec_kw={"hspace": 0.40, "wspace": 0.18},
 )
 
@@ -120,11 +127,11 @@ for ri, (cache_key, found_m, nonfound_m) in enumerate(ROWS):
         ax.set_xlim(xlo, xhi)
 
         ax.set_yticks([])
-        ax.tick_params(axis="x", labelsize=12)
+        ax.tick_params(axis="x", labelsize=TICK_FONTSIZE)
         ax.xaxis.set_major_locator(plt.MaxNLocator(nbins=4))
 
         if col == 0:
-            ax.set_title(title_str, fontsize=12, fontweight="bold",
+            ax.set_title(title_str, fontsize=TITLE_FONTSIZE, fontweight="bold",
                          loc="left", pad=12)
 
 # ── shared legend ────────────────────────────────────────────────────
@@ -137,7 +144,7 @@ legend_elements = [
            label="Observed $y$"),
 ]
 fig.legend(handles=legend_elements, loc="upper center",
-           ncol=3, fontsize=14, frameon=True, framealpha=0.9,
+           ncol=3, fontsize=LEGEND_FONTSIZE, frameon=True, framealpha=0.9,
            bbox_to_anchor=(0.52, 1.01))
 
 out_path = OUT_DIR / "foundation_failure_modes.png"

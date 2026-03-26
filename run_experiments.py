@@ -182,9 +182,13 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
         t0 = time.time()
         z_lo = z_train.min() - 0.05 * np.ptp(z_train)
         z_hi = z_train.max() + 0.05 * np.ptp(z_train)
-        cdes_pfn, zg_pfn = tabpfn_native_density(
-            pfn_reg, X_te, n_grid=n_grid, z_min=z_lo, z_max=z_hi
-        )
+        try:
+            cdes_pfn, zg_pfn = tabpfn_native_density(
+                pfn_reg, X_te, n_grid=n_grid, z_min=z_lo, z_max=z_hi
+            )
+        except Exception as oom_e:
+            print(f"[skipped: {type(oom_e).__name__}]")
+            return
         pred_t = time.time() - t0
         m = compute_all_metrics(cdes_pfn, zg_pfn, z_test)
         m['fit_time'] = fit_t + pred_t

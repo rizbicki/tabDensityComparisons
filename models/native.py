@@ -13,21 +13,56 @@ def tabpfn_native_density(model, X_test, n_grid=200, z_min=None, z_max=None):
     We access it via output_type="full", which returns logits and the criterion
     (bar distribution object), then convert to a density on a grid.
     """
+    from tabpfn.errors import TabPFNCUDAOutOfMemoryError
+    import torch
+
     n_test = X_test.shape[0]
     z_grid = np.linspace(z_min, z_max, n_grid)
     cdes = np.zeros((n_test, n_grid))
 
+    def _full_batched(X, batch_size):
+        all_logits = []
+        criterion = None
+        for start in range(0, len(X), batch_size):
+            try:
+                out = model.predict(X[start:start + batch_size], output_type="full")
+            except TabPFNCUDAOutOfMemoryError:
+                if batch_size <= 1:
+                    raise
+                return _full_batched(X, batch_size // 2)
+            if criterion is None:
+                criterion = out['criterion']
+            lg = out['logits']
+            if isinstance(lg, torch.Tensor):
+                lg = lg.detach().cpu().numpy()
+            all_logits.append(np.array(lg))
+        return criterion, np.vstack(all_logits)
+
+    def _quantiles_batched(X, alphas, batch_size):
+        batches = []
+        for start in range(0, len(X), batch_size):
+            try:
+                q = model.predict(X[start:start + batch_size],
+                                  output_type="quantiles",
+                                  quantiles=alphas.tolist())
+            except TabPFNCUDAOutOfMemoryError:
+                if batch_size <= 1:
+                    raise
+                return _quantiles_batched(X, alphas, batch_size // 2)
+            batches.append(np.column_stack(q))
+        return np.vstack(batches)
+
     try:
-        full_out = model.predict(X_test, output_type="full")
-
-        criterion = full_out['criterion']
-        logits = full_out['logits']
-
-        import torch
-        if isinstance(logits, torch.Tensor):
-            logits_np = logits.detach().cpu().numpy()
-        else:
-            logits_np = np.array(logits)
+        try:
+            full_out = model.predict(X_test, output_type="full")
+            criterion = full_out['criterion']
+            logits = full_out['logits']
+            if isinstance(logits, torch.Tensor):
+                logits_np = logits.detach().cpu().numpy()
+            else:
+                logits_np = np.array(logits)
+        except TabPFNCUDAOutOfMemoryError:
+            criterion, logits_np = _full_batched(X_test, n_test // 2)
 
         # Convert logits to probabilities via softmax
         logits_np = logits_np - logits_np.max(axis=-1, keepdims=True)
@@ -64,14 +99,21 @@ def tabpfn_native_density(model, X_test, n_grid=200, z_min=None, z_max=None):
         print(f"[quantile fallback: {type(e).__name__}] ", end="")
         alphas = np.linspace(0.01, 0.99, 99)
         try:
-            q_preds = model.predict(X_test, output_type="quantiles",
-                                    quantiles=alphas.tolist())
-            Q = np.column_stack(q_preds)
+            try:
+                q_preds = model.predict(X_test, output_type="quantiles",
+                                        quantiles=alphas.tolist())
+                Q = np.column_stack(q_preds)
+            except TabPFNCUDAOutOfMemoryError:
+                Q = _quantiles_batched(X_test, alphas, n_test // 2)
         except Exception:
             Q = np.zeros((n_test, len(alphas)))
             for j, a in enumerate(alphas):
-                Q[:, j] = model.predict(X_test, output_type="quantiles",
-                                        quantiles=[a])[0]
+                try:
+                    Q[:, j] = model.predict(X_test, output_type="quantiles",
+                                            quantiles=[a])[0]
+                except TabPFNCUDAOutOfMemoryError:
+                    Q[:, j] = _quantiles_batched(X_test, np.array([a]),
+                                                 n_test // 2)[:, 0]
 
         for i in range(n_test):
             Q[i, :] = np.sort(Q[i, :])

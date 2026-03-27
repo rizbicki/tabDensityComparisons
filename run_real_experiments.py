@@ -43,7 +43,6 @@ from utils import save_cache, load_cache, print_summary, aggregate_reps
 
 DEFAULT_REAL_METHODS = [
     'FlexCode-RF',
-    'TabPFN-Native',
     'TabPFN-2.5',
     'RealTabPFN-2.5',
     'TabICL-Quantiles',

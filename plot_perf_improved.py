@@ -30,7 +30,7 @@ METRICS = [
 ]
 
 # ── group membership ─────────────────────────────────────────────────────────
-FOUNDATIONAL = {"TabPFN-Native", "TabPFN-2.5", "RealTabPFN-2.5", "TabICL-Quantiles"}
+FOUNDATIONAL = {"TabPFN-2.5", "RealTabPFN-2.5", "TabICL-Quantiles"}
 
 PARAMETRIC_BASE = {
     "LinearGauss-Homo", "LinearGauss-Hetero", "Student-t",
@@ -50,18 +50,14 @@ C_NONPAR  = "#377eb8"
 C_FOUND   = "#e67e22"
 
 FOUND_STYLES = {
-    "TabPFN-Native":    {"ls": "-",  "marker": "o"},
     "TabPFN-2.5":       {"ls": "-",  "marker": "o"},
     "RealTabPFN-2.5":   {"ls": "-.", "marker": "^"},
     "TabICL-Quantiles": {"ls": ":",  "marker": "D"},
 }
-FOUND_MERGE = {"TabPFN-Native", "TabPFN-2.5"}
-FOUND_MERGE_LABEL = "TabPFN Native/2.5"
 
 NONPAR_LINES = ["-", "--", "-.", ":", (0,(3,1,1,1)), (0,(5,2))]
 
 DISPLAY = {
-    "TabPFN-Native":    "TabPFN Native",
     "TabPFN-2.5":       "TabPFN 2.5",
     "RealTabPFN-2.5":   "RealTabPFN 2.5",
     "TabICL-Quantiles": "TabICL Quantiles",
@@ -211,7 +207,6 @@ def draw_panel(ax, metric_key, metric_label, lower_is_better, *,
     # 3. FOUNDATION ───────────────────────────────────────────────────────────
     found_methods = sorted(m for m in FOUNDATIONAL
                            if get_series(m, metric_key)[0])
-    merged_label_added = False
     found_term_labels = []
     for m in found_methods:
         ns, vals, ses = get_series(m, metric_key)
@@ -226,13 +221,7 @@ def draw_panel(ax, metric_key, metric_label, lower_is_better, *,
             ax.plot(ns[-1], vals[-1], "x", color=C_FOUND,
                     ms=9, mew=2.2, zorder=9)
 
-        if m in FOUND_MERGE:
-            if merged_label_added:
-                continue
-            lbl = FOUND_MERGE_LABEL
-            merged_label_added = True
-        else:
-            lbl = disp(m)
+        lbl = disp(m)
 
         if terminates:
             found_term_labels.append((ns[-1], vals[-1], lbl))

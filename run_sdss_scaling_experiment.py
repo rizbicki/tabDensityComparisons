@@ -54,7 +54,6 @@ DEFAULT_METHOD_ORDER = [
     "LogNormal-Homo-Ridge",
     "LogNormal-Hetero-Ridge",
     "Gamma-GLM-Ridge",
-    "TabPFN-Native",
     "TabPFN-2.5",
     "RealTabPFN-2.5",
     "TabICL-Quantiles",
@@ -69,7 +68,7 @@ DEFAULT_METHOD_ORDER = [
 ]
 
 DEFAULT_SAMPLE_SIZE_SPEC = "500,1000,10000,50000,100000,250000,500000,full"
-TABPFN_METHODS = {"TabPFN-Native", "TabPFN-2.5", "RealTabPFN-2.5"}
+TABPFN_METHODS = {"TabPFN-2.5", "RealTabPFN-2.5"}
 
 
 def _key(name):

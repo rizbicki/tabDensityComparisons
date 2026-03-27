@@ -337,13 +337,6 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
                   f"LL={m['log_lik']:.3f}, CRPS={m['CRPS']:.4f}, "
                   f"KS={m['PIT_KS']:.3f}, t={fit_t:.1f}s")
 
-    # ── TabPFN Native Distribution ───────────────────────────────────────
-    if HAS_TABPFN and _want('TabPFN-Native'):
-        _run_tabpfn_method(
-            'TabPFN-Native',
-            lambda: TabPFNRegressor(device=device),
-        )
-
     # ── Explicit TabPFN 2.5 default checkpoint ──────────────────────────
     if HAS_TABPFN and ModelVersion is not None and _want('TabPFN-2.5'):
         _run_tabpfn_method(

@@ -18,7 +18,6 @@ from evaluation import eval_pit, eval_pit_ks
 METHOD_STYLES = {
     'FlexCode-RF':         {'color': '#984ea3', 'ls': '-',   'lw': 2.0, 'zorder': 4},
     'FlexZBoost':          {'color': '#c44dbc', 'ls': '--',  'lw': 2.0, 'zorder': 4},
-    'TabPFN-Native':       {'color': '#0072b2', 'ls': '--',  'lw': 2.0, 'zorder': 4},
     'TabPFN-2.5':          {'color': '#e69f00', 'ls': '-',   'lw': 2.4, 'zorder': 5},
     'RealTabPFN-2.5':      {'color': '#d55e00', 'ls': '-.',  'lw': 2.4, 'zorder': 5},
     'TabICL-Quantiles':    {'color': '#009e73', 'ls': '--',  'lw': 2.0, 'zorder': 4},
@@ -44,7 +43,6 @@ METHOD_STYLES = {
 _FALLBACK_COLORS = ['#8dd3c7', '#bebada', '#fb8072', '#80b1d3', '#fdb462']
 
 FOUNDATIONAL_MODELS = {
-    'TabPFN-Native',
     'TabPFN-2.5',
     'RealTabPFN-2.5',
     'TabICL-Quantiles',
@@ -72,13 +70,6 @@ METHOD_GROUP_META = {
 _FOUNDATIONAL_ACCENT = METHOD_GROUP_META['foundational']['accent']
 
 PERF_FOUNDATIONAL_STYLES = {
-    'TabPFN-Native': {
-        'color': _FOUNDATIONAL_ACCENT,
-        'ls': '--',
-        'lw': 4.2,
-        'marker': 's',
-        'zorder': 10,
-    },
     'TabPFN-2.5': {
         'color': _FOUNDATIONAL_ACCENT,
         'ls': '-',
@@ -130,7 +121,7 @@ HEATMAP_CELL_HEIGHT = 0.28
 HEATMAP_SUMMARY_HEIGHT = 1.0
 HEATMAP_MIN_FIG_HEIGHT = 3.6
 
-EXCLUDED_METHODS = {'Quantile-Linear'}
+EXCLUDED_METHODS = {'Quantile-Linear', 'TabPFN-Native'}
 
 METHOD_ORDER_HINTS = [
     'LinearGauss-Homo',
@@ -154,7 +145,6 @@ METHOD_ORDER_HINTS = [
     'Quantile-Tree',
     'CatMLP',
     'MDN',
-    'TabPFN-Native',
     'TabPFN-2.5',
     'RealTabPFN-2.5',
     'TabICL-Quantiles',
@@ -166,7 +156,6 @@ METHOD_CANONICAL_ALIASES = {
 }
 
 METHOD_LABEL_ALIASES = {
-    'TabPFN-Native': 'TabPFN Native',
     'TabPFN-2.5': 'TabPFN 2.5',
     'RealTabPFN-2.5': 'RealTabPFN 2.5',
     'TabICL-Quantiles': 'TabICL Quantiles',
@@ -2443,7 +2432,6 @@ def plot_true_vs_estimated(all_data, output_dir, n_examples=4):
 
 
 _NATIVE_SUBSET = [
-    'TabPFN-Native',
     'TabPFN-2.5',
     'RealTabPFN-2.5',
     'TabICL-Quantiles',
@@ -3061,12 +3049,10 @@ def plot_perf_vs_n_cde_improved(all_results, output_dir, all_data=None):
     NONPARAMETRIC = {'MDN', 'Flow-Spline', 'BART-Homo', 'BART-Hetero',
                      'FlexCode-RF', 'FlexZBoost', 'CatMLP', 'Quantile-Tree'}
     FOUND_STYLES_LOCAL = {
-        'TabPFN-Native':    {'ls': '-',  'marker': 'o'},
         'TabPFN-2.5':       {'ls': '-',  'marker': 'o'},
         'RealTabPFN-2.5':   {'ls': '-.', 'marker': '^'},
         'TabICL-Quantiles': {'ls': ':',  'marker': 'D'},
     }
-    FOUND_MERGE = {'TabPFN-Native', 'TabPFN-2.5'}
     NONPAR_LINES = ['-', '--', '-.', ':', (0,(3,1,1,1)), (0,(5,2))]
     MIN_GAP = 0.55
 
@@ -3154,7 +3140,6 @@ def plot_perf_vs_n_cde_improved(all_results, output_dir, all_data=None):
             ax.plot(ns[-1], vals[-1], 'x', color=C_NONPAR, ms=7, mew=1.8, zorder=7)
 
     # ── Foundation ────────────────────────────────────────────────────────────
-    merged_added = False
     found_methods = sorted(m for m in FOUNDATIONAL_MODELS if _get_series(m)[0])
     for m in found_methods:
         ns, vals, ses = _get_series(m)
@@ -3164,12 +3149,7 @@ def plot_perf_vs_n_cde_improved(all_results, output_dir, all_data=None):
         arr = np.array(vals); arr_se = np.array(ses)
         ax.fill_between(ns, arr - arr_se, arr + arr_se,
                         color=C_FOUND, alpha=0.14, zorder=7)
-        if m in FOUND_MERGE:
-            if not merged_added:
-                label_series.append((vals[-1], ns[-1], 'TabPFN Native/2.5', C_FOUND))
-                merged_added = True
-        else:
-            label_series.append((vals[-1], ns[-1], _display_method_name(m), C_FOUND))
+        label_series.append((vals[-1], ns[-1], _display_method_name(m), C_FOUND))
         if ns[-1] < MAX_N:
             ax.plot(ns[-1], vals[-1], 'x', color=C_FOUND, ms=9, mew=2.2, zorder=9)
 

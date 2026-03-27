@@ -602,4 +602,30 @@ CDE=-0.4980, LL=-0.756, CRPS=0.3120, KS=0.093
   LogNormal-Homo-Ridge... CDE=-0.0458, LL=-3.421, CRPS=4.3237, KS=0.055
   LogNormal-Hetero-Ridge... CDE=-0.0856, LL=-2.948, CRPS=4.0646, KS=0.029
   Gamma-GLM-Ridge... CDE=-0.0419, LL=-3.520, CRPS=4.8017, KS=0.076
-  BART-Homo... 
+  BART-Homo...     [tune] config 0: {'num_trees': 30, 'num_sweeps': 40} -> CDE=-0.0431
+    [tune] config 1: {'num_trees': 20, 'num_sweeps': 60} -> CDE=-0.0448
+    [tune] config 2: {'num_trees': 30, 'num_sweeps': 40} -> CDE=-0.0431
+    [tune] config 3: {'num_trees': 20, 'num_sweeps': 60} -> CDE=-0.0448
+    [tune] config 4: {'num_trees': 20, 'num_sweeps': 60} -> CDE=-0.0448
+    [tune] config 5: {'num_trees': 20, 'num_sweeps': 80} -> CDE=-0.0447
+    [tune] config 6: {'num_trees': 30, 'num_sweeps': 80} -> CDE=-0.0474
+    [tune] config 7: {'num_trees': 20, 'num_sweeps': 80} -> CDE=-0.0447
+    [tune] best: {'num_trees': 30, 'num_sweeps': 80} -> CDE=-0.0474
+CDE=-0.0822, LL=-2.892, CRPS=2.2307, KS=0.101
+  CatMLP...     [tune] config 0: {'n_bins': 50, 'n_hidden': 32, 'lr': 0.005, 'n_epochs': 500} -> CDE=-0.3065
+    [tune] config 1: {'n_bins': 50, 'n_hidden': 32, 'lr': 0.005, 'n_epochs': 500} -> CDE=-0.3049
+    [tune] config 2: {'n_bins': 30, 'n_hidden': 64, 'lr': 0.005, 'n_epochs': 800} -> CDE=-0.2220
+    [tune] config 3: {'n_bins': 50, 'n_hidden': 128, 'lr': 0.005, 'n_epochs': 800} -> CDE=-0.3342
+    [tune] config 4: {'n_bins': 50, 'n_hidden': 128, 'lr': 0.005, 'n_epochs': 300} -> CDE=-0.3329
+    [tune] config 5: {'n_bins': 100, 'n_hidden': 32, 'lr': 0.01, 'n_epochs': 800} -> CDE=-0.3673
+    [tune] config 6: {'n_bins': 100, 'n_hidden': 32, 'lr': 0.01, 'n_epochs': 500} -> CDE=-0.3687
+    [tune] config 7: {'n_bins': 100, 'n_hidden': 32, 'lr': 0.02, 'n_epochs': 500} -> CDE=-0.3574
+    [tune] best: {'n_bins': 100, 'n_hidden': 32, 'lr': 0.01, 'n_epochs': 500} -> CDE=-0.3687
+CDE=-0.4299, LL=-1.106, CRPS=0.5142, KS=0.093
+
+  ── rep 3/5 (seed=2) ──
+
+======================================================================
+  CTSlices-20000  (train=15000, test=5000, d=384)
+======================================================================
+  FlexCode-RF... 

@@ -112,7 +112,6 @@ utils/
 
 | Method | Description |
 |--------|-------------|
-| TabPFN-Native | TabPFN's built-in bar distribution |
 | TabPFN-2.5 | TabPFN v2.5 default regressor checkpoint |
 | RealTabPFN-2.5 | TabPFN v2.5 real-data regressor checkpoint |
 | TabICL-Quantiles | TabICLv2's native 999-quantile distribution |

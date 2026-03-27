@@ -573,6 +573,33 @@ CDE Experiments -- Real Datasets Only
 ======================================================================
   CTSlices-20000  (train=15000, test=5000, d=384)
 ======================================================================
-  [resume] 1 method(s) already done: FlexCode-RF
+  [resume] 8 method(s) already done: FlexCode-RF, TabICL-Quantiles, LinearGauss-Homo, LinearGauss-Hetero, Student-t, LogNormal-Homo, LogNormal-Hetero, MDN
   FlexCode-RF... [cached] CDE=-0.1234, LL=-2.459
-  TabPFN-Native... 
+  TabPFN-Native... [quantile fallback: TabPFNCUDAOutOfMemoryError] [skipped: TabPFNCUDAOutOfMemoryError]
+  TabPFN-2.5... [skipped: OutOfMemoryError]
+  RealTabPFN-2.5... [quantile fallback: TabPFNCUDAOutOfMemoryError] [skipped: TabPFNCUDAOutOfMemoryError]
+  TabICL-Quantiles... [cached] CDE=-0.9138, LL=-0.182
+  LinearGauss-Homo... [cached] CDE=-0.0378, LL=-3.529
+  LinearGauss-Hetero... [cached] CDE=-0.0797, LL=-3.072
+  Student-t... [cached] CDE=-0.0392, LL=-3.487
+  LogNormal-Homo... [cached] CDE=-0.0457, LL=-3.421
+  LogNormal-Hetero... [cached] CDE=-0.0861, LL=-2.961
+  MDN... [cached] CDE=-0.1358, LL=-2.393
+  Flow-Spline...     [tune] config 0: {'n_bins': 8, 'n_layers': 2, 'hidden_units': 32, 'lr': 0.002, 'weight_decay': 1e-05} -> CDE=-0.3002
+    [tune] config 1: {'n_bins': 4, 'n_layers': 2, 'hidden_units': 64, 'lr': 0.001, 'weight_decay': 1e-05} -> CDE=-0.3361
+    [tune] config 2: {'n_bins': 4, 'n_layers': 4, 'hidden_units': 64, 'lr': 0.005, 'weight_decay': 1e-06} -> CDE=-0.3946
+    [tune] config 3: {'n_bins': 12, 'n_layers': 3, 'hidden_units': 128, 'lr': 0.001, 'weight_decay': 1e-06} -> CDE=-0.4012
+    [tune] config 4: {'n_bins': 12, 'n_layers': 2, 'hidden_units': 64, 'lr': 0.005, 'weight_decay': 0.0001} -> CDE=-0.3799
+    [tune] config 5: {'n_bins': 4, 'n_layers': 3, 'hidden_units': 64, 'lr': 0.005, 'weight_decay': 1e-06} -> CDE=-0.3738
+    [tune] config 6: {'n_bins': 12, 'n_layers': 3, 'hidden_units': 64, 'lr': 0.002, 'weight_decay': 1e-05} -> CDE=-0.4051
+    [tune] config 7: {'n_bins': 12, 'n_layers': 3, 'hidden_units': 64, 'lr': 0.001, 'weight_decay': 1e-06} -> CDE=-0.3439
+    [tune] best: {'n_bins': 12, 'n_layers': 3, 'hidden_units': 64, 'lr': 0.002, 'weight_decay': 1e-05} -> CDE=-0.4051
+CDE=-0.4980, LL=-0.756, CRPS=0.3120, KS=0.093
+  Gamma-GLM... CDE=-0.0466, LL=-3.406, CRPS=4.2473, KS=0.058
+  LinGauss-Homo-Ridge... CDE=-0.0379, LL=-3.529, CRPS=4.4652, KS=0.059
+  LinGauss-Hetero-Ridge... CDE=-0.0801, LL=-3.239, CRPS=7.1496, KS=0.191
+  Student-t-Ridge... CDE=-0.0394, LL=-3.486, CRPS=4.4484, KS=0.020
+  LogNormal-Homo-Ridge... CDE=-0.0458, LL=-3.421, CRPS=4.3237, KS=0.055
+  LogNormal-Hetero-Ridge... CDE=-0.0856, LL=-2.948, CRPS=4.0646, KS=0.029
+  Gamma-GLM-Ridge... CDE=-0.0419, LL=-3.520, CRPS=4.8017, KS=0.076
+  BART-Homo... 

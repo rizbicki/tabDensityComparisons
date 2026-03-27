@@ -159,12 +159,15 @@ def normalizing_flow_density_tuned(X_train, z_train, X_test, n_grid=200,
     """Spline flow with random-search tuning."""
     from models.baselines import normalizing_flow_density
 
-    best_params, _ = tune_density_method(
+    best_params, best_score = tune_density_method(
         normalizing_flow_density, X_train, z_train, FLOW_SPACE,
         n_configs=n_configs, n_folds=n_folds, n_grid=n_grid,
         extra_kwargs={'device': device},
         random_state=random_state,
     )
+    if not np.isfinite(best_score):
+        raise RuntimeError(
+            "CUDA out of memory: all Flow-Spline tuning configurations failed")
     return normalizing_flow_density(X_train, z_train, X_test, n_grid=n_grid,
                                     z_min=z_min, z_max=z_max, device=device,
                                     **best_params)

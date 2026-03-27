@@ -190,8 +190,20 @@ def _method_aliases(method):
 def _lookup_method(mapping, method):
     for alias in _method_aliases(method):
         if alias in mapping:
-            return mapping[alias]
+            result = mapping[alias]
+            if isinstance(result, dict) and result.get('OOM'):
+                return None
+            return result
     return None
+
+
+def _is_oom_method(mapping, method):
+    """Check if a method was marked as OOM (out of memory)."""
+    for alias in _method_aliases(method):
+        if alias in mapping:
+            result = mapping[alias]
+            return isinstance(result, dict) and bool(result.get('OOM'))
+    return False
 
 
 def _display_method_name(method):
@@ -812,7 +824,8 @@ def _plot_rankings_grid(sub_results, methods, colors, n_size, kind_label,
     if not datasets:
         return
     methods = [m for m in methods if any(
-        _lookup_method(sub_results[ds], m) is not None for ds in datasets
+        _lookup_method(sub_results[ds], m) is not None
+        or _is_oom_method(sub_results[ds], m) for ds in datasets
     )]
     if not methods:
         return
@@ -1215,9 +1228,13 @@ def _plot_sdss_raw_combined(groups, methods, output_dir):
         se_matrix = np.full((n_sizes, len(base_methods)), np.nan)
         method_index = {m: i for i, m in enumerate(base_methods)}
 
+        oom_matrix = np.zeros((n_sizes, len(base_methods)), dtype=bool)
         for ri, (_, ds, sub_results) in enumerate(slices):
             for m in base_methods:
                 mi = method_index[m]
+                if _is_oom_method(sub_results[ds], m):
+                    oom_matrix[ri, mi] = True
+                    continue
                 method_result = _lookup_method(sub_results[ds], m)
                 v = method_result.get(metric) if method_result is not None else None
                 if v is not None:
@@ -1276,6 +1293,11 @@ def _plot_sdss_raw_combined(groups, methods, output_dir):
 
         for i in range(n_sizes):
             for j in range(n_methods):
+                if oom_matrix[i, j]:
+                    ax.text(j, i, 'X', ha='center', va='center',
+                            fontsize=value_fs, fontweight='bold',
+                            color='#666666', zorder=5)
+                    continue
                 val = plot_raw[i, j]
                 if np.isfinite(val):
                     norm_val = plot_norm[i, j]
@@ -1441,7 +1463,8 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
     if not datasets:
         return
     methods = [m for m in methods if any(
-        _lookup_method(sub_results[ds], m) is not None for ds in datasets
+        _lookup_method(sub_results[ds], m) is not None
+        or _is_oom_method(sub_results[ds], m) for ds in datasets
     )]
     if not methods:
         return
@@ -1463,9 +1486,13 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
 
     for metric, label, direction in METRICS_INFO:
         matrix = np.full((n_methods, n_ds), np.nan)
+        oom_matrix = np.zeros((n_methods, n_ds), dtype=bool)
         for di, ds in enumerate(datasets):
             for m in methods:
                 mi = method_index[m]
+                if _is_oom_method(sub_results[ds], m):
+                    oom_matrix[mi, di] = True
+                    continue
                 method_result = _lookup_method(sub_results[ds], m)
                 v = method_result.get(metric) if method_result is not None else None
                 if v is not None:
@@ -1511,8 +1538,9 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
         ordered_methods = _ordered_methods(methods, score_map=neg_scores)
         col_order = [method_index[m] for m in ordered_methods]
         # Transposed: rows=datasets, columns=methods
-        data_norm = norm_matrix[col_order, :].T  # (n_ds, n_methods)
-        data_raw = matrix[col_order, :].T         # (n_ds, n_methods) raw values
+        data_norm = norm_matrix[col_order, :].T   # (n_ds, n_methods)
+        data_raw = matrix[col_order, :].T          # (n_ds, n_methods) raw values
+        data_oom = oom_matrix[col_order, :].T      # (n_ds, n_methods) OOM flags
 
         # Build significance matrix aligned with data_raw
         sig_matrix = np.zeros((n_ds, n_methods), dtype=bool)
@@ -1570,8 +1598,15 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
             val_fs = max(5.0, min(7.0, 150 / max(n_methods, n_ds)))
             for i in range(n_ds):
                 for j in range(n_methods):
+                    if data_oom[i, j]:
+                        ax1.text(j, i, 'X', ha='center', va='center',
+                                 fontsize=val_fs, fontweight='bold',
+                                 color='#666666', zorder=5)
+                        continue
                     v = data_raw[i, j]
                     if np.isnan(v):
+                        ax1.text(j, i, 'N/A', ha='center', va='center',
+                                 fontsize=val_fs, color='#888888', zorder=5)
                         continue
                     nv = data_norm[i, j]
                     bg = cmap_obj(nv) if not np.isnan(nv) else (0.9, 0.9, 0.9, 1.0)
@@ -1582,11 +1617,20 @@ def _plot_raw_grid(sub_results, methods, colors, n_size, kind_label,
                              fontsize=val_fs, fontweight='bold',
                              color=_text_color_for_bg(bg), zorder=5)
         else:
-            # No values shown — render a standalone asterisk for significant cells
+            # No values shown — render asterisk for significant cells,
+            # X for OOM, and N/A for missing cells
             star_fs = max(7.0, min(12.0, 200 / max(n_methods, n_ds)))
+            na_fs = max(5.0, min(7.0, 150 / max(n_methods, n_ds)))
             for i in range(n_ds):
                 for j in range(n_methods):
-                    if sig_matrix[i, j]:
+                    if data_oom[i, j]:
+                        ax1.text(j, i, 'X', ha='center', va='center',
+                                 fontsize=star_fs, fontweight='bold',
+                                 color='#666666', zorder=5)
+                    elif np.isnan(data_raw[i, j]):
+                        ax1.text(j, i, 'N/A', ha='center', va='center',
+                                 fontsize=na_fs, color='#888888', zorder=5)
+                    elif sig_matrix[i, j]:
                         nv = data_norm[i, j]
                         bg = cmap_obj(nv) if not np.isnan(nv) else (0.9, 0.9, 0.9, 1.0)
                         ax1.text(j, i, '*', ha='center', va='center',

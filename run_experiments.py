@@ -167,6 +167,10 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
         hit = _cached(name)
         if hit:
             m_c, cdes_pfn, zg_pfn = hit
+            if m_c.get('OOM'):
+                results[name] = m_c
+                print(f"  {name}... [cached: OOM]")
+                return
             results[name] = m_c
             cdes_dict[name] = cdes_pfn
             zgrids_dict[name] = zg_pfn
@@ -175,19 +179,27 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
             return
 
         print(f"  {name}...", end=" ", flush=True)
-        t0 = time.time()
-        pfn_reg = model_factory()
-        pfn_reg.fit(X_tr, z_train)
-        fit_t = time.time() - t0
-        t0 = time.time()
-        z_lo = z_train.min() - 0.05 * np.ptp(z_train)
-        z_hi = z_train.max() + 0.05 * np.ptp(z_train)
         try:
+            t0 = time.time()
+            pfn_reg = model_factory()
+            pfn_reg.fit(X_tr, z_train)
+            fit_t = time.time() - t0
+            t0 = time.time()
+            z_lo = z_train.min() - 0.05 * np.ptp(z_train)
+            z_hi = z_train.max() + 0.05 * np.ptp(z_train)
             cdes_pfn, zg_pfn = tabpfn_native_density(
                 pfn_reg, X_te, n_grid=n_grid, z_min=z_lo, z_max=z_hi
             )
         except Exception as oom_e:
             print(f"[skipped: {type(oom_e).__name__}]")
+            oom_marker = {'OOM': True}
+            results[name] = oom_marker
+            partial_metrics[name] = oom_marker
+            if partial_dir is not None:
+                partial_dir.mkdir(exist_ok=True)
+                metrics_file = partial_dir / f"{dataset_name}_metrics.json"
+                with open(metrics_file, 'w') as f:
+                    json.dump(partial_metrics, f, indent=2)
             return
         pred_t = time.time() - t0
         m = compute_all_metrics(cdes_pfn, zg_pfn, z_test)
@@ -242,6 +254,8 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
         """Return (metrics, cdes, zgrid) if cached, else None."""
         for alias in _method_aliases(name):
             if alias in partial_metrics:
+                if partial_metrics[alias].get('OOM'):
+                    return partial_metrics[alias], None, None
                 cdes, zg = _load_arrays(name)
                 if cdes is not None:
                     return partial_metrics[alias], cdes, zg
@@ -395,6 +409,11 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
             print(f"CDE={m['CDE_loss']:.4f}, LL={m['log_lik']:.3f}, "
                   f"CRPS={m['CRPS']:.4f}, KS={m['PIT_KS']:.3f}")
 
+    # ── Free GPU cache after foundation models ────────────────────────────
+    if torch.cuda.is_available():
+        import gc; gc.collect()
+        torch.cuda.empty_cache()
+
     # ── Quantile GBM/XGB baseline (handled in baselines section below) ───
 
     # ── Helper for simple density baselines ──────────────────────────────
@@ -412,10 +431,24 @@ def run_experiment(X, z, dataset_name, device='auto', n_grid=200,
         t0 = time.time()
         z_lo = z_train.min() - 0.05 * np.ptp(z_train)
         z_hi = z_train.max() + 0.05 * np.ptp(z_train)
-        cdes_bl, zg_bl = density_fn(
-            X_tr, z_train, X_te, n_grid=n_grid, z_min=z_lo, z_max=z_hi,
-            **kwargs
-        )
+        try:
+            cdes_bl, zg_bl = density_fn(
+                X_tr, z_train, X_te, n_grid=n_grid, z_min=z_lo, z_max=z_hi,
+                **kwargs
+            )
+        except Exception as e:
+            if 'out of memory' in str(e).lower():
+                print(f"[skipped: OOM]")
+                oom_marker = {'OOM': True}
+                results[name] = oom_marker
+                partial_metrics[name] = oom_marker
+                if partial_dir is not None:
+                    partial_dir.mkdir(exist_ok=True)
+                    metrics_file = partial_dir / f"{dataset_name}_metrics.json"
+                    with open(metrics_file, 'w') as f:
+                        json.dump(partial_metrics, f, indent=2)
+                return
+            raise
         fit_t = time.time() - t0
         m_bl = compute_all_metrics(cdes_bl, zg_bl, z_test)
         m_bl['fit_time'] = fit_t
@@ -649,9 +682,12 @@ def main():
     for kind, state in dir_state.items():
         json_out = {}
         for ds, res in state['results'].items():
-            json_out[ds] = {m: {k: float(v) if v is not None else None
-                                for k, v in met.items()}
-                            for m, met in res.items()}
+            json_out[ds] = {
+                m: met if met.get('OOM')
+                else {k: float(v) if v is not None else None
+                      for k, v in met.items()}
+                for m, met in res.items()
+            }
         with open(state['output_dir'] / 'results.json', 'w') as f:
             json.dump(json_out, f, indent=2)
 

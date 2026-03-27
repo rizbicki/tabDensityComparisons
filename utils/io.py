@@ -47,6 +47,11 @@ def aggregate_reps(per_rep_results):
     methods = sorted(set(m for rep in per_rep_results for m in rep))
     agg = {}
     for m in methods:
+        # If any rep hit OOM for this method, mark the whole entry as OOM
+        if any(rep.get(m, {}).get('OOM') for rep in per_rep_results):
+            agg[m] = {'OOM': True}
+            continue
+
         vals = {k: [] for k in MEAN_METRICS}
         n_basis_vals = []
         for rep in per_rep_results:

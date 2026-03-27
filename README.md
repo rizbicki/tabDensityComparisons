@@ -13,8 +13,7 @@ recommended for TabPFN and TabICL; CPU-only runs are supported but slow.
 ```bash
 chmod +x setup_and_run.sh
 ./setup_and_run.sh --setup-only     # create .venv and install dependencies only
-./setup_and_run.sh --sim-only       # simulated datasets only
-./setup_and_run.sh                  # full run (synthetic + real datasets)
+./setup_and_run.sh                  # full run (real datasets)
 ./setup_and_run.sh --real-only      # real/semi-synthetic datasets only
 ./setup_and_run.sh --cpu            # force CPU (slower)
 ```
@@ -26,12 +25,8 @@ or the manual setup steps below, then launch:
 .venv/bin/python run_sdss_scaling_experiment.py --device cuda   # SDSS scaling study
 ```
 
-Results now split by dataset type:
-
-- simulated outputs go to `results_simulated/`
-- real-data outputs go to `results_real/`
-
-You can regenerate plots/tables from both after runs complete:
+Real-data outputs go to `results_real/`. You can regenerate plots/tables
+after runs complete:
 
 ```bash
 .venv/bin/python consolidate_partial_results.py
@@ -39,8 +34,7 @@ You can regenerate plots/tables from both after runs complete:
 ```
 
 If you only need the tables plus the metric-based figures on another machine,
-you can transfer just `results_real/results.json` and/or
-`results_simulated/results.json` and regenerate from metrics only:
+you can transfer just `results_real/results.json` and regenerate from metrics only:
 
 ```bash
 .venv/bin/python generate_plots.py --metrics-only
@@ -48,7 +42,7 @@ you can transfer just `results_real/results.json` and/or
 
 This reproduces the HTML table plus the ranking, raw-metric, and performance
 plots. It intentionally skips PIT histograms and density example plots, which
-require the cached arrays under `results_*/cache/*.npz`.
+require the cached arrays under `results_real/cache/*.npz`.
 
 ### Plots from partial results
 
@@ -81,7 +75,6 @@ so pip doesn't overwrite your CUDA build with a CPU-only one.
 ## Project Structure
 
 ```
-run_experiments.py              Main benchmark entry point (simulated + real datasets)
 run_real_experiments.py         Real/semi-synthetic experiments entry point
 run_sdss_scaling_experiment.py  SDSS-only scaling benchmark over multiple n
 consolidate_partial_results.py  Build results.json from partial checkpoints
@@ -95,7 +88,6 @@ models/
   baselines.py              Parametric, GLM, quantile, flow, MDN, BART, CatMLP baselines
   tuning.py                 Hyperparameter search helpers for learned baselines
 datasets/
-  synthetic.py              Synthetic DGPs (with known true densities)
   real.py                   Semi-synthetic + real-world dataset loaders
   sdss_galaxies.csv         SDSS DR18 photometric redshift data (500k galaxies, ~62 MB)
 evaluation/
@@ -165,38 +157,11 @@ the penalty chosen by leave-one-out cross-validation (`RidgeCV`).
 
 ## Datasets
 
-The main simulated and real-data benchmarks run `4` repetitions per dataset by
+The main real-data benchmarks run `4` repetitions per dataset by
 default (`--n-reps` to change this); metrics report mean ± SE across
 repetitions.
 
-### Synthetic (d ∈ {5, 10, 50}, n ∈ {50, 500, 1000, 5000, 10000, 20000})
-
-All synthetic datasets have known true conditional densities. Tags follow
-`{Base}-d{d}-{n}` (e.g. `Heteroscedastic-d10-5000`).
-
-| Dataset | Description |
-|---------|-------------|
-| Heteroscedastic | Input-dependent Gaussian noise |
-| Bimodal | Mixture of two Gaussians with fixed 50/50 weights |
-| Skewed | Gamma-shifted response with input-dependent shape |
-| Nonlinear | Nonlinear mean with heteroscedastic noise |
-| LinGauss-Homo | Linear Gaussian with homoscedastic noise |
-| Interaction | Interactions between covariates affecting mean and variance |
-| Friedman1 | Friedman #1 DGP; extra features (d>5) are irrelevant noise |
-| Friedman2 | Friedman #2 DGP; fixed d=4, tag `Friedman2-d4-{n}` |
-
-The benchmark `Bimodal` generator in [datasets/synthetic.py](datasets/synthetic.py)
-uses fixed weights:
-`0.5 * N(z; x0 + x1, 0.5^2) + 0.5 * N(z; -x0 + x1, 0.5^2)`.
-
-For a concrete input-dependent mixture example, see
-[datasets/synthetic.py](datasets/synthetic.py)
-function `make_bimodal_input_weighted_example`, which uses
-`w(x) = Phi(1.5 * x0 - 0.75 * x1)` and
-`f(z|x) = w(x) p1(z|x) + (1 - w(x)) p2(z|x)`.
-It is example-only and is not included in the default benchmark schedule.
-
-### Real-world (n ∈ {50, 500, 1000, 5000, 10000, 20000} where available)
+###  Real-world (n ∈ {50, 500, 1000, 5000, 10000, 20000} where available)
 
 From OpenML and SDSS DR18, subsampled consistently so smaller n is always
 a strict subset of larger n.
@@ -285,33 +250,21 @@ to the main scaling command.
 - **CRPS**: Continuous Ranked Probability Score
 - **PIT KS**: Kolmogorov-Smirnov statistic for calibration
 - **90% coverage**: proportion of test samples inside the central 90% predictive interval (ideal is close to `0.90`; rankings and table highlighting treat closer to `0.90` as better)
-- **Interval width**: mean width of that 90% predictive interval
 - **Fit time**: total wall-clock time (fit + predict) in seconds
 
 ## Output
 
-Simulated results go to `results_simulated/` by default. Real-dataset results
-go to `results_real/` by default. `generate_plots.py` reads both directories
-and writes each artifact back to the matching destination. The SDSS-specific
+Real-dataset results go to `results_real/` by default. `generate_plots.py`
+reads the directory and writes each artifact back to it. The SDSS-specific
 benchmark scripts write to their own subdirectories under `results_real/`.
 
 ```
-results_simulated/
-  results.json                      raw metric values (mean ± SE across repetitions)
-  results_table.html                formatted HTML table (±SE across repetitions)
-  rankings_sim_{metric}_n{n}.png    ranking heatmap — simulated, per n
-  raw_sim_{metric}_n{n}.png         raw value heatmap — simulated, per n
-  perf_vs_n_{metric}_sim_d{d}.png   performance vs n — simulated, per d; metric in {cde_loss, log_lik, crps, pit_ks, coverage_90, interval_width, fit_time}
-  pit_calibration.png               PIT histograms for calibration assessment
-  native_tab_{ds}.png               density comparison plots (synthetic)
-  cache/{dataset}.npz               cached arrays (skip re-runs)
-
 results_real/
   results.json                      raw metric values (mean ± SE across repetitions)
   results_table.html                formatted HTML table (±SE across repetitions)
   rankings_real_{metric}_n{n}.png   ranking heatmap — real, per n
   raw_real_{metric}_n{n}.png        raw value heatmap — real, per n
-  perf_vs_n_{metric}_real.png       performance vs n — real datasets; metric in {cde_loss, log_lik, crps, pit_ks, coverage_90, interval_width, fit_time}
+  perf_vs_n_{metric}_real.png       performance vs n — real datasets; metric in {cde_loss, log_lik, crps, pit_ks, coverage_90, fit_time}
   perf_vs_n_foundational_*.png      same metrics, highlighting foundation models only
   pit_calibration.png               PIT histograms for calibration assessment
   cache/{dataset}.npz               cached arrays (skip re-runs)
@@ -320,7 +273,7 @@ results_real/sdss_scaling/
   results.json                      aggregated SDSS-by-n metrics
   method_policy.json                methods selected/skipped at each sample size
   results_table.html                SDSS scaling HTML table
-  perf_vs_n_{metric}_real.png       SDSS performance vs n; metric in {cde_loss, log_lik, crps, pit_ks, coverage_90, interval_width, fit_time}
+  perf_vs_n_{metric}_real.png       SDSS performance vs n; metric in {cde_loss, log_lik, crps, pit_ks, coverage_90, fit_time}
   perf_vs_n_foundational_*.png      same metrics, SDSS performance vs n with foundational focus
   cache/partial/rep*/               per-repetition partial checkpoints
 ```

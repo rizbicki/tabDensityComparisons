@@ -55,6 +55,20 @@ You can regenerate preliminary plots at any point by re-running:
 
 Only datasets with at least one completed method will appear.
 
+### Post-hoc PIT recalibration
+
+The recalibration analysis runs on the cached real-data predictions and needs
+no refitting. It recomputes every metric before and after cross-fit PIT
+recalibration, then draws the summary figures and tables:
+
+```bash
+.venv/bin/python run_recalibration_analysis.py   # metrics before/after -> CSVs
+.venv/bin/python plot_recalibration.py           # figures + tables
+```
+
+Outputs go to `results_real/recalibration/`. This requires the cached arrays
+under `results_real/cache/*.npz`.
+
 ## Manual Setup
 
 ```bash
@@ -77,11 +91,13 @@ so pip doesn't overwrite your CUDA build with a CPU-only one.
 ```
 run_real_experiments.py         Real/semi-synthetic experiments entry point
 run_sdss_scaling_experiment.py  SDSS-only scaling benchmark over multiple n
+run_recalibration_analysis.py   Post-hoc PIT recalibration on cached predictions (no refitting)
 consolidate_partial_results.py  Build results.json from partial checkpoints
 generate_plots.py               Regenerate all plots from cached results
 plot_bimodal_illustration.py    Standalone bimodal-DGP illustration figure (input-dependent weights/variances)
 plot_bimodal_correctly_specified.py  Same DGP but with a correctly-specified parametric model fitted by MLE
 plot_perf_improved.py           Draft improved perf-vs-n CDE-loss figure with SE bands and right-side labels
+plot_recalibration.py           Recalibration figures and tables from the analysis CSVs
 models/
   flexcode.py               FlexCodeEstimator + RF regressor wrapper
   native.py                 TabPFN / RealTabPFN native density extraction
@@ -92,6 +108,7 @@ datasets/
   sdss_galaxies.csv         SDSS DR18 photometric redshift data (500k galaxies, ~62 MB)
 evaluation/
   metrics.py                CDE loss, log-lik, CRPS, PIT, coverage
+  recalibration.py          Cross-fit distribution-free PIT recalibration of cached densities
 visualization/
   plots.py                  HTML tables, rankings, raw metrics, density comparisons, PIT
 utils/
@@ -276,4 +293,10 @@ results_real/sdss_scaling/
   perf_vs_n_{metric}_real.png       SDSS performance vs n; metric in {cde_loss, log_lik, crps, pit_ks, coverage_90, fit_time}
   perf_vs_n_foundational_*.png      same metrics, SDSS performance vs n with foundational focus
   cache/partial/rep*/               per-repetition partial checkpoints
+
+results_real/recalibration/
+  recal_per_cell.csv                per (dataset, n, method) metrics, before vs after recalibration
+  recal_*_summary.csv               aggregated calibration / win-rate / foundation-best summaries
+  recal_*.png                       calibration, rank, win-rate, and scatter figures
+  recal_*_table.tex                 LaTeX summary tables
 ```

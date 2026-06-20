@@ -14,6 +14,9 @@ results_real/sdss_scaling/cache/
 results_real/sdss_scaling/*.json
 results_real/sdss_scaling/*.html
 results_real/sdss_scaling/*.tex
+!results_real/recalibration/
+results_real/recalibration/recal_tidy.csv
+results_real/recalibration/run.log
 !results_real/*.png
 !results_real/*.pdf
 !results_real/*.html

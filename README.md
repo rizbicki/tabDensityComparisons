@@ -3,6 +3,18 @@
 Benchmark comparing tabular foundation models (TabPFN, TabICL) against
 classical methods for conditional density estimation (CDE) on tabular data.
 
+## Paper
+
+This repository contains the code and experiments for:
+
+> **Benchmarking Tabular Foundation Models for Conditional Density Estimation in Regression**
+> Rafael Izbicki and Pedro L. C. Rodrigues
+> *Transactions on Machine Learning Research (TMLR)*, 2026.
+
+The paper is available on [OpenReview](https://openreview.net/forum?id=KWsWHpp5Do).
+
+If you use this code or the results from this repository, please cite the paper.
+
 ## Requirements
 
 Python 3.10 or later (tested on 3.10–3.13). A CUDA-capable GPU is strongly
